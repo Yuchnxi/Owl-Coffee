@@ -53,6 +53,25 @@ GET /api/public/products
 GET /api/public/products/recommended
 ```
 
+小程序鉴权：
+
+```txt
+POST /api/app/auth/login
+POST /api/app/auth/phone
+GET /api/app/auth/me
+```
+
+小程序订单与模拟支付：
+
+```txt
+POST /api/app/orders
+GET /api/app/orders
+GET /api/app/orders/{orderId}
+PUT /api/app/orders/{orderId}/cancel
+PUT /api/app/orders/{orderId}/confirm-pickup
+POST /api/app/payments/mock
+```
+
 库存管理：
 
 ```txt

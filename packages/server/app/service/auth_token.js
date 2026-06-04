@@ -22,6 +22,22 @@ class AuthTokenService extends Service {
     )
   }
 
+  // 生成小程序 accessToken
+  createAppAccessToken(user) {
+    const { jwt: jwtConfig } = this.config
+
+    return jwt.sign(
+      {
+        subjectType: 'app_user',
+      },
+      jwtConfig.secret,
+      {
+        subject: user.id,
+        expiresIn: jwtConfig.accessTokenExpiresIn,
+      }
+    )
+  }
+
   // 校验 accessToken 并返回载荷
   verifyAccessToken(token) {
     return jwt.verify(token, this.config.jwt.secret)

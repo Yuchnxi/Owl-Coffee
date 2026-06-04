@@ -137,6 +137,55 @@ class OrderService extends Service {
     }
   }
 
+  // 查询小程序订单列表
+  async listAppOrders(userId, filters = {}) {
+    const conditions = ['deleted_at IS NULL', 'user_id = :userId']
+    const params = { userId }
+
+    if (filters.statusGroup && filters.statusGroup !== 'all') {
+      conditions.push('order_status = :orderStatus')
+      params.orderStatus = this.toDbOrderStatus(filters.statusGroup)
+    }
+
+    const [rows] = await this.app.mysql.execute(
+      `
+        SELECT
+          id,
+          order_no AS orderNo,
+          user_name AS userName,
+          phone,
+          total_amount AS totalAmount,
+          discount_amount AS discountAmount,
+          pay_amount AS payAmount,
+          order_status AS orderStatus,
+          payment_status AS paymentStatus,
+          payment_method AS paymentMethod,
+          order_source AS orderSource,
+          pickup_code AS pickupCode,
+          created_at AS createdAt
+        FROM orders
+        WHERE ${conditions.join(' AND ')}
+        ORDER BY created_at DESC
+      `,
+      params
+    )
+
+    return {
+      list: rows.map(row => this.formatOrderListItem(row)),
+    }
+  }
+
+  // 查询小程序订单详情
+  async findAppOrderDetail(orderId, userId) {
+    const order = await this.findAdminOrderDetail(orderId)
+
+    if (!order || order.userId !== userId) {
+      return null
+    }
+
+    return order
+  }
+
   // 后台补单并扣减库存
   async createAdminOrder(data, adminUserId) {
     const connection = await this.app.mysql.getConnection()
@@ -284,6 +333,258 @@ class OrderService extends Service {
     }
   }
 
+  // 创建小程序待付款订单
+  async createAppOrder(data, user) {
+    const connection = await this.app.mysql.getConnection()
+
+    try {
+      await connection.beginTransaction()
+
+      const skuRows = await this.lockSkus(connection, data.items.map(item => item.skuId))
+      const skuMap = new Map(skuRows.map(sku => [sku.skuId, sku]))
+      const normalizedItems = []
+
+      for (const item of data.items) {
+        const sku = skuMap.get(item.skuId)
+
+        if (!sku) {
+          await connection.rollback()
+          return {
+            errorCode: 10002,
+            message: 'SKU 不存在',
+            data: { skuId: item.skuId },
+          }
+        }
+
+        if (sku.productStatus !== 'on_sale' || sku.skuStatus !== 'enabled') {
+          await connection.rollback()
+          return {
+            errorCode: 30002,
+            message: 'SKU 不可售',
+            data: { skuId: item.skuId },
+          }
+        }
+
+        normalizedItems.push({
+          ...sku,
+          quantity: item.quantity,
+          subtotalAmount: Number(sku.price) * item.quantity,
+        })
+      }
+
+      const orderId = this.service.authToken.createId('order')
+      const orderNo = this.createOrderNo()
+      const totalAmount = normalizedItems.reduce((sum, item) => sum + item.subtotalAmount, 0)
+      const payAmount = totalAmount
+
+      await connection.execute(
+        `
+          INSERT INTO orders (
+            id,
+            order_no,
+            user_id,
+            user_name,
+            phone,
+            order_source,
+            order_status,
+            payment_status,
+            payment_method,
+            total_amount,
+            discount_amount,
+            pay_amount,
+            user_coupon_id,
+            pickup_code,
+            remark,
+            paid_at,
+            making_at,
+            ready_at,
+            completed_at,
+            cancelled_at,
+            refunded_at,
+            created_at,
+            updated_at,
+            deleted_at,
+            created_by,
+            updated_by
+          )
+          VALUES (
+            :orderId,
+            :orderNo,
+            :userId,
+            :userName,
+            :phone,
+            'app',
+            'pending_payment',
+            'unpaid',
+            'mock',
+            :totalAmount,
+            0.00,
+            :payAmount,
+            :couponUserId,
+            NULL,
+            :remark,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            NOW(3),
+            NOW(3),
+            NULL,
+            :userId,
+            :userId
+          )
+        `,
+        {
+          orderId,
+          orderNo,
+          userId: user.id,
+          userName: user.nickname || '待补充',
+          phone: user.phone || null,
+          totalAmount,
+          payAmount,
+          couponUserId: data.couponUserId || null,
+          remark: data.remark || null,
+        }
+      )
+
+      for (const item of normalizedItems) {
+        await this.insertOrderItem(connection, orderId, item)
+      }
+
+      await connection.commit()
+
+      return this.findAdminOrderDetail(orderId)
+    } catch (err) {
+      await connection.rollback()
+      throw err
+    } finally {
+      connection.release()
+    }
+  }
+
+  // 小程序模拟支付
+  async mockPay(orderId, userId, result) {
+    const connection = await this.app.mysql.getConnection()
+
+    try {
+      await connection.beginTransaction()
+
+      const order = await this.lockOrder(connection, orderId, userId)
+
+      if (!order) {
+        await connection.rollback()
+        return {
+          errorCode: 10002,
+          message: '订单不存在',
+          data: {},
+        }
+      }
+
+      if (order.paymentStatus === 'paid') {
+        await connection.rollback()
+        return {
+          errorCode: 70002,
+          message: '订单已支付',
+          data: {},
+        }
+      }
+
+      if (order.orderStatus !== 'pending_payment') {
+        await connection.rollback()
+        return {
+          errorCode: 60001,
+          message: '订单状态不允许当前操作',
+          data: {},
+        }
+      }
+
+      if (result === 'fail') {
+        await this.insertPaymentRecord(connection, order, 'fail')
+        await connection.commit()
+
+        return {
+          orderId: order.id,
+          orderNo: order.orderNo,
+          orderStatus: this.toApiOrderStatus(order.orderStatus),
+          paymentStatus: order.paymentStatus,
+          pickupCode: order.pickupCode,
+        }
+      }
+
+      const items = await this.lockOrderItems(connection, orderId)
+      const skuRows = await this.lockSkus(connection, items.map(item => item.skuId))
+      const skuMap = new Map(skuRows.map(sku => [sku.skuId, sku]))
+
+      for (const item of items) {
+        const sku = skuMap.get(item.skuId)
+
+        if (!sku || sku.productStatus !== 'on_sale' || sku.skuStatus !== 'enabled') {
+          await connection.rollback()
+          return {
+            errorCode: 30002,
+            message: 'SKU 不可售',
+            data: { skuId: item.skuId },
+          }
+        }
+
+        if (Number(sku.stock) < item.quantity) {
+          await connection.rollback()
+          return {
+            errorCode: 50001,
+            message: '库存不足',
+            data: {
+              skuId: item.skuId,
+              availableStock: Number(sku.stock),
+            },
+          }
+        }
+
+        await this.deductSkuStock(connection, orderId, {
+          ...sku,
+          quantity: item.quantity,
+        }, userId)
+      }
+
+      const pickupCode = this.createPickupCode()
+      await connection.execute(
+        `
+          UPDATE orders
+          SET
+            order_status = 'paid',
+            payment_status = 'paid',
+            pickup_code = :pickupCode,
+            paid_at = NOW(3),
+            updated_at = NOW(3),
+            updated_by = :userId
+          WHERE id = :orderId
+        `,
+        { orderId, pickupCode, userId }
+      )
+      await this.insertPaymentRecord(connection, {
+        ...order,
+        pickupCode,
+      }, 'success')
+      await this.updateUserOrderStats(connection, userId, Number(order.payAmount))
+
+      await connection.commit()
+
+      return {
+        orderId: order.id,
+        orderNo: order.orderNo,
+        orderStatus: 'paid',
+        paymentStatus: 'paid',
+        pickupCode,
+      }
+    } catch (err) {
+      await connection.rollback()
+      throw err
+    } finally {
+      connection.release()
+    }
+  }
+
   // 更新订单状态
   async updateOrderStatus(orderId, orderStatus, adminUserId) {
     const dbStatus = this.toDbOrderStatus(orderStatus)
@@ -310,6 +611,44 @@ class OrderService extends Service {
   // 取消订单
   async cancelOrder(orderId, adminUserId) {
     return this.updateOrderStatus(orderId, 'cancelled', adminUserId)
+  }
+
+  // 小程序取消待付款订单
+  async cancelAppOrder(orderId, userId) {
+    const order = await this.findAppOrderDetail(orderId, userId)
+
+    if (!order) {
+      return null
+    }
+
+    if (order.orderStatus !== 'pendingPayment') {
+      return {
+        errorCode: 60001,
+        message: '订单状态不允许当前操作',
+        data: {},
+      }
+    }
+
+    return this.updateOrderStatus(orderId, 'cancelled', userId)
+  }
+
+  // 小程序确认取餐
+  async confirmPickup(orderId, userId) {
+    const order = await this.findAppOrderDetail(orderId, userId)
+
+    if (!order) {
+      return null
+    }
+
+    if (order.orderStatus !== 'readyForPickup') {
+      return {
+        errorCode: 60001,
+        message: '订单状态不允许当前操作',
+        data: {},
+      }
+    }
+
+    return this.updateOrderStatus(orderId, 'completed', userId)
   }
 
   // 标记退款
@@ -348,6 +687,52 @@ class OrderService extends Service {
     )
 
     return result.affectedRows > 0
+  }
+
+  // 锁定订单
+  async lockOrder(connection, orderId, userId) {
+    const [rows] = await connection.execute(
+      `
+        SELECT
+          id,
+          order_no AS orderNo,
+          user_id AS userId,
+          order_status AS orderStatus,
+          payment_status AS paymentStatus,
+          payment_method AS paymentMethod,
+          pay_amount AS payAmount,
+          pickup_code AS pickupCode
+        FROM orders
+        WHERE id = :orderId
+          AND user_id = :userId
+          AND deleted_at IS NULL
+        LIMIT 1
+        FOR UPDATE
+      `,
+      { orderId, userId }
+    )
+
+    return rows[0] || null
+  }
+
+  // 锁定订单明细
+  async lockOrderItems(connection, orderId) {
+    const [rows] = await connection.execute(
+      `
+        SELECT
+          sku_id AS skuId,
+          quantity
+        FROM order_items
+        WHERE order_id = :orderId
+        FOR UPDATE
+      `,
+      { orderId }
+    )
+
+    return rows.map(row => ({
+      skuId: row.skuId,
+      quantity: Number(row.quantity),
+    }))
   }
 
   // 锁定 SKU 并读取商品快照
@@ -499,6 +884,62 @@ class OrderService extends Service {
     )
   }
 
+  // 写入支付记录
+  async insertPaymentRecord(connection, order, paymentStatus) {
+    await connection.execute(
+      `
+        INSERT INTO payment_records (
+          id,
+          order_id,
+          payment_no,
+          payment_method,
+          payment_status,
+          amount,
+          raw_response,
+          paid_at,
+          created_at
+        )
+        VALUES (
+          :id,
+          :orderId,
+          :paymentNo,
+          'mock',
+          :paymentStatus,
+          :amount,
+          :rawResponse,
+          :paidAt,
+          NOW(3)
+        )
+      `,
+      {
+        id: this.service.authToken.createId('pay'),
+        orderId: order.id,
+        paymentNo: this.createPaymentNo(),
+        paymentStatus,
+        amount: Number(order.payAmount),
+        rawResponse: JSON.stringify({ result: paymentStatus }),
+        paidAt: paymentStatus === 'success' ? new Date() : null,
+      }
+    )
+  }
+
+  // 更新小程序用户订单统计
+  async updateUserOrderStats(connection, userId, payAmount) {
+    await connection.execute(
+      `
+        UPDATE users
+        SET
+          order_count = order_count + 1,
+          total_consume_amount = total_consume_amount + :payAmount,
+          last_order_at = NOW(3),
+          updated_at = NOW(3),
+          updated_by = :userId
+        WHERE id = :userId
+      `,
+      { userId, payAmount }
+    )
+  }
+
   // 构造订单查询条件
   buildOrderWhere(filters) {
     const conditions = ['deleted_at IS NULL']
@@ -580,6 +1021,11 @@ class OrderService extends Service {
   // 生成取餐码
   createPickupCode() {
     return Math.floor(1000 + Math.random() * 9000).toString()
+  }
+
+  // 生成模拟支付流水号
+  createPaymentNo() {
+    return `MP${Date.now()}${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`
   }
 
   // 获取状态时间字段

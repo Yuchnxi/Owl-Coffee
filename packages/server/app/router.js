@@ -3,6 +3,7 @@
 module.exports = app => {
   const { router, controller, middleware } = app
   const adminAuth = middleware.adminAuth()
+  const appAuth = middleware.appAuth()
 
   router.get('/', controller.health.index)
   router.get('/api/health', controller.health.index)
@@ -38,10 +39,20 @@ module.exports = app => {
   router.put('/api/admin/orders/:orderId/refund', adminAuth, controller.admin.order.refund)
   router.delete('/api/admin/orders/:orderId', adminAuth, controller.admin.order.destroy)
 
+  router.post('/api/app/auth/login', controller.app.auth.login)
+  router.post('/api/app/auth/phone', appAuth, controller.app.auth.phone)
+  router.get('/api/app/auth/me', appAuth, controller.app.auth.me)
+
   router.get('/api/app/categories', controller.app.category.index)
   router.get('/api/app/products', controller.app.product.index)
   router.get('/api/app/products/:productId', controller.app.product.show)
   router.get('/api/app/skus/:skuId/availability', controller.app.product.availability)
+  router.post('/api/app/orders', appAuth, controller.app.order.create)
+  router.get('/api/app/orders', appAuth, controller.app.order.index)
+  router.get('/api/app/orders/:orderId', appAuth, controller.app.order.show)
+  router.put('/api/app/orders/:orderId/cancel', appAuth, controller.app.order.cancel)
+  router.put('/api/app/orders/:orderId/confirm-pickup', appAuth, controller.app.order.confirmPickup)
+  router.post('/api/app/payments/mock', appAuth, controller.app.payment.mock)
 
   router.get('/api/public/categories', controller.public.category.index)
   router.get('/api/public/products', controller.public.product.index)
