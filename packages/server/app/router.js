@@ -74,6 +74,8 @@ module.exports = app => {
   router.put('/api/app/cart/items/:cartItemId', appAuth, controller.app.cart.updateItem)
   router.delete('/api/app/cart/items/:cartItemId', appAuth, controller.app.cart.deleteItem)
   router.delete('/api/app/cart', appAuth, controller.app.cart.clear)
+  router.get('/api/app/coupons', appAuth, controller.app.coupon.index)
+  router.get('/api/app/coupons/available', appAuth, controller.app.coupon.available)
   router.post('/api/app/orders', appAuth, controller.app.order.create)
   router.get('/api/app/orders', appAuth, controller.app.order.index)
   router.get('/api/app/orders/:orderId', appAuth, controller.app.order.show)

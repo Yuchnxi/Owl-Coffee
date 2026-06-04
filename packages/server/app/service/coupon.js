@@ -229,6 +229,156 @@ class CouponService extends Service {
     return result.affectedRows > 0
   }
 
+  // 查询小程序用户优惠券列表
+  async listAppCoupons(userId, status = '') {
+    const conditions = ['uc.user_id = :userId']
+    const params = { userId }
+
+    if (status) {
+      conditions.push('uc.coupon_status = :status')
+      params.status = status
+    }
+
+    const [rows] = await this.app.mysql.execute(
+      `
+        SELECT
+          uc.id,
+          uc.coupon_status AS userCouponStatus,
+          uc.received_at AS receivedAt,
+          uc.used_at AS usedAt,
+          uc.order_id AS orderId,
+          c.id AS couponId,
+          c.name,
+          c.coupon_type AS couponType,
+          c.threshold_amount AS thresholdAmount,
+          c.discount_amount AS discountAmount,
+          c.discount_rate AS discountRate,
+          c.valid_start_at AS validStartAt,
+          c.valid_end_at AS validEndAt,
+          c.coupon_status AS couponStatus
+        FROM user_coupons uc
+        INNER JOIN coupons c ON c.id = uc.coupon_id
+        WHERE ${conditions.join(' AND ')}
+          AND c.deleted_at IS NULL
+        ORDER BY uc.received_at DESC
+      `,
+      params
+    )
+
+    return {
+      list: rows.map(row => this.formatUserCoupon(row)),
+    }
+  }
+
+  // 查询结算可用优惠券
+  async listAvailableAppCoupons(userId, totalAmount) {
+    const [rows] = await this.app.mysql.execute(
+      `
+        SELECT
+          uc.id,
+          uc.coupon_status AS userCouponStatus,
+          uc.received_at AS receivedAt,
+          uc.used_at AS usedAt,
+          uc.order_id AS orderId,
+          c.id AS couponId,
+          c.name,
+          c.coupon_type AS couponType,
+          c.threshold_amount AS thresholdAmount,
+          c.discount_amount AS discountAmount,
+          c.discount_rate AS discountRate,
+          c.valid_start_at AS validStartAt,
+          c.valid_end_at AS validEndAt,
+          c.coupon_status AS couponStatus
+        FROM user_coupons uc
+        INNER JOIN coupons c ON c.id = uc.coupon_id
+        WHERE uc.user_id = :userId
+          AND uc.coupon_status = 'available'
+          AND c.coupon_status = 'active'
+          AND c.deleted_at IS NULL
+          AND c.valid_start_at <= NOW(3)
+          AND c.valid_end_at >= NOW(3)
+          AND c.threshold_amount <= :totalAmount
+        ORDER BY c.threshold_amount DESC, uc.received_at DESC
+      `,
+      { userId, totalAmount }
+    )
+
+    return {
+      list: rows.map(row => ({
+        ...this.formatUserCoupon(row),
+        discountAmount: this.calculateDiscountAmount(row, totalAmount),
+      })),
+    }
+  }
+
+  // 查询用户优惠券并校验是否可用于订单
+  async findAvailableUserCoupon(connection, userId, userCouponId, totalAmount) {
+    const [rows] = await connection.execute(
+      `
+        SELECT
+          uc.id,
+          uc.coupon_status AS userCouponStatus,
+          uc.received_at AS receivedAt,
+          uc.used_at AS usedAt,
+          uc.order_id AS orderId,
+          c.id AS couponId,
+          c.name,
+          c.coupon_type AS couponType,
+          c.threshold_amount AS thresholdAmount,
+          c.discount_amount AS discountAmount,
+          c.discount_rate AS discountRate,
+          c.valid_start_at AS validStartAt,
+          c.valid_end_at AS validEndAt,
+          c.coupon_status AS couponStatus
+        FROM user_coupons uc
+        INNER JOIN coupons c ON c.id = uc.coupon_id
+        WHERE uc.id = :userCouponId
+          AND uc.user_id = :userId
+          AND c.deleted_at IS NULL
+        LIMIT 1
+        FOR UPDATE
+      `,
+      { userId, userCouponId }
+    )
+    const coupon = rows[0]
+
+    if (!coupon || !this.isCouponAvailable(coupon, totalAmount)) {
+      return null
+    }
+
+    return {
+      ...this.formatUserCoupon(coupon),
+      discountAmount: this.calculateDiscountAmount(coupon, totalAmount),
+    }
+  }
+
+  // 标记用户优惠券已使用
+  async markUserCouponUsed(connection, userCouponId, orderId) {
+    await connection.execute(
+      `
+        UPDATE user_coupons
+        SET
+          coupon_status = 'used',
+          used_at = NOW(3),
+          order_id = :orderId,
+          updated_at = NOW(3)
+        WHERE id = :userCouponId
+      `,
+      { userCouponId, orderId }
+    )
+    await connection.execute(
+      `
+        UPDATE coupons c
+        INNER JOIN user_coupons uc ON uc.coupon_id = c.id
+        SET
+          c.used_quantity = c.used_quantity + 1,
+          c.updated_at = NOW(3)
+        WHERE uc.id = :userCouponId
+      `,
+      { userCouponId }
+    )
+  }
+
   // 构造优惠券查询条件
   buildCouponWhere(filters) {
     const conditions = ['deleted_at IS NULL']
@@ -318,6 +468,47 @@ class CouponService extends Service {
       createdAt: this.formatTime(coupon.createdAt),
       updatedAt: this.formatTime(coupon.updatedAt),
     }
+  }
+
+  // 格式化用户优惠券响应
+  formatUserCoupon(row) {
+    return {
+      id: row.id,
+      couponId: row.couponId,
+      name: row.name,
+      couponType: this.toApiCouponType(row.couponType),
+      thresholdAmount: Number(row.thresholdAmount),
+      discountAmount: row.discountAmount === null ? null : Number(row.discountAmount),
+      discountRate: row.discountRate === null ? null : Number(row.discountRate),
+      couponStatus: row.userCouponStatus,
+      templateStatus: this.toApiCouponStatus(row.couponStatus),
+      validStartAt: this.formatTime(row.validStartAt),
+      validEndAt: this.formatTime(row.validEndAt),
+      receivedAt: this.formatTime(row.receivedAt),
+      usedAt: this.formatTime(row.usedAt),
+      orderId: row.orderId,
+    }
+  }
+
+  // 判断用户优惠券是否可用
+  isCouponAvailable(row, totalAmount) {
+    const now = Date.now()
+
+    return row.userCouponStatus === 'available' &&
+      row.couponStatus === 'active' &&
+      new Date(row.validStartAt).getTime() <= now &&
+      new Date(row.validEndAt).getTime() >= now &&
+      Number(row.thresholdAmount) <= totalAmount
+  }
+
+  // 计算优惠金额
+  calculateDiscountAmount(row, totalAmount) {
+    if (this.toApiCouponType(row.couponType) === 'discountRate') {
+      const rate = Number(row.discountRate)
+      return Number((totalAmount * (10 - rate) / 10).toFixed(2))
+    }
+
+    return Math.min(Number(row.discountAmount), totalAmount)
   }
 
   // 转换接口优惠券类型为数据库类型

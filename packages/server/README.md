@@ -103,6 +103,13 @@ DELETE /api/app/cart/items/{cartItemId}
 DELETE /api/app/cart
 ```
 
+小程序优惠券：
+
+```txt
+GET /api/app/coupons
+GET /api/app/coupons/available
+```
+
 库存管理：
 
 ```txt

@@ -375,7 +375,21 @@ class OrderService extends Service {
       const orderId = this.service.authToken.createId('order')
       const orderNo = this.createOrderNo()
       const totalAmount = normalizedItems.reduce((sum, item) => sum + item.subtotalAmount, 0)
-      const payAmount = totalAmount
+      const userCoupon = data.couponUserId
+        ? await this.service.coupon.findAvailableUserCoupon(connection, user.id, data.couponUserId, totalAmount)
+        : null
+
+      if (data.couponUserId && !userCoupon) {
+        await connection.rollback()
+        return {
+          errorCode: 30003,
+          message: '优惠券不可用',
+          data: {},
+        }
+      }
+
+      const discountAmount = userCoupon ? userCoupon.discountAmount : 0
+      const payAmount = Math.max(totalAmount - discountAmount, 0)
 
       await connection.execute(
         `
@@ -418,7 +432,7 @@ class OrderService extends Service {
             'unpaid',
             'mock',
             :totalAmount,
-            0.00,
+            :discountAmount,
             :payAmount,
             :couponUserId,
             NULL,
@@ -443,6 +457,7 @@ class OrderService extends Service {
           userName: user.nickname || '待补充',
           phone: user.phone || null,
           totalAmount,
+          discountAmount,
           payAmount,
           couponUserId: data.couponUserId || null,
           remark: data.remark || null,
@@ -517,6 +532,24 @@ class OrderService extends Service {
       const skuRows = await this.lockSkus(connection, items.map(item => item.skuId))
       const skuMap = new Map(skuRows.map(sku => [sku.skuId, sku]))
 
+      if (order.userCouponId) {
+        const userCoupon = await this.service.coupon.findAvailableUserCoupon(
+          connection,
+          userId,
+          order.userCouponId,
+          Number(order.totalAmount)
+        )
+
+        if (!userCoupon || Number(userCoupon.discountAmount) !== Number(order.discountAmount)) {
+          await connection.rollback()
+          return {
+            errorCode: 30003,
+            message: '优惠券不可用',
+            data: {},
+          }
+        }
+      }
+
       for (const item of items) {
         const sku = skuMap.get(item.skuId)
 
@@ -562,6 +595,9 @@ class OrderService extends Service {
         `,
         { orderId, pickupCode, userId }
       )
+      if (order.userCouponId) {
+        await this.service.coupon.markUserCouponUsed(connection, order.userCouponId, orderId)
+      }
       await this.insertPaymentRecord(connection, {
         ...order,
         pickupCode,
@@ -700,7 +736,10 @@ class OrderService extends Service {
           order_status AS orderStatus,
           payment_status AS paymentStatus,
           payment_method AS paymentMethod,
+          total_amount AS totalAmount,
+          discount_amount AS discountAmount,
           pay_amount AS payAmount,
+          user_coupon_id AS userCouponId,
           pickup_code AS pickupCode
         FROM orders
         WHERE id = :orderId
