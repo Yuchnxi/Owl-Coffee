@@ -37,6 +37,22 @@ GET /api/app/categories
 GET /api/public/categories
 ```
 
+商品与 SKU：
+
+```txt
+GET /api/admin/products
+POST /api/admin/products
+GET /api/admin/products/{productId}
+PUT /api/admin/products/{productId}
+PUT /api/admin/products/{productId}/status
+DELETE /api/admin/products/{productId}
+GET /api/app/products
+GET /api/app/products/{productId}
+GET /api/app/skus/{skuId}/availability
+GET /api/public/products
+GET /api/public/products/recommended
+```
+
 ## 环境变量
 
 复制 `.env.example` 为 `.env` 后填写本地配置。真实数据库密码、JWT Secret、小程序密钥等敏感信息不要提交。

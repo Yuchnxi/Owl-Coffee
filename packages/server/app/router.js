@@ -19,6 +19,19 @@ module.exports = app => {
   router.put('/api/admin/categories/:categoryId', adminAuth, controller.admin.category.update)
   router.delete('/api/admin/categories/:categoryId', adminAuth, controller.admin.category.destroy)
 
+  router.get('/api/admin/products', adminAuth, controller.admin.product.index)
+  router.post('/api/admin/products', adminAuth, controller.admin.product.create)
+  router.get('/api/admin/products/:productId', adminAuth, controller.admin.product.show)
+  router.put('/api/admin/products/:productId', adminAuth, controller.admin.product.update)
+  router.put('/api/admin/products/:productId/status', adminAuth, controller.admin.product.updateStatus)
+  router.delete('/api/admin/products/:productId', adminAuth, controller.admin.product.destroy)
+
   router.get('/api/app/categories', controller.app.category.index)
+  router.get('/api/app/products', controller.app.product.index)
+  router.get('/api/app/products/:productId', controller.app.product.show)
+  router.get('/api/app/skus/:skuId/availability', controller.app.product.availability)
+
   router.get('/api/public/categories', controller.public.category.index)
+  router.get('/api/public/products', controller.public.product.index)
+  router.get('/api/public/products/recommended', controller.public.product.recommended)
 }
