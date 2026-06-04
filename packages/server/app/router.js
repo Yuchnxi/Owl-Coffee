@@ -26,6 +26,10 @@ module.exports = app => {
   router.put('/api/admin/products/:productId/status', adminAuth, controller.admin.product.updateStatus)
   router.delete('/api/admin/products/:productId', adminAuth, controller.admin.product.destroy)
 
+  router.get('/api/admin/inventory/skus', adminAuth, controller.admin.inventory.skus)
+  router.post('/api/admin/inventory/adjustments', adminAuth, controller.admin.inventory.adjust)
+  router.get('/api/admin/inventory/adjustments', adminAuth, controller.admin.inventory.adjustments)
+
   router.get('/api/app/categories', controller.app.category.index)
   router.get('/api/app/products', controller.app.product.index)
   router.get('/api/app/products/:productId', controller.app.product.show)
