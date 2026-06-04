@@ -113,6 +113,14 @@ PUT /api/admin/orders/{orderId}/refund
 DELETE /api/admin/orders/{orderId}
 ```
 
+用户管理：
+
+```txt
+GET /api/admin/users
+GET /api/admin/users/{userId}
+PUT /api/admin/users/{userId}/status
+```
+
 系统设置：
 
 ```txt
