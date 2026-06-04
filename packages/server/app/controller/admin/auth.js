@@ -17,6 +17,13 @@ class AdminAuthController extends Controller {
     const { account, password } = ctx.request.body || {}
 
     if (!account || !password) {
+      await ctx.service.adminLog.createLoginLog({
+        account: account || '',
+        loginResult: 'fail',
+        ip: ctx.ip,
+        userAgent: ctx.get('user-agent'),
+        message: '账号或密码为空',
+      })
       ctx.status = 400
       ctx.fail(10001, '账号和密码不能为空')
       return
@@ -25,10 +32,26 @@ class AdminAuthController extends Controller {
     const result = await ctx.service.adminAuth.login(account, password)
 
     if (!result) {
+      await ctx.service.adminLog.createLoginLog({
+        account,
+        loginResult: 'fail',
+        ip: ctx.ip,
+        userAgent: ctx.get('user-agent'),
+        message: '账号或密码错误',
+      })
       ctx.status = 401
       ctx.fail(20001, '账号或密码错误')
       return
     }
+
+    await ctx.service.adminLog.createLoginLog({
+      adminUserId: result.user.id,
+      account,
+      loginResult: 'success',
+      ip: ctx.ip,
+      userAgent: ctx.get('user-agent'),
+      message: '登录成功',
+    })
 
     ctx.success(result)
   }

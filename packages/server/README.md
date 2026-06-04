@@ -172,6 +172,13 @@ GET /api/admin/settings/account
 PUT /api/admin/settings/account
 ```
 
+后台日志：
+
+```txt
+GET /api/admin/logs/login
+GET /api/admin/logs/operation
+```
+
 ## 环境变量
 
 复制 `.env.example` 为 `.env` 后填写本地配置。真实数据库密码、JWT Secret、小程序密钥等敏感信息不要提交。
