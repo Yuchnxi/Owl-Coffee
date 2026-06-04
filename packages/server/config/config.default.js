@@ -19,6 +19,11 @@ module.exports = appInfo => {
     },
   }
 
+  config.multipart = {
+    mode: 'stream',
+    fileSize: '5mb',
+  }
+
   config.cluster = {
     listen: {
       port: Number(process.env.SERVER_PORT) || 7001,

@@ -26,6 +26,12 @@ POST /api/admin/auth/logout
 GET /api/admin/auth/me
 ```
 
+文件上传：
+
+```txt
+POST /api/admin/uploads
+```
+
 仪表盘：
 
 ```txt
