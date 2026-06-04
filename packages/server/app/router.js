@@ -63,4 +63,6 @@ module.exports = app => {
   router.get('/api/public/categories', controller.public.category.index)
   router.get('/api/public/products', controller.public.product.index)
   router.get('/api/public/products/recommended', controller.public.product.recommended)
+  router.get('/api/public/store', controller.public.content.store)
+  router.get('/api/public/miniapp-qrcode', controller.public.content.miniappQrcode)
 }

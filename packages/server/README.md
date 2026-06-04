@@ -53,6 +53,16 @@ GET /api/public/products
 GET /api/public/products/recommended
 ```
 
+官网公开展示：
+
+```txt
+GET /api/public/categories
+GET /api/public/products
+GET /api/public/products/recommended
+GET /api/public/store
+GET /api/public/miniapp-qrcode
+```
+
 小程序鉴权：
 
 ```txt
