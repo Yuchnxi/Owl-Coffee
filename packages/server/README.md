@@ -131,6 +131,16 @@ GET /api/admin/users/{userId}
 PUT /api/admin/users/{userId}/status
 ```
 
+优惠券管理：
+
+```txt
+GET /api/admin/coupons
+POST /api/admin/coupons
+PUT /api/admin/coupons/{couponId}
+PUT /api/admin/coupons/{couponId}/disable
+DELETE /api/admin/coupons/{couponId}
+```
+
 系统设置：
 
 ```txt
