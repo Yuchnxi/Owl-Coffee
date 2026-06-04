@@ -281,6 +281,8 @@ POST /api/app/auth/refresh
 POST /api/admin/uploads
 ```
 
+说明：当前服务端首版实现为本地上传存储，文件保存在服务端 `app/public/uploads` 下；对象存储配置仍为待补充。
+
 请求：
 
 | 字段 | 类型 | 必填 | 说明 |
@@ -934,6 +936,33 @@ PUT /api/admin/roles/{roleId}/menus
 ```txt
 GET /api/admin/menus
 ```
+
+### 9.9.5 登录日志
+```txt
+GET /api/admin/logs/login
+```
+
+查询参数：
+| 参数 | 说明 |
+|---|---|
+| `account` | 登录账号 |
+| `loginResult` | `success` / `fail` |
+| `startTime` | 开始时间 |
+| `endTime` | 结束时间 |
+
+### 9.9.6 操作日志
+```txt
+GET /api/admin/logs/operation
+```
+
+查询参数：
+| 参数 | 说明 |
+|---|---|
+| `module` | 模块 |
+| `action` | 操作 |
+| `adminUserId` | 操作人 |
+| `startTime` | 开始时间 |
+| `endTime` | 结束时间 |
 
 ---
 
