@@ -55,6 +55,11 @@ module.exports = app => {
   router.put('/api/admin/coupons/:couponId/disable', adminAuth, controller.admin.coupon.disable)
   router.delete('/api/admin/coupons/:couponId', adminAuth, controller.admin.coupon.destroy)
 
+  router.get('/api/admin/roles', adminAuth, controller.admin.role.index)
+  router.get('/api/admin/roles/:roleId', adminAuth, controller.admin.role.show)
+  router.put('/api/admin/roles/:roleId/menus', adminAuth, controller.admin.role.updateMenus)
+  router.get('/api/admin/menus', adminAuth, controller.admin.role.menus)
+
   router.get('/api/admin/settings/store', adminAuth, controller.admin.setting.store)
   router.put('/api/admin/settings/store', adminAuth, controller.admin.setting.updateStore)
   router.get('/api/admin/settings/account', adminAuth, controller.admin.setting.account)

@@ -148,6 +148,15 @@ PUT /api/admin/coupons/{couponId}/disable
 DELETE /api/admin/coupons/{couponId}
 ```
 
+权限管理：
+
+```txt
+GET /api/admin/roles
+GET /api/admin/roles/{roleId}
+PUT /api/admin/roles/{roleId}/menus
+GET /api/admin/menus
+```
+
 系统设置：
 
 ```txt
