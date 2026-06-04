@@ -38,6 +38,7 @@ module.exports = appInfo => {
     database: process.env.MYSQL_DATABASE || '待补充',
     user: process.env.MYSQL_USER || '待补充',
     password: process.env.MYSQL_PASSWORD || '待补充',
+    connectionLimit: Number(process.env.MYSQL_CONNECTION_LIMIT) || 10,
   }
 
   return config

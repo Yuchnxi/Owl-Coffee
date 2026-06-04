@@ -13,6 +13,17 @@ pnpm server:dev
 
 ```txt
 GET /api/health
+GET /api/health/database
+```
+
+后台鉴权：
+
+```txt
+GET /api/admin/auth/captcha
+POST /api/admin/auth/login
+POST /api/admin/auth/refresh
+POST /api/admin/auth/logout
+GET /api/admin/auth/me
 ```
 
 ## 环境变量
@@ -32,3 +43,10 @@ mysql --default-character-set=utf8mb4 -u root -p -e "SOURCE E:/Owl-Coffee/packag
 如果在项目根目录执行，也可以直接使用脚本里的 `CREATE DATABASE IF NOT EXISTS` 和 `USE owl_coffee`，重复执行不会清空已有业务数据。
 
 Windows PowerShell 不建议使用 `< packages/server/database/init.sql` 这种输入重定向，可能导致中文种子数据转码异常。
+
+初始化后默认后台开发账号：
+
+```txt
+账号：admin
+密码：admin123
+```

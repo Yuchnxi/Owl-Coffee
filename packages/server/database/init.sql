@@ -385,8 +385,9 @@ ON DUPLICATE KEY UPDATE
 
 INSERT INTO admin_users (id, account, password_hash, name, phone, avatar_url, role_id, status, last_login_at, created_at, updated_at, deleted_at, created_by, updated_by)
 VALUES
-  ('admin_default', 'admin', '待部署初始化', '管理员', NULL, NULL, 'role_admin', 'enabled', NULL, NOW(3), NOW(3), NULL, NULL, NULL)
+  ('admin_default', 'admin', '$2b$10$oNt/fdgFhA8SngE6xfsacOACgAyLsGWkh.AcBoCXeHvCm3ISYxZPi', '管理员', NULL, NULL, 'role_admin', 'enabled', NULL, NOW(3), NOW(3), NULL, NULL, NULL)
 ON DUPLICATE KEY UPDATE
+  password_hash = VALUES(password_hash),
   name = VALUES(name),
   role_id = VALUES(role_id),
   status = VALUES(status),
@@ -403,3 +404,24 @@ ON DUPLICATE KEY UPDATE
   pickup_notice = VALUES(pickup_notice),
   map_info = VALUES(map_info),
   updated_at = NOW(3);
+
+ALTER TABLE admin_users COMMENT = '后台管理员和店员账号表';
+ALTER TABLE roles COMMENT = '后台角色表';
+ALTER TABLE menus COMMENT = '后台菜单表';
+ALTER TABLE role_menus COMMENT = '角色菜单权限关系表';
+ALTER TABLE auth_refresh_tokens COMMENT = '后台和小程序刷新令牌表';
+ALTER TABLE users COMMENT = '小程序用户表';
+ALTER TABLE cart_items COMMENT = '小程序购物车明细表';
+ALTER TABLE categories COMMENT = '商品分类表';
+ALTER TABLE products COMMENT = '商品主表';
+ALTER TABLE product_skus COMMENT = '商品 SKU 与库存表';
+ALTER TABLE inventory_logs COMMENT = '库存变更流水表';
+ALTER TABLE orders COMMENT = '订单主表';
+ALTER TABLE order_items COMMENT = '订单商品明细快照表';
+ALTER TABLE payment_records COMMENT = '支付记录表';
+ALTER TABLE coupons COMMENT = '优惠券模板表';
+ALTER TABLE user_coupons COMMENT = '用户优惠券表';
+ALTER TABLE store_settings COMMENT = '单店基础配置表';
+ALTER TABLE files COMMENT = '上传文件记录表';
+ALTER TABLE admin_login_logs COMMENT = '后台登录日志表';
+ALTER TABLE admin_operation_logs COMMENT = '后台操作日志表';

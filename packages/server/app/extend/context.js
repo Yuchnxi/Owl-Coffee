@@ -16,4 +16,14 @@ module.exports = {
       data,
     }
   },
+
+  getBearerToken() {
+    const authorization = this.get('authorization')
+
+    if (!authorization || !authorization.startsWith('Bearer ')) {
+      return ''
+    }
+
+    return authorization.slice(7).trim()
+  },
 }
