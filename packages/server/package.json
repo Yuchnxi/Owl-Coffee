@@ -1,0 +1,26 @@
+{
+  "name": "@owl-coffee/server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Owl Coffee 服务端",
+  "main": "app.js",
+  "scripts": {
+    "dev": "egg-bin dev",
+    "debug": "egg-bin debug",
+    "start": "egg-scripts start --daemon --title=owl-coffee-server",
+    "stop": "egg-scripts stop --title=owl-coffee-server",
+    "test": "egg-bin test"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "egg": "^3.34.0",
+    "egg-scripts": "^3.1.0"
+  },
+  "devDependencies": {
+    "egg-bin": "^6.13.0",
+    "egg-mock": "^5.15.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

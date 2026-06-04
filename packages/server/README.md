@@ -1,0 +1,34 @@
+# Owl Coffee 服务端
+
+服务端使用 Node.js + Egg.js，接口统一返回 `{ code, message, data }`。
+
+## 本地启动
+
+```bash
+pnpm install
+pnpm server:dev
+```
+
+健康检查：
+
+```txt
+GET /api/health
+```
+
+## 环境变量
+
+复制 `.env.example` 为 `.env` 后填写本地配置。真实数据库密码、JWT Secret、小程序密钥等敏感信息不要提交。
+
+当前初始化阶段只保留 MySQL 配置占位，后续数据库初始化时再接入连接插件和迁移脚本。
+
+## 数据库初始化
+
+确认已创建本地 MySQL 数据库 `owl_coffee` 后执行：
+
+```bash
+mysql --default-character-set=utf8mb4 -u root -p -e "SOURCE E:/Owl-Coffee/packages/server/database/init.sql"
+```
+
+如果在项目根目录执行，也可以直接使用脚本里的 `CREATE DATABASE IF NOT EXISTS` 和 `USE owl_coffee`，重复执行不会清空已有业务数据。
+
+Windows PowerShell 不建议使用 `< packages/server/database/init.sql` 这种输入重定向，可能导致中文种子数据转码异常。
