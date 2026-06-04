@@ -26,6 +26,16 @@ POST /api/admin/auth/logout
 GET /api/admin/auth/me
 ```
 
+仪表盘：
+
+```txt
+GET /api/admin/dashboard/summary
+GET /api/admin/dashboard/sales-trend
+GET /api/admin/dashboard/order-status
+GET /api/admin/dashboard/recent-orders
+GET /api/admin/dashboard/stock-warnings
+```
+
 商品分类：
 
 ```txt

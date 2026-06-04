@@ -15,6 +15,12 @@ module.exports = app => {
   router.post('/api/admin/auth/logout', adminAuth, controller.admin.auth.logout)
   router.get('/api/admin/auth/me', adminAuth, controller.admin.auth.me)
 
+  router.get('/api/admin/dashboard/summary', adminAuth, controller.admin.dashboard.summary)
+  router.get('/api/admin/dashboard/sales-trend', adminAuth, controller.admin.dashboard.salesTrend)
+  router.get('/api/admin/dashboard/order-status', adminAuth, controller.admin.dashboard.orderStatus)
+  router.get('/api/admin/dashboard/recent-orders', adminAuth, controller.admin.dashboard.recentOrders)
+  router.get('/api/admin/dashboard/stock-warnings', adminAuth, controller.admin.dashboard.stockWarnings)
+
   router.get('/api/admin/categories', adminAuth, controller.admin.category.index)
   router.post('/api/admin/categories', adminAuth, controller.admin.category.create)
   router.put('/api/admin/categories/:categoryId', adminAuth, controller.admin.category.update)
