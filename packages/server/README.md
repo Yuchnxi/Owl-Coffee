@@ -72,6 +72,17 @@ PUT /api/app/orders/{orderId}/confirm-pickup
 POST /api/app/payments/mock
 ```
 
+小程序购物车：
+
+```txt
+GET /api/app/cart
+POST /api/app/cart/sync
+POST /api/app/cart/items
+PUT /api/app/cart/items/{cartItemId}
+DELETE /api/app/cart/items/{cartItemId}
+DELETE /api/app/cart
+```
+
 库存管理：
 
 ```txt
