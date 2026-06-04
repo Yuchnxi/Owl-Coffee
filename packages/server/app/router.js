@@ -39,6 +39,11 @@ module.exports = app => {
   router.put('/api/admin/orders/:orderId/refund', adminAuth, controller.admin.order.refund)
   router.delete('/api/admin/orders/:orderId', adminAuth, controller.admin.order.destroy)
 
+  router.get('/api/admin/settings/store', adminAuth, controller.admin.setting.store)
+  router.put('/api/admin/settings/store', adminAuth, controller.admin.setting.updateStore)
+  router.get('/api/admin/settings/account', adminAuth, controller.admin.setting.account)
+  router.put('/api/admin/settings/account', adminAuth, controller.admin.setting.updateAccount)
+
   router.post('/api/app/auth/login', controller.app.auth.login)
   router.post('/api/app/auth/phone', appAuth, controller.app.auth.phone)
   router.get('/api/app/auth/me', appAuth, controller.app.auth.me)
