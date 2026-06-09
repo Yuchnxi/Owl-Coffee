@@ -281,6 +281,8 @@ POST /api/app/auth/refresh
 POST /api/admin/uploads
 ```
 
+说明：当前服务端首版实现为本地上传存储，文件保存在服务端 `app/public/uploads` 下；对象存储配置仍为待补充。
+
 请求：
 
 | 字段 | 类型 | 必填 | 说明 |
@@ -696,11 +698,15 @@ PUT /api/admin/orders/{orderId}/status
 }
 ```
 
+说明：后台状态更新接口仅用于制作流程流转，允许 `making`、`readyForPickup`、`completed`。取消和退款必须使用独立接口。
+
 ### 9.5.5 取消订单
 
 ```txt
 PUT /api/admin/orders/{orderId}/cancel
 ```
+
+说明：仅允许取消未支付的待付款订单。
 
 ### 9.5.6 退款标记
 
@@ -708,7 +714,7 @@ PUT /api/admin/orders/{orderId}/cancel
 PUT /api/admin/orders/{orderId}/refund
 ```
 
-说明：首版不接真实微信支付，仅更新为 `refunded`。
+说明：首版不接真实微信支付，仅允许已支付且未完成的订单退款；退款后订单支付状态更新为 `refunded`，并回补 SKU 库存。
 
 ### 9.5.7 删除订单
 
@@ -934,6 +940,33 @@ PUT /api/admin/roles/{roleId}/menus
 ```txt
 GET /api/admin/menus
 ```
+
+### 9.9.5 登录日志
+```txt
+GET /api/admin/logs/login
+```
+
+查询参数：
+| 参数 | 说明 |
+|---|---|
+| `account` | 登录账号 |
+| `loginResult` | `success` / `fail` |
+| `startTime` | 开始时间 |
+| `endTime` | 结束时间 |
+
+### 9.9.6 操作日志
+```txt
+GET /api/admin/logs/operation
+```
+
+查询参数：
+| 参数 | 说明 |
+|---|---|
+| `module` | 模块 |
+| `action` | 操作 |
+| `adminUserId` | 操作人 |
+| `startTime` | 开始时间 |
+| `endTime` | 结束时间 |
 
 ---
 
