@@ -361,7 +361,7 @@ JSON 使用说明：`meta` 可保存标题、缓存、隐藏等前端扩展配�
 |---|---|---|---|
 | `id` | `VARCHAR(32)` | PK | 库存流水 ID |
 | `sku_id` | `VARCHAR(32)` | NOT NULL, INDEX | SKU ID |
-| `change_type` | `VARCHAR(32)` | NOT NULL | `in` / `out` / `check` / `order_deduct` |
+| `change_type` | `VARCHAR(32)` | NOT NULL | `in` / `out` / `check` / `order_deduct` / `order_refund` |
 | `change_quantity` | `INT` | NOT NULL | 变化数量，出库和扣减可为负数 |
 | `before_stock` | `INT` | NOT NULL | 变化前库存 |
 | `after_stock` | `INT` | NOT NULL | 变化后库存 |
@@ -370,7 +370,7 @@ JSON 使用说明：`meta` 可保存标题、缓存、隐藏等前端扩展配�
 | `created_at` | `DATETIME(3)` | NOT NULL | 创建时间 |
 | `created_by` | `VARCHAR(32)` | NULL | 操作人 |
 
-说明：模拟支付成功扣减库存时必须写入 `order_deduct` 流水。
+说明：模拟支付成功扣减库存时必须写入 `order_deduct` 流水，后台退款回补库存时必须写入 `order_refund` 流水。
 
 ---
 
@@ -649,7 +649,9 @@ JSON 使用说明：`meta` 可保存标题、缓存、隐藏等前端扩展配�
 | `account` | `admin` |
 | `password_hash` | 待部署初始化 |
 | `role_id` | `role_admin` |
-| `status` | `enabled` |
+| `status` | `disabled` |
+
+说明：默认管理员仅作为占位账号，部署或本地调试时需要单独设置密码哈希并启用账号，避免提交固定默认密码。
 
 ### 10.4 门店配置
 
@@ -873,7 +875,7 @@ CREATE TABLE coupons (
 
 ### 12.2 业务资料
 
-- 默认管理员初始密码：待部署初始化
+- 默认管理员密码初始化方式：待部署初始化
 - 真实门店名称：待补充
 - 真实门店地址：待补充
 - 真实营业时间：待补充
