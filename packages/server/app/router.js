@@ -86,6 +86,7 @@ module.exports = app => {
 
   // 小程序鉴权
   router.post('/api/app/auth/login', controller.app.auth.login)
+  router.post('/api/app/auth/refresh', controller.app.auth.refresh)
   router.post('/api/app/auth/phone', appAuth, controller.app.auth.phone)
   router.get('/api/app/auth/me', appAuth, controller.app.auth.me)
 

@@ -13,6 +13,7 @@ const ORDER_STATUS_LIST = [
 ]
 const PAYMENT_STATUS_LIST = ['unpaid', 'paid', 'refunded']
 const ORDER_SOURCE_LIST = ['app', 'admin']
+const ADMIN_UPDATE_STATUS_LIST = ['making', 'readyForPickup', 'completed']
 
 class AdminOrderController extends Controller {
   // 查询后台订单列表
@@ -80,9 +81,9 @@ class AdminOrderController extends Controller {
       return
     }
 
-    if (!ORDER_STATUS_LIST.includes(orderStatus)) {
+    if (!ADMIN_UPDATE_STATUS_LIST.includes(orderStatus)) {
       ctx.status = 400
-      ctx.fail(10001, '订单状态不正确')
+      ctx.fail(10001, '订单状态不允许通过此接口更新')
       return
     }
 
@@ -91,6 +92,18 @@ class AdminOrderController extends Controller {
       orderStatus,
       ctx.state.admin.id
     )
+
+    if (!updatedOrder) {
+      ctx.status = 404
+      ctx.fail(10002, '订单不存在')
+      return
+    }
+
+    if (updatedOrder.errorCode) {
+      ctx.status = 409
+      ctx.fail(updatedOrder.errorCode, updatedOrder.message, updatedOrder.data)
+      return
+    }
 
     ctx.success(updatedOrder)
   }
@@ -106,19 +119,19 @@ class AdminOrderController extends Controller {
       return
     }
 
-    if (order.orderStatus === 'cancelled') {
-      ctx.status = 409
-      ctx.fail(60002, '订单已取消')
-      return
-    }
-
-    if (order.orderStatus === 'completed') {
-      ctx.status = 409
-      ctx.fail(60003, '订单已完成')
-      return
-    }
-
     const updatedOrder = await ctx.service.order.cancelOrder(ctx.params.orderId, ctx.state.admin.id)
+
+    if (!updatedOrder) {
+      ctx.status = 404
+      ctx.fail(10002, '订单不存在')
+      return
+    }
+
+    if (updatedOrder.errorCode) {
+      ctx.status = 409
+      ctx.fail(updatedOrder.errorCode, updatedOrder.message, updatedOrder.data)
+      return
+    }
 
     ctx.success(updatedOrder)
   }
@@ -134,13 +147,19 @@ class AdminOrderController extends Controller {
       return
     }
 
-    if (order.orderStatus === 'refunded') {
-      ctx.status = 409
-      ctx.fail(60001, '订单状态不允许当前操作')
+    const updatedOrder = await ctx.service.order.refundOrder(ctx.params.orderId, ctx.state.admin.id)
+
+    if (!updatedOrder) {
+      ctx.status = 404
+      ctx.fail(10002, '订单不存在')
       return
     }
 
-    const updatedOrder = await ctx.service.order.refundOrder(ctx.params.orderId, ctx.state.admin.id)
+    if (updatedOrder.errorCode) {
+      ctx.status = 409
+      ctx.fail(updatedOrder.errorCode, updatedOrder.message, updatedOrder.data)
+      return
+    }
 
     ctx.success(updatedOrder)
   }

@@ -83,6 +83,7 @@ GET /api/public/miniapp-qrcode
 
 ```txt
 POST /api/app/auth/login
+POST /api/app/auth/refresh
 POST /api/app/auth/phone
 GET /api/app/auth/me
 ```
@@ -197,9 +198,4 @@ mysql --default-character-set=utf8mb4 -u root -p -e "SOURCE E:/Owl-Coffee/packag
 
 Windows PowerShell 不建议使用 `< packages/server/database/init.sql` 这种输入重定向，可能导致中文种子数据转码异常。
 
-初始化后默认后台开发账号：
-
-```txt
-账号：admin
-密码：admin123
-```
+初始化 SQL 只创建禁用的默认管理员占位账号，密码哈希需要在部署或本地调试时单独初始化，避免提交固定默认密码。

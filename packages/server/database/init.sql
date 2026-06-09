@@ -385,12 +385,10 @@ ON DUPLICATE KEY UPDATE
 
 INSERT INTO admin_users (id, account, password_hash, name, phone, avatar_url, role_id, status, last_login_at, created_at, updated_at, deleted_at, created_by, updated_by)
 VALUES
-  ('admin_default', 'admin', '$2b$10$oNt/fdgFhA8SngE6xfsacOACgAyLsGWkh.AcBoCXeHvCm3ISYxZPi', '管理员', NULL, NULL, 'role_admin', 'enabled', NULL, NOW(3), NOW(3), NULL, NULL, NULL)
+  ('admin_default', 'admin', '待部署初始化', '管理员', NULL, NULL, 'role_admin', 'disabled', NULL, NOW(3), NOW(3), NULL, NULL, NULL)
 ON DUPLICATE KEY UPDATE
-  password_hash = VALUES(password_hash),
   name = VALUES(name),
   role_id = VALUES(role_id),
-  status = VALUES(status),
   updated_at = NOW(3);
 
 INSERT INTO store_settings (id, store_name, address, business_hours, phone, pickup_notice, map_info, miniapp_qrcode_url, created_at, updated_at, updated_by)

@@ -19,6 +19,28 @@ class AppAuthController extends Controller {
     ctx.success(result)
   }
 
+  // 刷新小程序 accessToken
+  async refresh() {
+    const { ctx } = this
+    const { refreshToken } = ctx.request.body || {}
+
+    if (!refreshToken) {
+      ctx.status = 400
+      ctx.fail(10001, 'refreshToken 不能为空')
+      return
+    }
+
+    const result = await ctx.service.appAuth.refresh(refreshToken)
+
+    if (!result) {
+      ctx.status = 401
+      ctx.fail(20003, 'Refresh Token 无效')
+      return
+    }
+
+    ctx.success(result)
+  }
+
   // 小程序手机号授权演示
   async phone() {
     const { ctx } = this

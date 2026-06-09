@@ -20,4 +20,14 @@ describe('test/app/controller/admin_auth.test.js', () => {
     assert(res.body.code === 20001)
     assert(res.body.message === '未登录')
   })
+
+  it('POST /api/app/auth/refresh without refreshToken', async () => {
+    const res = await app.httpRequest()
+      .post('/api/app/auth/refresh')
+      .send({})
+      .expect(400)
+
+    assert(res.body.code === 10001)
+    assert(res.body.message === 'refreshToken 不能为空')
+  })
 })

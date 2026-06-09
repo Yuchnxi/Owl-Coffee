@@ -22,6 +22,14 @@ const ORDER_STATUS_TO_API = {
   refunded: 'refunded',
 }
 
+const ADMIN_STATUS_TRANSITIONS = {
+  paid: ['making'],
+  making: ['ready_for_pickup'],
+  ready_for_pickup: ['completed'],
+}
+
+const REFUNDABLE_ORDER_STATUSES = ['paid', 'making', 'ready_for_pickup']
+
 class OrderService extends Service {
   // 查询后台订单列表
   async listAdminOrders(filters = {}) {
@@ -624,48 +632,146 @@ class OrderService extends Service {
   // 更新订单状态
   async updateOrderStatus(orderId, orderStatus, adminUserId) {
     const dbStatus = this.toDbOrderStatus(orderStatus)
-    const timeField = this.getStatusTimeField(dbStatus)
-    const timeSql = timeField ? `, ${timeField} = NOW(3)` : ''
+    const connection = await this.app.mysql.getConnection()
 
-    await this.app.mysql.execute(
-      `
-        UPDATE orders
-        SET
-          order_status = :dbStatus,
-          updated_at = NOW(3),
-          updated_by = :adminUserId
-          ${timeSql}
-        WHERE id = :orderId
-          AND deleted_at IS NULL
-      `,
-      { orderId, dbStatus, adminUserId }
-    )
+    try {
+      await connection.beginTransaction()
 
-    return this.findAdminOrderDetail(orderId)
+      const order = await this.lockAdminOrder(connection, orderId)
+
+      if (!order) {
+        await connection.rollback()
+        return null
+      }
+
+      if (!this.canUpdateAdminStatus(order, dbStatus)) {
+        await connection.rollback()
+        return {
+          errorCode: 60001,
+          message: '订单状态不允许当前操作',
+          data: {},
+        }
+      }
+
+      const timeField = this.getStatusTimeField(dbStatus)
+      const timeSql = timeField ? `, ${timeField} = NOW(3)` : ''
+
+      await connection.execute(
+        `
+          UPDATE orders
+          SET
+            order_status = :dbStatus,
+            updated_at = NOW(3),
+            updated_by = :adminUserId
+            ${timeSql}
+          WHERE id = :orderId
+        `,
+        { orderId, dbStatus, adminUserId }
+      )
+
+      await connection.commit()
+
+      return this.findAdminOrderDetail(orderId)
+    } catch (err) {
+      await connection.rollback()
+      throw err
+    } finally {
+      connection.release()
+    }
   }
 
   // 取消订单
   async cancelOrder(orderId, adminUserId) {
-    return this.updateOrderStatus(orderId, 'cancelled', adminUserId)
+    const connection = await this.app.mysql.getConnection()
+
+    try {
+      await connection.beginTransaction()
+
+      const order = await this.lockAdminOrder(connection, orderId)
+
+      if (!order) {
+        await connection.rollback()
+        return null
+      }
+
+      if (order.orderStatus !== 'pending_payment' || order.paymentStatus !== 'unpaid') {
+        await connection.rollback()
+        return {
+          errorCode: 60001,
+          message: '只有未支付待付款订单可以取消',
+          data: {},
+        }
+      }
+
+      await connection.execute(
+        `
+          UPDATE orders
+          SET
+            order_status = 'cancelled',
+            cancelled_at = NOW(3),
+            updated_at = NOW(3),
+            updated_by = :adminUserId
+          WHERE id = :orderId
+        `,
+        { orderId, adminUserId }
+      )
+
+      await connection.commit()
+
+      return this.findAdminOrderDetail(orderId)
+    } catch (err) {
+      await connection.rollback()
+      throw err
+    } finally {
+      connection.release()
+    }
   }
 
   // 小程序取消待付款订单
   async cancelAppOrder(orderId, userId) {
-    const order = await this.findAppOrderDetail(orderId, userId)
+    const connection = await this.app.mysql.getConnection()
 
-    if (!order) {
-      return null
-    }
+    try {
+      await connection.beginTransaction()
 
-    if (order.orderStatus !== 'pendingPayment') {
-      return {
-        errorCode: 60001,
-        message: '订单状态不允许当前操作',
-        data: {},
+      const order = await this.lockOrder(connection, orderId, userId)
+
+      if (!order) {
+        await connection.rollback()
+        return null
       }
-    }
 
-    return this.updateOrderStatus(orderId, 'cancelled', userId)
+      if (order.orderStatus !== 'pending_payment' || order.paymentStatus !== 'unpaid') {
+        await connection.rollback()
+        return {
+          errorCode: 60001,
+          message: '订单状态不允许当前操作',
+          data: {},
+        }
+      }
+
+      await connection.execute(
+        `
+          UPDATE orders
+          SET
+            order_status = 'cancelled',
+            cancelled_at = NOW(3),
+            updated_at = NOW(3),
+            updated_by = :userId
+          WHERE id = :orderId
+        `,
+        { orderId, userId }
+      )
+
+      await connection.commit()
+
+      return this.findAdminOrderDetail(orderId)
+    } catch (err) {
+      await connection.rollback()
+      throw err
+    } finally {
+      connection.release()
+    }
   }
 
   // 小程序确认取餐
@@ -689,22 +795,72 @@ class OrderService extends Service {
 
   // 标记退款
   async refundOrder(orderId, adminUserId) {
-    await this.app.mysql.execute(
-      `
-        UPDATE orders
-        SET
-          order_status = 'refunded',
-          payment_status = 'refunded',
-          refunded_at = NOW(3),
-          updated_at = NOW(3),
-          updated_by = :adminUserId
-        WHERE id = :orderId
-          AND deleted_at IS NULL
-      `,
-      { orderId, adminUserId }
-    )
+    const connection = await this.app.mysql.getConnection()
 
-    return this.findAdminOrderDetail(orderId)
+    try {
+      await connection.beginTransaction()
+
+      const order = await this.lockAdminOrder(connection, orderId)
+
+      if (!order) {
+        await connection.rollback()
+        return null
+      }
+
+      if (order.paymentStatus !== 'paid' || !REFUNDABLE_ORDER_STATUSES.includes(order.orderStatus)) {
+        await connection.rollback()
+        return {
+          errorCode: 60001,
+          message: '只有已支付且未完成的订单可以退款',
+          data: {},
+        }
+      }
+
+      const items = await this.lockOrderItems(connection, orderId)
+      const skuRows = await this.lockSkus(connection, items.map(item => item.skuId))
+      const skuMap = new Map(skuRows.map(sku => [sku.skuId, sku]))
+
+      for (const item of items) {
+        const sku = skuMap.get(item.skuId)
+
+        if (!sku) {
+          await connection.rollback()
+          return {
+            errorCode: 10002,
+            message: 'SKU 不存在',
+            data: { skuId: item.skuId },
+          }
+        }
+
+        await this.returnSkuStock(connection, orderId, {
+          ...sku,
+          quantity: item.quantity,
+        }, adminUserId)
+      }
+
+      await connection.execute(
+        `
+          UPDATE orders
+          SET
+            order_status = 'refunded',
+            payment_status = 'refunded',
+            refunded_at = NOW(3),
+            updated_at = NOW(3),
+            updated_by = :adminUserId
+          WHERE id = :orderId
+        `,
+        { orderId, adminUserId }
+      )
+
+      await connection.commit()
+
+      return this.findAdminOrderDetail(orderId)
+    } catch (err) {
+      await connection.rollback()
+      throw err
+    } finally {
+      connection.release()
+    }
   }
 
   // 软删除订单
@@ -749,6 +905,34 @@ class OrderService extends Service {
         FOR UPDATE
       `,
       { orderId, userId }
+    )
+
+    return rows[0] || null
+  }
+
+  // 锁定后台订单
+  async lockAdminOrder(connection, orderId) {
+    const [rows] = await connection.execute(
+      `
+        SELECT
+          id,
+          order_no AS orderNo,
+          user_id AS userId,
+          order_status AS orderStatus,
+          payment_status AS paymentStatus,
+          payment_method AS paymentMethod,
+          total_amount AS totalAmount,
+          discount_amount AS discountAmount,
+          pay_amount AS payAmount,
+          user_coupon_id AS userCouponId,
+          pickup_code AS pickupCode
+        FROM orders
+        WHERE id = :orderId
+          AND deleted_at IS NULL
+        LIMIT 1
+        FOR UPDATE
+      `,
+      { orderId }
     )
 
     return rows[0] || null
@@ -923,6 +1107,66 @@ class OrderService extends Service {
     )
   }
 
+  // 回补退款订单的 SKU 库存并记录流水
+  async returnSkuStock(connection, orderId, item, adminUserId) {
+    const beforeStock = Number(item.stock)
+    const afterStock = beforeStock + item.quantity
+
+    await connection.execute(
+      `
+        UPDATE product_skus
+        SET
+          stock = :afterStock,
+          updated_at = NOW(3),
+          updated_by = :adminUserId
+        WHERE id = :skuId
+      `,
+      {
+        skuId: item.skuId,
+        afterStock,
+        adminUserId,
+      }
+    )
+
+    await connection.execute(
+      `
+        INSERT INTO inventory_logs (
+          id,
+          sku_id,
+          change_type,
+          change_quantity,
+          before_stock,
+          after_stock,
+          related_order_id,
+          reason,
+          created_at,
+          created_by
+        )
+        VALUES (
+          :id,
+          :skuId,
+          'order_refund',
+          :changeQuantity,
+          :beforeStock,
+          :afterStock,
+          :orderId,
+          '订单退款回补库存',
+          NOW(3),
+          :adminUserId
+        )
+      `,
+      {
+        id: this.service.authToken.createId('inv'),
+        skuId: item.skuId,
+        changeQuantity: item.quantity,
+        beforeStock,
+        afterStock,
+        orderId,
+        adminUserId,
+      }
+    )
+  }
+
   // 写入支付记录
   async insertPaymentRecord(connection, order, paymentStatus) {
     await connection.execute(
@@ -1079,6 +1323,17 @@ class OrderService extends Service {
     }
 
     return map[dbStatus] || ''
+  }
+
+  // 判断后台订单状态是否允许流转
+  canUpdateAdminStatus(order, nextStatus) {
+    if (order.paymentStatus !== 'paid') {
+      return false
+    }
+
+    const allowedNextStatuses = ADMIN_STATUS_TRANSITIONS[order.orderStatus] || []
+
+    return allowedNextStatuses.includes(nextStatus)
   }
 
   // 格式化订单列表项

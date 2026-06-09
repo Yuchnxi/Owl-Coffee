@@ -698,11 +698,15 @@ PUT /api/admin/orders/{orderId}/status
 }
 ```
 
+说明：后台状态更新接口仅用于制作流程流转，允许 `making`、`readyForPickup`、`completed`。取消和退款必须使用独立接口。
+
 ### 9.5.5 取消订单
 
 ```txt
 PUT /api/admin/orders/{orderId}/cancel
 ```
+
+说明：仅允许取消未支付的待付款订单。
 
 ### 9.5.6 退款标记
 
@@ -710,7 +714,7 @@ PUT /api/admin/orders/{orderId}/cancel
 PUT /api/admin/orders/{orderId}/refund
 ```
 
-说明：首版不接真实微信支付，仅更新为 `refunded`。
+说明：首版不接真实微信支付，仅允许已支付且未完成的订单退款；退款后订单支付状态更新为 `refunded`，并回补 SKU 库存。
 
 ### 9.5.7 删除订单
 

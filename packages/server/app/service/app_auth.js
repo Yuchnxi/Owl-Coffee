@@ -177,6 +177,51 @@ class AppAuthService extends Service {
     )
   }
 
+  // 根据小程序 refreshToken 重新签发 token
+  async refresh(refreshToken) {
+    const refreshTokenHash = this.service.authToken.hashRefreshToken(refreshToken)
+    const [rows] = await this.app.mysql.execute(
+      `
+        SELECT id, subject_id AS subjectId
+        FROM auth_refresh_tokens
+        WHERE refresh_token_hash = :refreshTokenHash
+          AND subject_type = 'app_user'
+          AND revoked_at IS NULL
+          AND expires_at > NOW(3)
+        LIMIT 1
+      `,
+      { refreshTokenHash }
+    )
+
+    const tokenRecord = rows[0]
+
+    if (!tokenRecord) {
+      return null
+    }
+
+    const user = await this.findUserById(tokenRecord.subjectId)
+
+    if (!user || user.userStatus !== 'normal') {
+      return null
+    }
+
+    await this.app.mysql.execute(
+      'UPDATE auth_refresh_tokens SET revoked_at = NOW(3) WHERE id = :id',
+      { id: tokenRecord.id }
+    )
+
+    const accessToken = this.service.authToken.createAppAccessToken(user)
+    const nextRefreshToken = this.service.authToken.createRefreshToken()
+
+    await this.saveRefreshToken(user.id, nextRefreshToken)
+
+    return {
+      accessToken,
+      refreshToken: nextRefreshToken,
+      expiresIn: 7200,
+    }
+  }
+
   // 格式化登录用户响应
   formatLoginUser(user) {
     return {
