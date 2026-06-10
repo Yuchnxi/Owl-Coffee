@@ -1,7 +1,7 @@
 <template>
   <el-aside class="admin-sidebar" :class="{ 'is-collapsed': appStore.sidebarCollapsed }" :width="asideWidth">
     <RouterLink class="admin-brand" to="/dashboard">
-      <span class="admin-brand__mark">OC</span>
+      <img class="admin-brand__icon" :src="logoIcon" alt="Owl Coffee" />
       <span class="admin-brand__text">Owl Coffee</span>
     </RouterLink>
 
@@ -24,6 +24,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import logoIcon from '../../assets/logo/owlcoffee_icon_cropped.png'
 import { adminMenus } from '../../config/menus'
 import { useAppStore } from '../../stores/app'
 

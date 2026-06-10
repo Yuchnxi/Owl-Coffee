@@ -1,7 +1,6 @@
 <template>
   <el-footer class="admin-footer">
     <span>© {{ currentYear }} Owl Coffee 管理系统</span>
-    <span>后台功能持续补充中</span>
   </el-footer>
 </template>
 
