@@ -72,7 +72,11 @@ module.exports = app => {
   router.get('/api/admin/roles', adminAuth, controller.admin.role.index)
   router.get('/api/admin/roles/:roleId', adminAuth, controller.admin.role.show)
   router.put('/api/admin/roles/:roleId/menus', adminAuth, adminOperationLog, controller.admin.role.updateMenus)
-  router.get('/api/admin/menus', adminAuth, controller.admin.role.menus)
+  router.get('/api/admin/menus', adminAuth, controller.admin.menu.index)
+  router.post('/api/admin/menus', adminAuth, adminOperationLog, controller.admin.menu.create)
+  router.put('/api/admin/menus/:menuId', adminAuth, adminOperationLog, controller.admin.menu.update)
+  router.put('/api/admin/menus/:menuId/status', adminAuth, adminOperationLog, controller.admin.menu.updateStatus)
+  router.delete('/api/admin/menus/:menuId', adminAuth, adminOperationLog, controller.admin.menu.destroy)
 
   // 后台日志查询
   router.get('/api/admin/logs/login', adminAuth, controller.admin.log.loginLogs)
