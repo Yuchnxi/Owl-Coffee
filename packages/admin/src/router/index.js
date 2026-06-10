@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AdminLayout from '../layouts/AdminLayout.vue'
 import { getAuthStorage } from '../utils/storage'
-import DashboardView from '../views/DashboardView.vue'
-import LoginView from '../views/LoginView.vue'
+import DashboardView from '../views/dashboard/index.vue'
+import LoginView from '../views/login/index.vue'
 
 const routes = [
   {

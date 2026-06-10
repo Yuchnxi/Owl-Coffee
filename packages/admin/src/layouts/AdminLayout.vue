@@ -14,8 +14,8 @@
 </template>
 
 <script setup>
-import LayoutAside from './components/LayoutAside.vue'
-import LayoutFooter from './components/LayoutFooter.vue'
-import LayoutHeader from './components/LayoutHeader.vue'
-import LayoutMain from './components/LayoutMain.vue'
+import LayoutAside from './components/LayoutAside/index.vue'
+import LayoutFooter from './components/LayoutFooter/index.vue'
+import LayoutHeader from './components/LayoutHeader/index.vue'
+import LayoutMain from './components/LayoutMain/index.vue'
 </script>

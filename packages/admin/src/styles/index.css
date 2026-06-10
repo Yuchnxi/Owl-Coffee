@@ -331,10 +331,6 @@ a {
   width: 84px;
 }
 
-.admin-sidebar.is-collapsed .admin-menu__item span {
-  display: none;
-}
-
 .admin-sidebar.is-collapsed .admin-brand__text {
   display: none;
 }
@@ -365,34 +361,62 @@ a {
 }
 
 .admin-menu {
-  display: flex;
-  flex-direction: column;
   flex: 1;
   min-height: 0;
   margin-top: 26px;
   overflow-y: auto;
   overflow-x: hidden;
-  gap: 6px;
+  border-right: 0;
 }
 
-.admin-menu__item {
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 13px;
+.admin-menu.el-menu {
+  --el-menu-bg-color: transparent;
+  --el-menu-hover-bg-color: var(--oc-primary-soft);
+  --el-menu-active-color: var(--oc-text);
+  --el-menu-text-color: var(--oc-text-secondary);
+  --el-menu-item-height: 44px;
+  --el-menu-sub-item-height: 44px;
+  border-right: 0;
+  background: transparent;
+}
+
+.admin-menu .el-menu-item,
+.admin-menu .el-sub-menu__title {
+  height: 44px;
+  margin: 0 0 6px;
   border-radius: var(--oc-radius);
-  color: var(--oc-text-secondary);
-  gap: 12px;
+  line-height: 44px;
 }
 
-.admin-menu__item:hover,
-.admin-menu__item.router-link-active {
+.admin-menu .el-menu-item.is-active {
+  background: var(--oc-primary-soft);
+  box-shadow: inset 3px 0 0 var(--oc-primary);
+}
+
+.admin-menu .el-menu-item:hover,
+.admin-menu .el-sub-menu__title:hover {
   background: var(--oc-primary-soft);
   color: var(--oc-text);
 }
 
-.admin-menu__item.router-link-active {
-  box-shadow: inset 3px 0 0 var(--oc-primary);
+.admin-menu .el-icon {
+  width: 18px;
+  margin-right: 12px;
+  font-size: 16px;
+}
+
+.admin-menu.el-menu--collapse {
+  width: 52px;
+}
+
+.admin-menu.el-menu--collapse .el-menu-item,
+.admin-menu.el-menu--collapse .el-sub-menu__title {
+  justify-content: center;
+  padding: 0;
+}
+
+.admin-menu.el-menu--collapse .el-icon {
+  margin-right: 0;
 }
 
 .admin-topbar {
@@ -594,12 +618,12 @@ a {
     width: 100% !important;
   }
 
-  .admin-sidebar.is-collapsed .admin-menu__item span {
+  .admin-sidebar.is-collapsed .admin-brand__text {
     display: inline;
   }
 
-  .admin-sidebar.is-collapsed .admin-brand__text {
-    display: inline;
+  .admin-menu.el-menu--collapse {
+    width: 100%;
   }
 
   .admin-footer {

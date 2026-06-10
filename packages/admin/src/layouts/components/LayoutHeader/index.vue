@@ -19,7 +19,7 @@
 
 <script setup>
 import { Expand, Fold } from '@element-plus/icons-vue'
-import { useAppStore } from '../../stores/app'
+import { useAppStore } from '../../../stores/app'
 
 // 全局布局状态
 const appStore = useAppStore()

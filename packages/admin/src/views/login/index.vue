@@ -75,9 +75,9 @@ import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Key, Lock, User } from '@element-plus/icons-vue'
-import { fetchCaptcha } from '../api/auth'
-import logoHorizontal from '../assets/logo/owlcoffee_logo_horizontal.png'
-import { useAuthStore } from '../stores/auth'
+import { fetchCaptcha } from '../../api/auth'
+import logoHorizontal from '../../assets/logo/owlcoffee_logo_horizontal.png'
+import { useAuthStore } from '../../stores/auth'
 
 // 路由实例
 const router = useRouter()
@@ -157,7 +157,7 @@ loadCaptcha()
   background:
     linear-gradient(90deg, rgba(10, 6, 3, 0.28) 0%, rgba(7, 11, 16, 0.54) 48%, rgba(7, 11, 16, 0.88) 100%),
     linear-gradient(180deg, rgba(7, 11, 16, 0.12), rgba(7, 11, 16, 0.3)),
-    url("../assets/admin_login_bg.png") center / cover no-repeat;
+    url("../../assets/admin_login_bg.png") center / cover no-repeat;
 }
 
 .login-page::before {
