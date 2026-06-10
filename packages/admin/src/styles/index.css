@@ -43,11 +43,12 @@
 html,
 body,
 #app {
-  min-height: 100%;
+  height: 100%;
   margin: 0;
 }
 
 body {
+  overflow: hidden;
   background: var(--oc-bg);
   color: var(--oc-text);
 }
@@ -284,13 +285,33 @@ a {
   text-align: center;
 }
 
-.admin-shell {
-  display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
-  min-height: 100vh;
+.admin-layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
   background:
     linear-gradient(180deg, rgba(238, 146, 38, 0.06), transparent 340px),
     var(--oc-bg);
+}
+
+.admin-layout__body {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.admin-layout__content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .admin-sidebar {
@@ -298,10 +319,12 @@ a {
   top: 0;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   padding: 22px 16px;
+  overflow: hidden;
   border-right: 1px solid var(--oc-border);
   background: rgba(8, 12, 18, 0.94);
+  transition: width 0.2s ease;
 }
 
 .admin-sidebar.is-collapsed {
@@ -317,6 +340,7 @@ a {
   display: flex;
   align-items: center;
   height: 52px;
+  flex: 0 0 auto;
   padding: 0 10px;
   gap: 12px;
 }
@@ -343,7 +367,11 @@ a {
 .admin-menu {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
   margin-top: 26px;
+  overflow-y: auto;
+  overflow-x: hidden;
   gap: 6px;
 }
 
@@ -367,10 +395,6 @@ a {
   box-shadow: inset 3px 0 0 var(--oc-primary);
 }
 
-.admin-main {
-  min-width: 0;
-}
-
 .admin-topbar {
   position: sticky;
   top: 0;
@@ -378,6 +402,7 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
   min-height: 78px;
   padding: 0 28px;
   border-bottom: 1px solid var(--oc-border);
@@ -429,7 +454,11 @@ a {
 }
 
 .admin-content {
+  flex: 1;
+  width: 100%;
   min-width: 0;
+  min-height: 0;
+  overflow: auto;
   padding: 28px;
 }
 
@@ -516,6 +545,18 @@ a {
   justify-content: flex-end;
 }
 
+.admin-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 28px;
+  border-top: 1px solid var(--oc-border);
+  background: rgba(7, 11, 16, 0.92);
+  color: var(--oc-text-muted);
+  font-size: 12px;
+}
+
 @media (max-width: 1100px) {
   .login-page {
     grid-template-columns: 1fr;
@@ -554,13 +595,28 @@ a {
     grid-template-columns: 1fr;
   }
 
-  .admin-shell {
-    grid-template-columns: 1fr;
+  .admin-layout__body {
+    flex-direction: column;
   }
 
   .admin-sidebar {
     position: static;
     height: auto;
+    max-height: 45vh;
+    width: 100% !important;
+  }
+
+  .admin-sidebar.is-collapsed .admin-brand__text,
+  .admin-sidebar.is-collapsed .admin-menu__item span {
+    display: inline;
+  }
+
+  .admin-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: center;
+    height: 64px;
+    gap: 4px;
   }
 
   .admin-topbar,

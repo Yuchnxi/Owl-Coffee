@@ -14,9 +14,15 @@
         <p>登录 Owl Coffee 管理系统</p>
       </div>
 
-      <el-form class="login-form" label-position="top">
+      <el-form class="login-form" label-position="top" @submit.prevent="handleLogin">
         <el-form-item>
-          <el-input v-model="form.account" size="large" placeholder="请输入账号" :prefix-icon="User" />
+          <el-input
+            v-model.trim="form.account"
+            size="large"
+            placeholder="请输入账号"
+            :prefix-icon="User"
+            @keyup.enter="handleLogin"
+          />
         </el-form-item>
 
         <el-form-item>
@@ -27,13 +33,23 @@
             type="password"
             show-password
             :prefix-icon="Lock"
+            @keyup.enter="handleLogin"
           />
         </el-form-item>
 
         <el-form-item>
           <div class="captcha-row">
-            <el-input v-model="form.captchaCode" size="large" placeholder="请输入验证码" :prefix-icon="Key" />
-            <button class="captcha-code" type="button" aria-label="验证码占位">待补充</button>
+            <el-input
+              v-model.trim="form.captchaCode"
+              size="large"
+              placeholder="请输入验证码"
+              :prefix-icon="Key"
+              @keyup.enter="handleLogin"
+            />
+            <button class="captcha-code" type="button" aria-label="验证码" @click="loadCaptcha">
+              <img v-if="captchaImageUrl" :src="captchaImageUrl" alt="登录验证码" />
+              <span v-else>待补充</span>
+            </button>
           </div>
         </el-form-item>
 
@@ -42,7 +58,9 @@
           <button class="login-link" type="button">联系管理员</button>
         </div>
 
-        <el-button class="login-submit" size="large" type="primary">登 录</el-button>
+        <el-button class="login-submit" size="large" type="primary" :loading="loginLoading" @click="handleLogin">
+          登 录
+        </el-button>
       </el-form>
     </section>
 
@@ -54,21 +72,81 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { Key, Lock, User } from '@element-plus/icons-vue'
+import { fetchCaptcha } from '../api/auth'
 import logoHorizontal from '../assets/logo/owlcoffee_logo_horizontal.png'
+import { useAuthStore } from '../stores/auth'
+
+// 路由实例
+const router = useRouter()
+
+// 登录状态
+const authStore = useAuthStore()
 
 // 登录表单数据
 const form = reactive({
   account: '',
   password: '',
+  captchaId: '',
   captchaCode: ''
 })
 
 // 是否记住账号
 const rememberAccount = ref(true)
 
+// 登录按钮加载状态
+const loginLoading = ref(false)
+
+// 验证码图片地址
+const captchaImageUrl = ref('')
+
 // 当前年份
 const currentYear = new Date().getFullYear()
+
+// 加载登录验证码
+async function loadCaptcha() {
+  try {
+    const data = await fetchCaptcha()
+
+    form.captchaId = data.captchaId || ''
+    captchaImageUrl.value = data.imageUrl && data.imageUrl !== '待补充' ? data.imageUrl : ''
+  } catch (err) {
+    captchaImageUrl.value = ''
+  }
+}
+
+// 提交登录表单
+async function handleLogin() {
+  if (loginLoading.value) {
+    return
+  }
+
+  if (!form.account || !form.password) {
+    ElMessage.warning('请输入账号和密码')
+    return
+  }
+
+  loginLoading.value = true
+
+  try {
+    await authStore.login({
+      account: form.account,
+      password: form.password,
+      captchaId: form.captchaId,
+      captchaCode: form.captchaCode
+    })
+    ElMessage.success('登录成功')
+    router.replace('/dashboard')
+  } catch (err) {
+    await loadCaptcha()
+  } finally {
+    loginLoading.value = false
+  }
+}
+
+loadCaptcha()
 </script>
 
 <style scoped>
@@ -146,6 +224,13 @@ const currentYear = new Date().getFullYear()
 
 .login-submit {
   min-height: 58px;
+}
+
+.captcha-code img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 @media (max-width: 1280px) {
