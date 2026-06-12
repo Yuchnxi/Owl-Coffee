@@ -75,6 +75,8 @@ async function handleUserCommand(command) {
   if (command === 'logout') {
     try {
       await authStore.logout()
+    } catch (err) {
+      // 退出接口失败时仍按本地退出处理
     } finally {
       ElMessage.success('已退出登录')
       router.replace('/login')
