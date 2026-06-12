@@ -42,7 +42,7 @@ function getAction(method, path) {
     return 'refund'
   }
 
-  if (path.endsWith('/menus')) {
+  if (method === 'PUT' && path.includes('/roles/') && path.endsWith('/menus')) {
     return 'updateMenus'
   }
 

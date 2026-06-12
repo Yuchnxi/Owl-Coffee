@@ -134,29 +134,16 @@ class AdminAuthService extends Service {
 
   // 查询后台用户菜单权限
   async listMenus(roleId) {
-    const [rows] = await this.app.mysql.execute(
-      `
-        SELECT
-          m.id,
-          m.parent_id AS parentId,
-          m.name,
-          m.path,
-          m.icon,
-          m.sort,
-          m.meta
-        FROM role_menus rm
-        INNER JOIN menus m ON m.id = rm.menu_id
-        WHERE rm.role_id = :roleId
-          AND m.status = 'enabled'
-          AND m.deleted_at IS NULL
-        ORDER BY m.sort ASC
-      `,
-      { roleId }
-    )
+    const menus = await this.service.role.listRoleMenus(roleId)
 
-    return rows.map(menu => ({
-      ...menu,
-      meta: this.parseJson(menu.meta),
+    return menus.map(menu => ({
+      id: menu.id,
+      parentId: menu.parentId,
+      name: menu.name,
+      path: menu.path,
+      icon: menu.icon,
+      sort: menu.sort,
+      meta: menu.meta,
     }))
   }
 

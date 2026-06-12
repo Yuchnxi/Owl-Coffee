@@ -2,6 +2,8 @@
 
 const Service = require('egg').Service
 
+const DEFAULT_MENU_ID = 'dashboard'
+
 class RoleService extends Service {
   // 查询后台角色列表
   async listRoles() {
@@ -41,7 +43,7 @@ class RoleService extends Service {
 
     return {
       ...role,
-      menuIds: menus.map(menu => menu.id),
+      menuIds: menus.filter(menu => menu.id !== DEFAULT_MENU_ID).map(menu => menu.id),
       menus: this.buildMenuTree(menus),
     }
   }
@@ -84,13 +86,14 @@ class RoleService extends Service {
           m.meta,
           m.created_at AS createdAt,
           m.updated_at AS updatedAt
-        FROM role_menus rm
-        INNER JOIN menus m ON m.id = rm.menu_id
-        WHERE rm.role_id = :roleId
+        FROM menus m
+        LEFT JOIN role_menus rm ON rm.menu_id = m.id AND rm.role_id = :roleId
+        WHERE (rm.role_id IS NOT NULL OR m.id = :defaultMenuId)
           AND m.deleted_at IS NULL
+          AND m.status = 'enabled'
         ORDER BY m.sort ASC, m.created_at ASC
       `,
-      { roleId }
+      { roleId, defaultMenuId: DEFAULT_MENU_ID }
     )
 
     return rows.map(row => this.formatMenu(row))
@@ -98,7 +101,10 @@ class RoleService extends Service {
 
   // 查询后台菜单树
   async listMenuTree(onlyEnabled = false) {
-    const conditions = ['deleted_at IS NULL']
+    const conditions = ['deleted_at IS NULL', 'id != :defaultMenuId']
+    const params = {
+      defaultMenuId: DEFAULT_MENU_ID,
+    }
 
     if (onlyEnabled) {
       conditions.push("status = 'enabled'")
@@ -120,7 +126,8 @@ class RoleService extends Service {
         FROM menus
         WHERE ${conditions.join(' AND ')}
         ORDER BY sort ASC, created_at ASC
-      `
+      `,
+      params
     )
 
     return {
@@ -139,7 +146,9 @@ class RoleService extends Service {
         { roleId }
       )
 
-      for (const menuId of menuIds) {
+      const manageableMenuIds = menuIds.filter(menuId => menuId !== DEFAULT_MENU_ID)
+
+      for (const menuId of manageableMenuIds) {
         await connection.execute(
           `
             INSERT INTO role_menus (role_id, menu_id, created_at)
@@ -161,14 +170,16 @@ class RoleService extends Service {
 
   // 判断菜单 ID 是否全部有效
   async areMenuIdsValid(menuIds) {
-    if (menuIds.length === 0) {
+    const manageableMenuIds = menuIds.filter(menuId => menuId !== DEFAULT_MENU_ID)
+
+    if (manageableMenuIds.length === 0) {
       return true
     }
 
-    const placeholders = menuIds.map((_, index) => `:menuId${index}`)
+    const placeholders = manageableMenuIds.map((_, index) => `:menuId${index}`)
     const params = {}
 
-    menuIds.forEach((menuId, index) => {
+    manageableMenuIds.forEach((menuId, index) => {
       params[`menuId${index}`] = menuId
     })
 
@@ -183,7 +194,7 @@ class RoleService extends Service {
       params
     )
 
-    return rows.length === menuIds.length
+    return rows.length === manageableMenuIds.length
   }
 
   // 构建菜单树

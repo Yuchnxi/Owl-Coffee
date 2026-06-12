@@ -4,6 +4,9 @@
   "private": true,
   "description": "Owl Coffee monorepo",
   "scripts": {
+    "admin:dev": "pnpm --filter @owl-coffee/admin dev",
+    "admin:build": "pnpm --filter @owl-coffee/admin build",
+    "admin:preview": "pnpm --filter @owl-coffee/admin preview",
     "server:dev": "pnpm --filter @owl-coffee/server dev",
     "server:start": "pnpm --filter @owl-coffee/server start",
     "server:stop": "pnpm --filter @owl-coffee/server stop",

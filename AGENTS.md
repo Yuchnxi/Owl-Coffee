@@ -131,11 +131,18 @@ src/
 
 ```text
 src/views/
-└── FunctionName/
+└── function-name/
     ├── index.vue
     └── childComps/
         └── DetailDialog.vue
 ```
+
+组件和页面目录约定：
+
+1. 页面、布局组件和业务组件都优先使用“功能文件夹 + `index.vue`”结构，方便后续扩展子组件、样式和工具文件。
+2. `layouts/components` 下的组件目录示例：`LayoutAside/index.vue`、`LayoutHeader/index.vue`。
+3. `views` 下的页面目录示例：`login/index.vue`、`dashboard/index.vue`。
+4. 新增页面目录使用小写短横线命名，Vue 组件文件仍统一命名为 `index.vue`。
 
 ## 7. 后台开发规则
 
@@ -283,4 +290,3 @@ PR 使用轻量规则，至少包含：
 5. 禁止在后台首版加入多门店、加盟、多层组织权限和按钮级权限配置。
 6. 禁止提交真实密钥、密码、appSecret 和支付配置。
 7. 禁止无关重构和无说明的大范围改动。
-
