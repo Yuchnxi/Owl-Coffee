@@ -73,9 +73,12 @@ async function handleUserCommand(command) {
   }
 
   if (command === 'logout') {
-    await authStore.logout()
-    ElMessage.success('已退出登录')
-    router.replace('/login')
+    try {
+      await authStore.logout()
+    } finally {
+      ElMessage.success('已退出登录')
+      router.replace('/login')
+    }
   }
 }
 </script>
