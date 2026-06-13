@@ -136,7 +136,12 @@ class AdminAuthService extends Service {
   async listMenus(roleId) {
     const menus = await this.service.role.listRoleMenus(roleId)
 
-    return menus.map(menu => ({
+    return this.service.role.buildMenuTree(menus).map(menu => this.formatMenu(menu))
+  }
+
+  // 格式化后台菜单响应
+  formatMenu(menu) {
+    return {
       id: menu.id,
       parentId: menu.parentId,
       name: menu.name,
@@ -144,7 +149,8 @@ class AdminAuthService extends Service {
       icon: menu.icon,
       sort: menu.sort,
       meta: menu.meta,
-    }))
+      children: Array.isArray(menu.children) ? menu.children.map(child => this.formatMenu(child)) : [],
+    }
   }
 
   // 根据 refreshToken 重新签发 token

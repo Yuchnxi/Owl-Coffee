@@ -60,7 +60,7 @@ const activeMenu = computed(() => route.meta.activeMenu || route.path)
 
 // 拉取当前用户菜单
 onMounted(async () => {
-  if (!authStore.user?.menus?.length && authStore.accessToken) {
+  if (authStore.accessToken) {
     await authStore.loadCurrentUser()
   }
 })

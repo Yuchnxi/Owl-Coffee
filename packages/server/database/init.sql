@@ -355,9 +355,11 @@ VALUES
   ('users', NULL, '用户管理', '/users', 'users', 40, 'enabled', JSON_OBJECT('title', '用户管理'), NOW(3), NOW(3), NULL),
   ('inventory', NULL, '库存管理', '/inventory', 'inventory', 50, 'enabled', JSON_OBJECT('title', '库存管理'), NOW(3), NOW(3), NULL),
   ('marketing', NULL, '营销管理', '/marketing', 'marketing', 60, 'enabled', JSON_OBJECT('title', '营销管理'), NOW(3), NOW(3), NULL),
-  ('permissions', NULL, '权限管理', '/permissions', 'permissions', 70, 'enabled', JSON_OBJECT('title', '权限管理'), NOW(3), NOW(3), NULL),
-  ('settings', NULL, '系统设置', '/settings', 'settings', 80, 'enabled', JSON_OBJECT('title', '系统设置'), NOW(3), NOW(3), NULL)
+  ('settings', NULL, '系统设置', '/settings', 'settings', 70, 'enabled', JSON_OBJECT('title', '系统设置'), NOW(3), NOW(3), NULL),
+  ('admin_users', 'settings', '账号管理', '/settings/admin-users', 'adminUsers', 10, 'enabled', JSON_OBJECT('title', '账号管理'), NOW(3), NOW(3), NULL),
+  ('role_permissions', 'settings', '角色权限', '/settings/role-permissions', 'rolePermissions', 20, 'enabled', JSON_OBJECT('title', '角色权限'), NOW(3), NOW(3), NULL)
 ON DUPLICATE KEY UPDATE
+  parent_id = VALUES(parent_id),
   name = VALUES(name),
   path = VALUES(path),
   icon = VALUES(icon),
@@ -365,6 +367,15 @@ ON DUPLICATE KEY UPDATE
   status = VALUES(status),
   meta = VALUES(meta),
   updated_at = NOW(3);
+
+UPDATE menus
+SET status = 'disabled',
+    deleted_at = COALESCE(deleted_at, NOW(3)),
+    updated_at = NOW(3)
+WHERE id = 'permissions';
+
+DELETE FROM role_menus
+WHERE menu_id = 'permissions';
 
 INSERT INTO role_menus (role_id, menu_id, created_at)
 VALUES
@@ -374,8 +385,9 @@ VALUES
   ('role_admin', 'users', NOW(3)),
   ('role_admin', 'inventory', NOW(3)),
   ('role_admin', 'marketing', NOW(3)),
-  ('role_admin', 'permissions', NOW(3)),
   ('role_admin', 'settings', NOW(3)),
+  ('role_admin', 'admin_users', NOW(3)),
+  ('role_admin', 'role_permissions', NOW(3)),
   ('role_staff', 'dashboard', NOW(3)),
   ('role_staff', 'products', NOW(3)),
   ('role_staff', 'orders', NOW(3)),

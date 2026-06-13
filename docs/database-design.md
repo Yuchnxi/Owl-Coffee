@@ -631,16 +631,17 @@ JSON 使用说明：`meta` 可保存标题、缓存、隐藏等前端扩展配�
 
 ### 10.2 菜单
 
-| id | name | path |
-|---|---|---|
-| `dashboard` | 仪表盘 | `/dashboard` |
-| `products` | 商品管理 | `/products` |
-| `orders` | 订单管理 | `/orders` |
-| `users` | 用户管理 | `/users` |
-| `inventory` | 库存管理 | `/inventory` |
-| `marketing` | 营销管理 | `/marketing` |
-| `permissions` | 权限管理 | `/permissions` |
-| `settings` | 系统设置 | `/settings` |
+| id | parent_id | name | path |
+|---|---|---|---|
+| `dashboard` | `NULL` | 仪表盘 | `/dashboard` |
+| `products` | `NULL` | 商品管理 | `/products` |
+| `orders` | `NULL` | 订单管理 | `/orders` |
+| `users` | `NULL` | 用户管理 | `/users` |
+| `inventory` | `NULL` | 库存管理 | `/inventory` |
+| `marketing` | `NULL` | 营销管理 | `/marketing` |
+| `settings` | `NULL` | 系统设置 | `/settings` |
+| `admin_users` | `settings` | 账号管理 | `/settings/admin-users` |
+| `role_permissions` | `settings` | 角色权限 | `/settings/role-permissions` |
 
 ### 10.3 默认管理员
 

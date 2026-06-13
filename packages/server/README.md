@@ -155,7 +155,7 @@ PUT /api/admin/coupons/{couponId}/disable
 DELETE /api/admin/coupons/{couponId}
 ```
 
-权限管理：
+系统设置 - 角色权限：
 
 ```txt
 GET /api/admin/roles
@@ -172,6 +172,8 @@ PUT /api/admin/settings/store
 GET /api/admin/settings/account
 PUT /api/admin/settings/account
 ```
+
+账号管理作为系统设置二级菜单，接口待补充。
 
 后台日志：
 

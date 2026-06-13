@@ -29,7 +29,8 @@ import {
   Setting,
   ShoppingCart,
   Tickets,
-  User
+  User,
+  UserFilled
 } from '@element-plus/icons-vue'
 import { computed } from 'vue'
 
@@ -52,7 +53,9 @@ const iconMap = {
   inventory: Box,
   marketing: Tickets,
   permissions: Lock,
-  settings: Setting
+  settings: Setting,
+  adminUsers: UserFilled,
+  rolePermissions: Lock
 }
 
 // 菜单是否存在子级

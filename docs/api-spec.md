@@ -905,7 +905,9 @@ DELETE /api/admin/coupons/{couponId}
 
 ---
 
-## 9.9 权限管理
+## 9.9 系统设置 - 角色权限
+
+说明：角色权限作为后台“系统设置”的二级菜单展示。
 
 ### 9.9.1 角色列表
 
@@ -929,7 +931,7 @@ PUT /api/admin/roles/{roleId}/menus
 
 ```json
 {
-  "menuIds": ["dashboard", "products", "orders"]
+  "menuIds": ["dashboard", "products", "orders", "settings", "role_permissions"]
 }
 ```
 
@@ -971,6 +973,8 @@ GET /api/admin/logs/operation
 ---
 
 ## 9.10 系统设置
+
+说明：后台侧边栏中，“账号管理”和“角色权限”作为“系统设置”的二级菜单展示。
 
 ### 9.10.1 门店设置
 
@@ -1014,6 +1018,10 @@ PUT /api/admin/settings/account
   "confirmPassword": "待补充"
 }
 ```
+
+### 9.10.3 账号管理
+
+说明：管理员和店员账号管理接口待补充。
 
 ---
 
