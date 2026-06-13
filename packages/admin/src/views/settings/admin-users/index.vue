@@ -35,9 +35,6 @@
         <el-button :icon="Edit" :disabled="selectedRows.length !== 1" @click="openEditDialog(selectedRows[0])">
           编辑
         </el-button>
-        <el-button :icon="Delete" :disabled="selectedRows.length === 0" @click="handleBatchDelete">
-          删除
-        </el-button>
       </div>
       <div class="admin-users-operations__right">
         <el-button :icon="Refresh" :loading="loading" @click="loadAdminUsers">刷新</el-button>
@@ -322,6 +319,11 @@ function openEditDialog(row) {
   accountDialog.visible = true
 }
 
+// 记录表格勾选账号
+function handleSelectionChange(rows) {
+  selectedRows.value = rows
+}
+
 // 打开账号详情弹窗
 async function openDetailDialog(row) {
   currentAccount.value = await fetchAdminUserDetail(row.id)
@@ -365,11 +367,6 @@ async function submitAccountForm(form) {
   } finally {
     accountDialog.submitting = false
   }
-}
-
-// 记录表格勾选账号
-function handleSelectionChange(rows) {
-  selectedRows.value = rows
 }
 
 // 处理更多菜单命令
@@ -437,31 +434,6 @@ async function handleDelete(row) {
     pagination.page -= 1
   }
 
-  await loadAdminUsers()
-}
-
-// 批量删除账号
-async function handleBatchDelete() {
-  if (!selectedRows.value.length) {
-    return
-  }
-
-  try {
-    await ElMessageBox.confirm(`确认删除已选中的 ${selectedRows.value.length} 个账号吗？`, '批量删除账号', {
-      type: 'warning',
-      confirmButtonText: '确认删除',
-      cancelButtonText: '取消'
-    })
-  } catch (err) {
-    return
-  }
-
-  for (const row of selectedRows.value) {
-    await deleteAdminUser(row.id)
-  }
-
-  ElMessage.success('已删除选中账号')
-  selectedRows.value = []
   await loadAdminUsers()
 }
 
