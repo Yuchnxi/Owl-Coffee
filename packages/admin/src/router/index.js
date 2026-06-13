@@ -6,6 +6,8 @@ import Error401View from '../views/error/401.vue'
 import Error404View from '../views/error/404.vue'
 import LoginView from '../views/login/index.vue'
 
+const AdminUsersView = () => import('../views/settings/admin-users/index.vue')
+
 const routes = [
   {
     path: '/',
@@ -29,6 +31,14 @@ const routes = [
         component: DashboardView,
         meta: {
           title: '仪表盘'
+        }
+      },
+      {
+        path: 'settings/admin-users',
+        name: 'settingsAdminUsers',
+        component: AdminUsersView,
+        meta: {
+          title: '账号管理'
         }
       },
       {

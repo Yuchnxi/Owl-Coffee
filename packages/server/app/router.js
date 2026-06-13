@@ -61,6 +61,16 @@ module.exports = app => {
   router.get('/api/admin/users/:userId', adminAuth, controller.admin.user.show)
   router.put('/api/admin/users/:userId/status', adminAuth, adminOperationLog, controller.admin.user.updateStatus)
 
+  // 后台账号管理
+  router.get('/api/admin/admin-users', adminAuth, controller.admin.adminUser.index)
+  router.post('/api/admin/admin-users', adminAuth, adminOperationLog, controller.admin.adminUser.create)
+  router.get('/api/admin/admin-users/roles', adminAuth, controller.admin.adminUser.roles)
+  router.get('/api/admin/admin-users/:adminUserId', adminAuth, controller.admin.adminUser.show)
+  router.put('/api/admin/admin-users/:adminUserId', adminAuth, adminOperationLog, controller.admin.adminUser.update)
+  router.put('/api/admin/admin-users/:adminUserId/status', adminAuth, adminOperationLog, controller.admin.adminUser.updateStatus)
+  router.put('/api/admin/admin-users/:adminUserId/password', adminAuth, adminOperationLog, controller.admin.adminUser.resetPassword)
+  router.delete('/api/admin/admin-users/:adminUserId', adminAuth, adminOperationLog, controller.admin.adminUser.destroy)
+
   // 后台优惠券管理
   router.get('/api/admin/coupons', adminAuth, controller.admin.coupon.index)
   router.post('/api/admin/coupons', adminAuth, adminOperationLog, controller.admin.coupon.create)

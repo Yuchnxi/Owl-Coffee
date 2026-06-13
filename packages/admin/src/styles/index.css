@@ -534,6 +534,8 @@ a {
 }
 
 .admin-content {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   width: 100%;
   min-width: 0;
@@ -544,12 +546,13 @@ a {
 
 .admin-page {
   display: flex;
+  flex: 1;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
   gap: 18px;
 }
 
-.admin-page__heading,
 .admin-search-panel,
 .admin-toolbar,
 .admin-table-panel,
@@ -561,13 +564,20 @@ a {
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.18);
 }
 
-.admin-page__heading,
 .admin-toolbar,
 .admin-pagination {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 18px;
+}
+
+.admin-page__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 0 2px 4px;
 }
 
 .admin-page__heading h2,
@@ -622,7 +632,12 @@ a {
 }
 
 .admin-pagination {
-  justify-content: flex-end;
+  justify-content: space-between;
+}
+
+.admin-pagination__total {
+  color: var(--oc-text-secondary);
+  font-size: 13px;
 }
 
 .admin-footer {

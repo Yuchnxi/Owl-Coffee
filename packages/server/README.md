@@ -173,7 +173,18 @@ GET /api/admin/settings/account
 PUT /api/admin/settings/account
 ```
 
-账号管理作为系统设置二级菜单，接口待补充。
+账号管理：
+
+```txt
+GET /api/admin/admin-users
+POST /api/admin/admin-users
+GET /api/admin/admin-users/roles
+GET /api/admin/admin-users/{adminUserId}
+PUT /api/admin/admin-users/{adminUserId}
+PUT /api/admin/admin-users/{adminUserId}/status
+PUT /api/admin/admin-users/{adminUserId}/password
+DELETE /api/admin/admin-users/{adminUserId}
+```
 
 后台日志：
 
