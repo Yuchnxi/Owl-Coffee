@@ -70,3 +70,22 @@ export function post(url, data, options = {}) {
     data: data || {}
   })
 }
+
+// 发起 PUT 请求
+export function put(url, data, options = {}) {
+  return request({
+    ...options,
+    url,
+    method: 'put',
+    data: data || {}
+  })
+}
+
+// 发起 DELETE 请求
+export function del(url, options = {}) {
+  return request({
+    ...options,
+    url,
+    method: 'delete'
+  })
+}

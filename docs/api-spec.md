@@ -1021,7 +1021,110 @@ PUT /api/admin/settings/account
 
 ### 9.10.3 账号管理
 
-说明：管理员和店员账号管理接口待补充。
+说明：管理员和店员账号管理，只管理后台账号，不管理小程序用户。
+
+#### 9.10.3.1 账号列表
+
+```txt
+GET /api/admin/admin-users
+```
+
+查询参数：
+| 参数 | 说明 |
+|---|---|
+| `page` | 页码 |
+| `pageSize` | 每页数量 |
+| `account` | 登录账号 |
+| `name` | 姓名 |
+| `phone` | 手机号 |
+| `roleId` | 角色 ID |
+| `status` | `enabled` / `disabled` |
+
+#### 9.10.3.2 新增账号
+
+```txt
+POST /api/admin/admin-users
+```
+
+请求体：
+
+```json
+{
+  "account": "staff01",
+  "name": "店员",
+  "phone": "待补充",
+  "roleId": "role_staff",
+  "password": "待补充",
+  "status": "enabled"
+}
+```
+
+#### 9.10.3.3 账号详情
+
+```txt
+GET /api/admin/admin-users/{adminUserId}
+```
+
+#### 9.10.3.4 编辑账号
+
+```txt
+PUT /api/admin/admin-users/{adminUserId}
+```
+
+请求体：
+
+```json
+{
+  "account": "staff01",
+  "name": "店员",
+  "phone": "待补充",
+  "roleId": "role_staff"
+}
+```
+
+#### 9.10.3.5 启停账号
+
+```txt
+PUT /api/admin/admin-users/{adminUserId}/status
+```
+
+请求体：
+
+```json
+{
+  "status": "disabled"
+}
+```
+
+说明：不允许禁用当前登录账号；不允许禁用最后一个启用状态的管理员账号。
+
+#### 9.10.3.6 重置密码
+
+```txt
+PUT /api/admin/admin-users/{adminUserId}/password
+```
+
+请求体：
+
+```json
+{
+  "password": "待补充"
+}
+```
+
+#### 9.10.3.7 删除账号
+
+```txt
+DELETE /api/admin/admin-users/{adminUserId}
+```
+
+说明：软删除；不允许删除当前登录账号；不允许删除最后一个启用状态的管理员账号。
+
+#### 9.10.3.8 可选角色
+
+```txt
+GET /api/admin/admin-users/roles
+```
 
 ---
 
