@@ -2,12 +2,14 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AdminLayout from '../layouts/AdminLayout.vue'
 import { getAuthStorage } from '../utils/storage'
 import DashboardView from '../views/dashboard/index.vue'
+import Error401View from '../views/error/401.vue'
+import Error404View from '../views/error/404.vue'
 import LoginView from '../views/login/index.vue'
 
 const routes = [
   {
     path: '/',
-    redirect: '/login'
+    redirect: '/dashboard'
   },
   {
     path: '/login',
@@ -28,6 +30,26 @@ const routes = [
         meta: {
           title: '仪表盘'
         }
+      },
+      {
+        path: '401',
+        name: 'error401',
+        component: Error401View,
+        meta: {
+          title: '无访问权限'
+        }
+      },
+      {
+        path: '404',
+        name: 'error404',
+        component: Error404View,
+        meta: {
+          title: '页面不存在'
+        }
+      },
+      {
+        path: ':pathMatch(.*)*',
+        redirect: '/404'
       }
     ]
   }
