@@ -349,16 +349,16 @@ ON DUPLICATE KEY UPDATE
 
 INSERT INTO menus (id, parent_id, name, path, icon, sort, status, meta, created_at, updated_at, deleted_at)
 VALUES
-  ('dashboard', NULL, '仪表盘', '/dashboard', 'dashboard', 10, 'enabled', JSON_OBJECT('title', '仪表盘'), NOW(3), NOW(3), NULL),
-  ('products', NULL, '商品管理', '/products', 'products', 20, 'enabled', JSON_OBJECT('title', '商品管理'), NOW(3), NOW(3), NULL),
-  ('orders', NULL, '订单管理', '/orders', 'orders', 30, 'enabled', JSON_OBJECT('title', '订单管理'), NOW(3), NOW(3), NULL),
-  ('users', NULL, '用户管理', '/users', 'users', 40, 'enabled', JSON_OBJECT('title', '用户管理'), NOW(3), NOW(3), NULL),
-  ('inventory', NULL, '库存管理', '/inventory', 'inventory', 50, 'enabled', JSON_OBJECT('title', '库存管理'), NOW(3), NOW(3), NULL),
-  ('marketing', NULL, '营销管理', '/marketing', 'marketing', 60, 'enabled', JSON_OBJECT('title', '营销管理'), NOW(3), NOW(3), NULL),
-  ('settings', NULL, '系统设置', '/settings', 'settings', 70, 'enabled', JSON_OBJECT('title', '系统设置'), NOW(3), NOW(3), NULL),
-  ('admin_users', 'settings', '账号管理', '/settings/admin-users', 'adminUsers', 10, 'enabled', JSON_OBJECT('title', '账号管理'), NOW(3), NOW(3), NULL),
-  ('menu_management', 'settings', '菜单管理', '/settings/menus', 'menuManagement', 20, 'enabled', JSON_OBJECT('title', '菜单管理'), NOW(3), NOW(3), NULL),
-  ('role_permissions', 'settings', '角色权限', '/settings/role-permissions', 'rolePermissions', 30, 'enabled', JSON_OBJECT('title', '角色权限'), NOW(3), NOW(3), NULL)
+  ('dashboard', NULL, '仪表盘', '/dashboard', 'DataBoard', 10, 'enabled', JSON_OBJECT('title', '仪表盘'), NOW(3), NOW(3), NULL),
+  ('products', NULL, '商品管理', '/products', 'Goods', 20, 'enabled', JSON_OBJECT('title', '商品管理'), NOW(3), NOW(3), NULL),
+  ('orders', NULL, '订单管理', '/orders', 'ShoppingCart', 30, 'enabled', JSON_OBJECT('title', '订单管理'), NOW(3), NOW(3), NULL),
+  ('users', NULL, '用户管理', '/users', 'User', 40, 'enabled', JSON_OBJECT('title', '用户管理'), NOW(3), NOW(3), NULL),
+  ('inventory', NULL, '库存管理', '/inventory', 'Box', 50, 'enabled', JSON_OBJECT('title', '库存管理'), NOW(3), NOW(3), NULL),
+  ('marketing', NULL, '营销管理', '/marketing', 'Tickets', 60, 'enabled', JSON_OBJECT('title', '营销管理'), NOW(3), NOW(3), NULL),
+  ('settings', NULL, '系统设置', '/settings', 'Setting', 70, 'enabled', JSON_OBJECT('title', '系统设置'), NOW(3), NOW(3), NULL),
+  ('admin_users', 'settings', '账号管理', '/settings/admin-users', 'UserFilled', 10, 'enabled', JSON_OBJECT('title', '账号管理'), NOW(3), NOW(3), NULL),
+  ('menu_management', 'settings', '菜单管理', '/settings/menus', 'Menu', 20, 'enabled', JSON_OBJECT('title', '菜单管理'), NOW(3), NOW(3), NULL),
+  ('role_permissions', 'settings', '角色权限', '/settings/role-permissions', 'Lock', 30, 'enabled', JSON_OBJECT('title', '角色权限'), NOW(3), NOW(3), NULL)
 ON DUPLICATE KEY UPDATE
   parent_id = VALUES(parent_id),
   name = VALUES(name),

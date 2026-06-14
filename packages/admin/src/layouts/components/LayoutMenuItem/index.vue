@@ -33,7 +33,7 @@ const props = defineProps({
   }
 })
 
-const iconNameMap = {
+const legacyIconNameMap = {
   dashboard: 'DataBoard',
   products: 'Goods',
   orders: 'ShoppingCart',
@@ -54,5 +54,5 @@ const hasChildren = computed(() => Array.isArray(props.item.children) && props.i
 const menuTitle = computed(() => props.item.meta?.title || props.item.name || '待补充')
 
 // 菜单图标名称
-const menuIconName = computed(() => iconNameMap[props.item.icon] || iconNameMap[props.item.id] || props.item.icon || 'Operation')
+const menuIconName = computed(() => legacyIconNameMap[props.item.icon] || props.item.icon || legacyIconNameMap[props.item.id] || 'Operation')
 </script>
