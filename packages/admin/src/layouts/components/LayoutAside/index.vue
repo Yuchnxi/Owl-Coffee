@@ -34,7 +34,7 @@ const route = useRoute()
 // 侧边栏宽度
 const asideWidth = computed(() => (appStore.sidebarCollapsed ? '84px' : '260px'))
 
-// 默认仪表盘菜单
+// 默认侧边栏菜单
 const defaultMenus = [
   {
     id: 'dashboard',
@@ -45,6 +45,47 @@ const defaultMenus = [
       title: '仪表盘'
     },
     children: []
+  },
+  {
+    id: 'settings',
+    name: '系统设置',
+    path: '/settings',
+    icon: 'settings',
+    meta: {
+      title: '系统设置'
+    },
+    children: [
+      {
+        id: 'admin_users',
+        name: '账号管理',
+        path: '/settings/admin-users',
+        icon: 'adminUsers',
+        meta: {
+          title: '账号管理'
+        },
+        children: []
+      },
+      {
+        id: 'menu_management',
+        name: '菜单管理',
+        path: '/settings/menus',
+        icon: 'menuManagement',
+        meta: {
+          title: '菜单管理'
+        },
+        children: []
+      },
+      {
+        id: 'role_permissions',
+        name: '角色权限',
+        path: '/settings/role-permissions',
+        icon: 'rolePermissions',
+        meta: {
+          title: '角色权限'
+        },
+        children: []
+      }
+    ]
   }
 ]
 

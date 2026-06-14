@@ -201,6 +201,14 @@ class AdminMenuController extends Controller {
       return '父级菜单不存在'
     }
 
+    if (currentMenuId) {
+      const parentIsDescendant = await this.ctx.service.menu.isDescendantOf(payload.parentId, currentMenuId)
+
+      if (parentIsDescendant) {
+        return '父级菜单不能选择自己的子菜单'
+      }
+    }
+
     return ''
   }
 

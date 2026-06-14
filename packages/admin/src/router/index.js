@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AdminLayout from '../layouts/AdminLayout.vue'
+import { useAuthStore } from '../stores/auth'
 import { getAuthStorage } from '../utils/storage'
 import DashboardView from '../views/dashboard/index.vue'
 import Error401View from '../views/error/401.vue'
@@ -7,6 +8,8 @@ import Error404View from '../views/error/404.vue'
 import LoginView from '../views/login/index.vue'
 
 const AdminUsersView = () => import('../views/settings/admin-users/index.vue')
+const MenusView = () => import('../views/settings/menus/index.vue')
+const RolePermissionsView = () => import('../views/settings/role-permissions/index.vue')
 
 const routes = [
   {
@@ -30,7 +33,8 @@ const routes = [
         name: 'dashboard',
         component: DashboardView,
         meta: {
-          title: '仪表盘'
+          title: '仪表盘',
+          menuId: 'dashboard'
         }
       },
       {
@@ -38,7 +42,26 @@ const routes = [
         name: 'settingsAdminUsers',
         component: AdminUsersView,
         meta: {
-          title: '账号管理'
+          title: '账号管理',
+          menuId: 'admin_users'
+        }
+      },
+      {
+        path: 'settings/menus',
+        name: 'settingsMenus',
+        component: MenusView,
+        meta: {
+          title: '菜单管理',
+          menuId: 'menu_management'
+        }
+      },
+      {
+        path: 'settings/role-permissions',
+        name: 'settingsRolePermissions',
+        component: RolePermissionsView,
+        meta: {
+          title: '角色权限',
+          menuId: 'role_permissions'
         }
       },
       {
@@ -70,7 +93,7 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach(to => {
+router.beforeEach(async to => {
   const { accessToken } = getAuthStorage()
 
   if (to.path === '/login' && accessToken) {
@@ -81,7 +104,39 @@ router.beforeEach(to => {
     return '/login'
   }
 
+  if (to.meta.menuId && !isPublicMenu(to.meta.menuId)) {
+    const authStore = useAuthStore()
+
+    if (!authStore.user?.menus && authStore.accessToken) {
+      await authStore.loadCurrentUser()
+    }
+
+    if (!hasMenuPermission(authStore.user?.menus || [], to.meta.menuId)) {
+      return '/401'
+    }
+  }
+
   return true
 })
+
+// 判断是否为固定开放菜单
+function isPublicMenu(menuId) {
+  return menuId === 'dashboard'
+}
+
+// 判断当前菜单树是否包含目标菜单
+function hasMenuPermission(menus, menuId) {
+  for (const menu of menus) {
+    if (menu.id === menuId) {
+      return true
+    }
+
+    if (Array.isArray(menu.children) && hasMenuPermission(menu.children, menuId)) {
+      return true
+    }
+  }
+
+  return false
+}
 
 export default router

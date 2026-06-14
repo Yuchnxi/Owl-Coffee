@@ -90,6 +90,35 @@ class MenuService extends Service {
     return rows.length > 0
   }
 
+  // 判断菜单是否为目标菜单的子孙菜单
+  async isDescendantOf(menuId, ancestorId) {
+    const [rows] = await this.app.mysql.execute(
+      `
+        SELECT id, parent_id AS parentId
+        FROM menus
+        WHERE deleted_at IS NULL
+      `
+    )
+    const parentMap = new Map(rows.map(row => [row.id, row.parentId]))
+    const visitedIds = new Set()
+    let currentParentId = parentMap.get(menuId)
+
+    while (currentParentId) {
+      if (currentParentId === ancestorId) {
+        return true
+      }
+
+      if (visitedIds.has(currentParentId)) {
+        return false
+      }
+
+      visitedIds.add(currentParentId)
+      currentParentId = parentMap.get(currentParentId)
+    }
+
+    return false
+  }
+
   // 新增后台菜单
   async createMenu(data) {
     await this.app.mysql.execute(
