@@ -357,7 +357,8 @@ VALUES
   ('marketing', NULL, '营销管理', '/marketing', 'marketing', 60, 'enabled', JSON_OBJECT('title', '营销管理'), NOW(3), NOW(3), NULL),
   ('settings', NULL, '系统设置', '/settings', 'settings', 70, 'enabled', JSON_OBJECT('title', '系统设置'), NOW(3), NOW(3), NULL),
   ('admin_users', 'settings', '账号管理', '/settings/admin-users', 'adminUsers', 10, 'enabled', JSON_OBJECT('title', '账号管理'), NOW(3), NOW(3), NULL),
-  ('role_permissions', 'settings', '角色权限', '/settings/role-permissions', 'rolePermissions', 20, 'enabled', JSON_OBJECT('title', '角色权限'), NOW(3), NOW(3), NULL)
+  ('menu_management', 'settings', '菜单管理', '/settings/menus', 'menuManagement', 20, 'enabled', JSON_OBJECT('title', '菜单管理'), NOW(3), NOW(3), NULL),
+  ('role_permissions', 'settings', '角色权限', '/settings/role-permissions', 'rolePermissions', 30, 'enabled', JSON_OBJECT('title', '角色权限'), NOW(3), NOW(3), NULL)
 ON DUPLICATE KEY UPDATE
   parent_id = VALUES(parent_id),
   name = VALUES(name),
@@ -387,6 +388,7 @@ VALUES
   ('role_admin', 'marketing', NOW(3)),
   ('role_admin', 'settings', NOW(3)),
   ('role_admin', 'admin_users', NOW(3)),
+  ('role_admin', 'menu_management', NOW(3)),
   ('role_admin', 'role_permissions', NOW(3)),
   ('role_staff', 'dashboard', NOW(3)),
   ('role_staff', 'products', NOW(3)),

@@ -641,6 +641,7 @@ JSON 使用说明：`meta` 可保存标题、缓存、隐藏等前端扩展配�
 | `marketing` | `NULL` | 营销管理 | `/marketing` |
 | `settings` | `NULL` | 系统设置 | `/settings` |
 | `admin_users` | `settings` | 账号管理 | `/settings/admin-users` |
+| `menu_management` | `settings` | 菜单管理 | `/settings/menus` |
 | `role_permissions` | `settings` | 角色权限 | `/settings/role-permissions` |
 
 ### 10.3 默认管理员

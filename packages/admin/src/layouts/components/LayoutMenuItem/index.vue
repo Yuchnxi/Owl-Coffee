@@ -25,6 +25,7 @@ import {
   Goods,
   Lock,
   Management,
+  Menu,
   Operation,
   Setting,
   ShoppingCart,
@@ -55,6 +56,7 @@ const iconMap = {
   permissions: Lock,
   settings: Setting,
   adminUsers: UserFilled,
+  menuManagement: Menu,
   rolePermissions: Lock
 }
 

@@ -931,7 +931,7 @@ PUT /api/admin/roles/{roleId}/menus
 
 ```json
 {
-  "menuIds": ["dashboard", "products", "orders", "settings", "role_permissions"]
+  "menuIds": ["dashboard", "products", "orders", "settings", "menu_management", "role_permissions"]
 }
 ```
 
@@ -943,7 +943,27 @@ PUT /api/admin/roles/{roleId}/menus
 GET /api/admin/menus
 ```
 
-### 9.9.5 登录日志
+### 9.9.5 菜单管理
+
+说明：菜单管理只用于维护后台侧边栏菜单，首版不做按钮级权限。
+
+```txt
+POST /api/admin/menus
+```
+
+```txt
+PUT /api/admin/menus/{menuId}
+```
+
+```txt
+PUT /api/admin/menus/{menuId}/status
+```
+
+```txt
+DELETE /api/admin/menus/{menuId}
+```
+
+### 9.9.6 登录日志
 ```txt
 GET /api/admin/logs/login
 ```
@@ -956,7 +976,7 @@ GET /api/admin/logs/login
 | `startTime` | 开始时间 |
 | `endTime` | 结束时间 |
 
-### 9.9.6 操作日志
+### 9.9.7 操作日志
 ```txt
 GET /api/admin/logs/operation
 ```
@@ -974,7 +994,7 @@ GET /api/admin/logs/operation
 
 ## 9.10 系统设置
 
-说明：后台侧边栏中，“账号管理”和“角色权限”作为“系统设置”的二级菜单展示。
+说明：后台侧边栏中，“账号管理”“菜单管理”和“角色权限”作为“系统设置”的二级菜单展示。
 
 ### 9.10.1 门店设置
 
