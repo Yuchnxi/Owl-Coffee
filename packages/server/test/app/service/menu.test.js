@@ -76,4 +76,34 @@ describe('test/app/service/menu.test.js', () => {
     assert(calls.some(call => call.sql && call.sql.includes('DELETE FROM role_menus')))
     assert(calls.some(call => call.type === 'commit'))
   })
+
+  it('isDescendantOf detects descendant menu', async () => {
+    const ctx = app.mockContext()
+
+    app.mysql.execute = async () => [[
+      { id: 'settings', parentId: null },
+      { id: 'menu_management', parentId: 'settings' },
+      { id: 'menu_detail', parentId: 'menu_management' },
+    ]]
+
+    const result = await ctx.service.menu.isDescendantOf('menu_detail', 'settings')
+    const unrelated = await ctx.service.menu.isDescendantOf('settings', 'menu_detail')
+
+    assert(result === true)
+    assert(unrelated === false)
+  })
+
+  it('isDescendantOf handles existing menu cycle', async () => {
+    const ctx = app.mockContext()
+
+    app.mysql.execute = async () => [[
+      { id: 'menu_a', parentId: 'menu_b' },
+      { id: 'menu_b', parentId: 'menu_a' },
+      { id: 'settings', parentId: null },
+    ]]
+
+    const result = await ctx.service.menu.isDescendantOf('menu_a', 'settings')
+
+    assert(result === false)
+  })
 })

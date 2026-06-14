@@ -155,7 +155,7 @@ async function loadRoleDetail(roleId) {
   try {
     currentRoleDetail.value = await fetchRoleDetail(roleId)
     await nextTick()
-    treeRef.value?.setCheckedKeys(currentRoleDetail.value?.menuIds || [])
+    treeRef.value?.setCheckedKeys(currentRoleDetail.value?.menuIds || [], true)
   } finally {
     detailLoading.value = false
   }
@@ -175,7 +175,7 @@ async function submitPermissions() {
 
   try {
     currentRoleDetail.value = await updateRoleMenus(currentRole.value.id, menuIds)
-    treeRef.value?.setCheckedKeys(currentRoleDetail.value?.menuIds || [])
+    treeRef.value?.setCheckedKeys(currentRoleDetail.value?.menuIds || [], true)
     ElMessage.success('角色权限已保存')
     await loadRoles()
   } finally {
