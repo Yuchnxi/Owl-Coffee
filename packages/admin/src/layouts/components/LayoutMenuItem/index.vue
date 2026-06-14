@@ -2,7 +2,7 @@
   <el-sub-menu v-if="hasChildren" :index="item.path">
     <template #title>
       <el-icon>
-        <component :is="menuIcon" />
+        <SvgIcon :name="menuIconName" />
       </el-icon>
       <span>{{ menuTitle }}</span>
     </template>
@@ -12,28 +12,15 @@
 
   <el-menu-item v-else :index="item.path">
     <el-icon>
-      <component :is="menuIcon" />
+      <SvgIcon :name="menuIconName" />
     </el-icon>
     <template #title>{{ menuTitle }}</template>
   </el-menu-item>
 </template>
 
 <script setup>
-import {
-  Box,
-  DataBoard,
-  Goods,
-  Lock,
-  Management,
-  Menu,
-  Operation,
-  Setting,
-  ShoppingCart,
-  Tickets,
-  User,
-  UserFilled
-} from '@element-plus/icons-vue'
 import { computed } from 'vue'
+import SvgIcon from '../../../components/SvgIcon/index.vue'
 
 defineOptions({
   name: 'LayoutMenuItem'
@@ -46,18 +33,18 @@ const props = defineProps({
   }
 })
 
-const iconMap = {
-  dashboard: DataBoard,
-  products: Goods,
-  orders: ShoppingCart,
-  users: User,
-  inventory: Box,
-  marketing: Tickets,
-  permissions: Lock,
-  settings: Setting,
-  adminUsers: UserFilled,
-  menuManagement: Menu,
-  rolePermissions: Lock
+const iconNameMap = {
+  dashboard: 'DataBoard',
+  products: 'Goods',
+  orders: 'ShoppingCart',
+  users: 'User',
+  inventory: 'Box',
+  marketing: 'Tickets',
+  permissions: 'Lock',
+  settings: 'Setting',
+  adminUsers: 'UserFilled',
+  menuManagement: 'Menu',
+  rolePermissions: 'Lock'
 }
 
 // 菜单是否存在子级
@@ -66,6 +53,6 @@ const hasChildren = computed(() => Array.isArray(props.item.children) && props.i
 // 菜单标题
 const menuTitle = computed(() => props.item.meta?.title || props.item.name || '待补充')
 
-// 菜单图标
-const menuIcon = computed(() => iconMap[props.item.icon] || iconMap[props.item.id] || Management || Operation)
+// 菜单图标名称
+const menuIconName = computed(() => iconNameMap[props.item.icon] || iconNameMap[props.item.id] || props.item.icon || 'Operation')
 </script>

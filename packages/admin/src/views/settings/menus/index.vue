@@ -45,7 +45,13 @@
         <el-table-column prop="id" label="菜单 ID" min-width="150" align="center" />
         <el-table-column prop="path" label="路径" min-width="190" align="center" />
         <el-table-column prop="icon" label="图标" min-width="130" align="center">
-          <template #default="{ row }">{{ row.icon || '待补充' }}</template>
+          <template #default="{ row }">
+            <span v-if="row.icon" class="menu-management-icon">
+              <SvgIcon :name="row.icon" :size="18" />
+              {{ row.icon }}
+            </span>
+            <span v-else>待补充</span>
+          </template>
         </el-table-column>
         <el-table-column prop="sort" label="排序" width="90" align="center" />
         <el-table-column label="状态" width="100" align="center">
@@ -106,6 +112,7 @@ import {
   updateMenu,
   updateMenuStatus
 } from '../../../api/role'
+import SvgIcon from '../../../components/SvgIcon/index.vue'
 import MenuFormDialog from './childComps/MenuFormDialog.vue'
 
 // 页面加载状态
@@ -377,6 +384,17 @@ onMounted(() => {
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 10px;
+}
+
+.menu-management-icon {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .menu-management-table {

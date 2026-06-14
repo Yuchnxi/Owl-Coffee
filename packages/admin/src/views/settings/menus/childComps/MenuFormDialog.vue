@@ -29,7 +29,7 @@
         <el-input v-model.trim="form.path" placeholder="例如 /settings/menus" />
       </el-form-item>
       <el-form-item label="图标">
-        <el-input v-model.trim="form.icon" placeholder="例如 menuManagement" />
+        <IconSelect v-model="form.icon" />
       </el-form-item>
       <el-form-item label="排序" prop="sort">
         <el-input-number v-model="form.sort" :min="0" :step="10" controls-position="right" />
@@ -54,6 +54,7 @@
 
 <script setup>
 import { reactive, ref, watch } from 'vue'
+import IconSelect from '../../../../components/IconSelect/index.vue'
 
 const props = defineProps({
   visible: {
