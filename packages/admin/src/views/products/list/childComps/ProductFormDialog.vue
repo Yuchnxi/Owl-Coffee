@@ -118,10 +118,10 @@
             <template #default="{ row }">
               <el-select v-model="row.skuStatus">
                 <el-option label="启用" value="enabled" />
-              <el-option label="停用" value="disabled" />
-            </el-select>
-          </template>
-        </el-table-column>
+                <el-option label="停用" value="disabled" />
+              </el-select>
+            </template>
+          </el-table-column>
         </el-table>
       </div>
     </el-form>
