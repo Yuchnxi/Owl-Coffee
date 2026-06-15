@@ -45,7 +45,14 @@
           <h2>快捷入口</h2>
         </header>
         <div class="dashboard-quick-grid">
-          <button v-for="item in quickActions" :key="item.label" class="dashboard-quick-action" type="button" disabled>
+          <button
+            v-for="item in quickActions"
+            :key="item.label"
+            class="dashboard-quick-action"
+            type="button"
+            :disabled="item.disabled"
+            @click="goToQuickAction(item.path)"
+          >
             <el-icon><component :is="item.icon" /></el-icon>
             <span>{{ item.label }}</span>
           </button>
@@ -57,10 +64,10 @@
       <section class="dashboard-panel">
         <header class="dashboard-panel__header">
           <h2>最近订单</h2>
-          <button class="dashboard-link" type="button" disabled>查看全部</button>
+          <button class="dashboard-link" type="button" @click="goToOrders">查看全部</button>
         </header>
         <el-table class="dashboard-table" :data="recentOrders" empty-text="暂无订单">
-          <el-table-column prop="orderNo" label="订单编号" min-width="150" />
+          <el-table-column prop="orderNo" label="订单编号" min-width="150" align="center" />
           <el-table-column label="用户" min-width="130">
             <template #default="{ row }">
               <div class="dashboard-user">
@@ -69,17 +76,17 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="金额" min-width="100">
+          <el-table-column label="金额" min-width="100" align="center">
             <template #default="{ row }">￥{{ formatMoney(row.payAmount) }}</template>
           </el-table-column>
-          <el-table-column label="状态" min-width="110">
+          <el-table-column label="状态" min-width="110" align="center">
             <template #default="{ row }">
               <el-tag :type="getOrderStatusMeta(row.orderStatus).type" effect="dark">
                 {{ getOrderStatusMeta(row.orderStatus).label }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="时间" min-width="170">
+          <el-table-column label="时间" min-width="120" align="center">
             <template #default="{ row }">{{ formatDateTime(row.createdAt) }}</template>
           </el-table-column>
         </el-table>
@@ -88,7 +95,7 @@
       <section class="dashboard-panel">
         <header class="dashboard-panel__header">
           <h2>库存预警</h2>
-          <button class="dashboard-link" type="button" disabled>查看全部</button>
+          <button class="dashboard-link" type="button" @click="goToInventory">查看全部</button>
         </header>
         <div v-if="stockWarnings.length" class="dashboard-stock-list">
           <article v-for="item in stockWarnings" :key="item.skuId" class="dashboard-stock-item">
@@ -119,6 +126,7 @@
 
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import {
   BellFilled,
@@ -170,6 +178,8 @@ const stockWarnings = ref([])
 const salesChartRef = ref(null)
 // 订单状态图容器
 const statusChartRef = ref(null)
+// 路由实例
+const router = useRouter()
 
 let salesChart = null
 let statusChart = null
@@ -225,10 +235,10 @@ const orderStatusItems = computed(() => orderStatusList.value.map(item => {
 
 // 快捷入口配置
 const quickActions = [
-  { label: '新增商品', icon: Goods },
-  { label: '处理订单', icon: List },
-  { label: '发布活动', icon: Promotion },
-  { label: '库存预警', icon: BellFilled }
+  { label: '新增商品', icon: Goods, path: '/products/list' },
+  { label: '处理订单', icon: List, path: '/orders' },
+  { label: '发布活动', icon: Promotion, path: '', disabled: true },
+  { label: '库存预警', icon: BellFilled, path: '/inventory' }
 ]
 
 // 加载仪表盘数据
@@ -468,6 +478,25 @@ function getStockPercent(item) {
   return `${Math.min(Math.max((stock / warningStock) * 100, 0), 100)}%`
 }
 
+// 跳转订单管理页
+function goToOrders() {
+  router.push('/orders')
+}
+
+// 跳转库存管理页
+function goToInventory() {
+  router.push('/inventory')
+}
+
+// 跳转快捷入口目标页
+function goToQuickAction(path) {
+  if (!path) {
+    return
+  }
+
+  router.push(path)
+}
+
 onMounted(() => {
   loadDashboard()
   window.addEventListener('resize', resizeCharts)
@@ -699,9 +728,22 @@ onBeforeUnmount(() => {
   border-radius: var(--oc-radius);
   background: rgba(255, 255, 255, 0.03);
   color: var(--oc-text-secondary);
-  cursor: not-allowed;
+  cursor: pointer;
   font-weight: 800;
   gap: 10px;
+}
+
+.dashboard-quick-action:hover {
+  border-color: rgba(238, 146, 38, 0.4);
+  background: rgba(238, 146, 38, 0.12);
+  color: var(--oc-text);
+}
+
+.dashboard-quick-action:disabled {
+  border-color: rgba(181, 139, 92, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--oc-text-secondary);
+  cursor: not-allowed;
 }
 
 .dashboard-quick-action .el-icon {
@@ -712,10 +754,14 @@ onBeforeUnmount(() => {
 .dashboard-link {
   border: 0;
   background: transparent;
-  color: rgba(238, 146, 38, 0.58);
-  cursor: not-allowed;
+  color: var(--oc-primary);
+  cursor: pointer;
   font-size: 13px;
   font-weight: 800;
+}
+
+.dashboard-link:hover {
+  color: #ffd59a;
 }
 
 .dashboard-table {
