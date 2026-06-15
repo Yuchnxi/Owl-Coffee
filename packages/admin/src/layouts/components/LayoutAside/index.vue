@@ -88,6 +88,16 @@ const defaultMenus = [
     ]
   },
   {
+    id: 'users',
+    name: '用户管理',
+    path: '/users',
+    icon: 'users',
+    meta: {
+      title: '用户管理'
+    },
+    children: []
+  },
+  {
     id: 'settings',
     name: '系统设置',
     path: '/settings',
