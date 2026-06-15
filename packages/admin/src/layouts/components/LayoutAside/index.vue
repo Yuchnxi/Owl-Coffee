@@ -74,6 +74,16 @@ const defaultMenus = [
           title: '商品分类'
         },
         children: []
+      },
+      {
+        id: 'inventory',
+        name: '库存管理',
+        path: '/inventory',
+        icon: 'Box',
+        meta: {
+          title: '库存管理'
+        },
+        children: []
       }
     ]
   },
@@ -167,6 +177,16 @@ function normalizeMenus(menus) {
           icon: 'FolderOpened',
           meta: {
             title: '商品分类'
+          },
+          children: []
+        },
+        {
+          id: 'inventory',
+          name: '库存管理',
+          path: '/inventory',
+          icon: 'Box',
+          meta: {
+            title: '库存管理'
           },
           children: []
         }

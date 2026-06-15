@@ -637,9 +637,9 @@ JSON 使用说明：`meta` 可保存标题、缓存、隐藏等前端扩展配�
 | `products` | `NULL` | 商品管理 | `/products` |
 | `product_list` | `products` | 商品列表 | `/products/list` |
 | `product_categories` | `products` | 商品分类 | `/products/categories` |
+| `inventory` | `products` | 库存管理 | `/inventory` |
 | `orders` | `NULL` | 订单管理 | `/orders` |
 | `users` | `NULL` | 用户管理 | `/users` |
-| `inventory` | `NULL` | 库存管理 | `/inventory` |
 | `marketing` | `NULL` | 营销管理 | `/marketing` |
 | `settings` | `NULL` | 系统设置 | `/settings` |
 | `admin_users` | `settings` | 账号管理 | `/settings/admin-users` |
