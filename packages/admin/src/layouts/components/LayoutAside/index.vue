@@ -47,6 +47,37 @@ const defaultMenus = [
     children: []
   },
   {
+    id: 'products',
+    name: '商品管理',
+    path: '/products',
+    icon: 'products',
+    meta: {
+      title: '商品管理'
+    },
+    children: [
+      {
+        id: 'product_list',
+        name: '商品列表',
+        path: '/products/list',
+        icon: 'Goods',
+        meta: {
+          title: '商品列表'
+        },
+        children: []
+      },
+      {
+        id: 'product_categories',
+        name: '商品分类',
+        path: '/products/categories',
+        icon: 'FolderOpened',
+        meta: {
+          title: '商品分类'
+        },
+        children: []
+      }
+    ]
+  },
+  {
     id: 'settings',
     name: '系统设置',
     path: '/settings',
@@ -93,8 +124,56 @@ const defaultMenus = [
 const sidebarMenus = computed(() => {
   const menus = authStore.user?.menus
 
-  return Array.isArray(menus) && menus.length > 0 ? menus : defaultMenus
+  return normalizeMenus(Array.isArray(menus) && menus.length > 0 ? menus : defaultMenus)
 })
+
+// 兼容旧菜单数据，补齐商品管理二级菜单
+function normalizeMenus(menus) {
+  return menus.map(menu => {
+    if (menu.id !== 'products') {
+      return {
+        ...menu,
+        children: Array.isArray(menu.children) ? normalizeMenus(menu.children) : []
+      }
+    }
+
+    const children = Array.isArray(menu.children) ? menu.children : []
+
+    if (children.some(child => child.id === 'product_list')) {
+      return {
+        ...menu,
+        children: normalizeMenus(children)
+      }
+    }
+
+    return {
+      ...menu,
+      path: '/products',
+      children: [
+        {
+          id: 'product_list',
+          name: '商品列表',
+          path: '/products/list',
+          icon: 'Goods',
+          meta: {
+            title: '商品列表'
+          },
+          children: []
+        },
+        {
+          id: 'product_categories',
+          name: '商品分类',
+          path: '/products/categories',
+          icon: 'FolderOpened',
+          meta: {
+            title: '商品分类'
+          },
+          children: []
+        }
+      ]
+    }
+  })
+}
 
 // 当前激活菜单
 const activeMenu = computed(() => route.meta.activeMenu || route.path)

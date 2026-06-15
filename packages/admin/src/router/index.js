@@ -7,6 +7,8 @@ import Error401View from '../views/error/401.vue'
 import Error404View from '../views/error/404.vue'
 import LoginView from '../views/login/index.vue'
 
+const ProductListView = () => import('../views/products/list/index.vue')
+const ProductCategoriesView = () => import('../views/products/categories/index.vue')
 const AdminUsersView = () => import('../views/settings/admin-users/index.vue')
 const MenusView = () => import('../views/settings/menus/index.vue')
 const RolePermissionsView = () => import('../views/settings/role-permissions/index.vue')
@@ -35,6 +37,35 @@ const routes = [
         meta: {
           title: '仪表盘',
           menuId: 'dashboard'
+        }
+      },
+      {
+        path: 'products',
+        name: 'products',
+        redirect: '/products/list',
+        meta: {
+          title: '商品管理',
+          menuId: 'products'
+        }
+      },
+      {
+        path: 'products/list',
+        name: 'productList',
+        component: ProductListView,
+        meta: {
+          title: '商品列表',
+          menuId: 'product_list',
+          activeMenu: '/products/list'
+        }
+      },
+      {
+        path: 'products/categories',
+        name: 'productCategories',
+        component: ProductCategoriesView,
+        meta: {
+          title: '商品分类',
+          menuId: 'product_categories',
+          activeMenu: '/products/categories'
         }
       },
       {
@@ -126,6 +157,10 @@ function isPublicMenu(menuId) {
 
 // 判断当前菜单树是否包含目标菜单
 function hasMenuPermission(menus, menuId) {
+  if (isLegacyProductChildMenu(menus, menuId)) {
+    return true
+  }
+
   for (const menu of menus) {
     if (menu.id === menuId) {
       return true
@@ -137,6 +172,23 @@ function hasMenuPermission(menus, menuId) {
   }
 
   return false
+}
+
+// 兼容旧商品菜单权限，父级 products 可访问商品二级页面
+function isLegacyProductChildMenu(menus, menuId) {
+  const productChildMenus = ['product_list', 'product_categories']
+
+  if (!productChildMenus.includes(menuId)) {
+    return false
+  }
+
+  return menus.some(menu => {
+    if (menu.id === 'products') {
+      return true
+    }
+
+    return Array.isArray(menu.children) && isLegacyProductChildMenu(menu.children, menuId)
+  })
 }
 
 export default router

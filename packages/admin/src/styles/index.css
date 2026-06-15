@@ -95,6 +95,34 @@ a {
   box-shadow: 0 0 0 1px rgba(238, 146, 38, 0.42) inset;
 }
 
+.el-input-number__decrease,
+.el-input-number__increase {
+  border-color: rgba(181, 139, 92, 0.22);
+  background: rgba(238, 146, 38, 0.12);
+  color: var(--oc-primary);
+}
+
+.el-input-number__decrease:hover,
+.el-input-number__increase:hover {
+  background: rgba(238, 146, 38, 0.22);
+  color: var(--oc-text);
+}
+
+.el-input-number__decrease.is-disabled,
+.el-input-number__increase.is-disabled {
+  background: rgba(119, 129, 143, 0.14);
+  color: var(--oc-text-muted);
+}
+
+.el-input-number.is-controls-right .el-input-number__decrease,
+.el-input-number.is-controls-right .el-input-number__increase {
+  border-left-color: rgba(181, 139, 92, 0.22);
+}
+
+.el-input-number.is-controls-right .el-input-number__increase {
+  border-bottom-color: rgba(181, 139, 92, 0.22);
+}
+
 .el-table {
   --el-table-bg-color: transparent;
   --el-table-tr-bg-color: transparent;

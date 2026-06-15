@@ -351,6 +351,8 @@ INSERT INTO menus (id, parent_id, name, path, icon, sort, status, meta, created_
 VALUES
   ('dashboard', NULL, '仪表盘', '/dashboard', 'DataBoard', 10, 'enabled', JSON_OBJECT('title', '仪表盘'), NOW(3), NOW(3), NULL),
   ('products', NULL, '商品管理', '/products', 'Goods', 20, 'enabled', JSON_OBJECT('title', '商品管理'), NOW(3), NOW(3), NULL),
+  ('product_list', 'products', '商品列表', '/products/list', 'Goods', 10, 'enabled', JSON_OBJECT('title', '商品列表'), NOW(3), NOW(3), NULL),
+  ('product_categories', 'products', '商品分类', '/products/categories', 'FolderOpened', 20, 'enabled', JSON_OBJECT('title', '商品分类'), NOW(3), NOW(3), NULL),
   ('orders', NULL, '订单管理', '/orders', 'ShoppingCart', 30, 'enabled', JSON_OBJECT('title', '订单管理'), NOW(3), NOW(3), NULL),
   ('users', NULL, '用户管理', '/users', 'User', 40, 'enabled', JSON_OBJECT('title', '用户管理'), NOW(3), NOW(3), NULL),
   ('inventory', NULL, '库存管理', '/inventory', 'Box', 50, 'enabled', JSON_OBJECT('title', '库存管理'), NOW(3), NOW(3), NULL),
@@ -382,6 +384,8 @@ INSERT INTO role_menus (role_id, menu_id, created_at)
 VALUES
   ('role_admin', 'dashboard', NOW(3)),
   ('role_admin', 'products', NOW(3)),
+  ('role_admin', 'product_list', NOW(3)),
+  ('role_admin', 'product_categories', NOW(3)),
   ('role_admin', 'orders', NOW(3)),
   ('role_admin', 'users', NOW(3)),
   ('role_admin', 'inventory', NOW(3)),
@@ -392,6 +396,8 @@ VALUES
   ('role_admin', 'role_permissions', NOW(3)),
   ('role_staff', 'dashboard', NOW(3)),
   ('role_staff', 'products', NOW(3)),
+  ('role_staff', 'product_list', NOW(3)),
+  ('role_staff', 'product_categories', NOW(3)),
   ('role_staff', 'orders', NOW(3)),
   ('role_staff', 'inventory', NOW(3))
 ON DUPLICATE KEY UPDATE

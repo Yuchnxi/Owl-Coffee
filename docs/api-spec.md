@@ -931,7 +931,7 @@ PUT /api/admin/roles/{roleId}/menus
 
 ```json
 {
-  "menuIds": ["dashboard", "products", "orders", "settings", "menu_management", "role_permissions"]
+  "menuIds": ["dashboard", "products", "product_list", "product_categories", "orders", "settings", "menu_management", "role_permissions"]
 }
 ```
 
