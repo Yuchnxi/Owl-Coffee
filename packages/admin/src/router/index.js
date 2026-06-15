@@ -9,6 +9,7 @@ import LoginView from '../views/login/index.vue'
 
 const ProductListView = () => import('../views/products/list/index.vue')
 const ProductCategoriesView = () => import('../views/products/categories/index.vue')
+const InventoryView = () => import('../views/products/inventory/index.vue')
 const OrdersView = () => import('../views/orders/index.vue')
 const AdminUsersView = () => import('../views/settings/admin-users/index.vue')
 const MenusView = () => import('../views/settings/menus/index.vue')
@@ -67,6 +68,16 @@ const routes = [
           title: '商品分类',
           menuId: 'product_categories',
           activeMenu: '/products/categories'
+        }
+      },
+      {
+        path: 'inventory',
+        name: 'inventory',
+        component: InventoryView,
+        meta: {
+          title: '库存管理',
+          menuId: 'inventory',
+          activeMenu: '/inventory'
         }
       },
       {
@@ -186,7 +197,7 @@ function hasMenuPermission(menus, menuId) {
 
 // 兼容旧商品菜单权限，父级 products 可访问商品二级页面
 function isLegacyProductChildMenu(menus, menuId) {
-  const productChildMenus = ['product_list', 'product_categories']
+  const productChildMenus = ['product_list', 'product_categories', 'inventory']
 
   if (!productChildMenus.includes(menuId)) {
     return false
