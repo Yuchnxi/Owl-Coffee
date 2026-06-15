@@ -98,6 +98,27 @@ const defaultMenus = [
     children: []
   },
   {
+    id: 'marketing',
+    name: '营销管理',
+    path: '/marketing',
+    icon: 'marketing',
+    meta: {
+      title: '营销管理'
+    },
+    children: [
+      {
+        id: 'coupon_management',
+        name: '优惠券管理',
+        path: '/marketing/coupons',
+        icon: 'Tickets',
+        meta: {
+          title: '优惠券管理'
+        },
+        children: []
+      }
+    ]
+  },
+  {
     id: 'settings',
     name: '系统设置',
     path: '/settings',
@@ -150,6 +171,10 @@ const sidebarMenus = computed(() => {
 // 兼容旧菜单数据，补齐商品管理二级菜单
 function normalizeMenus(menus) {
   return menus.map(menu => {
+    if (menu.id === 'marketing') {
+      return normalizeMarketingMenu(menu)
+    }
+
     if (menu.id !== 'products') {
       return {
         ...menu,
@@ -203,6 +228,36 @@ function normalizeMenus(menus) {
       ]
     }
   })
+}
+
+// 兼容旧营销菜单数据，补齐优惠券管理二级菜单
+function normalizeMarketingMenu(menu) {
+  const children = Array.isArray(menu.children) ? menu.children : []
+
+  if (children.some(child => child.id === 'coupon_management')) {
+    return {
+      ...menu,
+      path: '/marketing',
+      children: normalizeMenus(children)
+    }
+  }
+
+  return {
+    ...menu,
+    path: '/marketing',
+    children: [
+      {
+        id: 'coupon_management',
+        name: '优惠券管理',
+        path: '/marketing/coupons',
+        icon: 'Tickets',
+        meta: {
+          title: '优惠券管理'
+        },
+        children: []
+      }
+    ]
+  }
 }
 
 // 当前激活菜单

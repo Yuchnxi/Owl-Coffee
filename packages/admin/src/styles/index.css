@@ -179,6 +179,160 @@ a {
   color: var(--oc-text-muted);
 }
 
+.el-picker__popper.el-popper,
+.el-picker__popper.el-popper.is-light {
+  overflow: hidden;
+  border: 1px solid rgba(181, 139, 92, 0.24);
+  background: #111923;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.44);
+}
+
+.el-picker__popper.el-popper .el-popper__arrow::before {
+  border-color: rgba(181, 139, 92, 0.24);
+  background: #111923;
+}
+
+.el-picker-panel,
+.el-date-picker,
+.el-date-range-picker,
+.el-time-panel {
+  border-color: rgba(181, 139, 92, 0.2);
+  background: #111923;
+  color: var(--oc-text-secondary);
+}
+
+.el-picker-panel__body,
+.el-picker-panel__content,
+.el-picker-panel__footer,
+.el-date-range-picker__time-header,
+.el-date-range-picker__content.is-left {
+  border-color: rgba(181, 139, 92, 0.18);
+  background: #111923;
+}
+
+.el-picker-panel__icon-btn,
+.el-date-picker__header-label,
+.el-date-range-picker__header,
+.el-date-table th,
+.el-date-table td,
+.el-month-table td .cell,
+.el-year-table td .cell,
+.el-time-spinner__item {
+  color: var(--oc-text-secondary);
+}
+
+.el-date-picker__header-label:hover,
+.el-picker-panel__icon-btn:hover,
+.el-date-table td.available:hover,
+.el-month-table td .cell:hover,
+.el-year-table td .cell:hover {
+  color: var(--oc-primary);
+}
+
+.el-picker-panel .el-input__wrapper,
+.el-date-range-picker__time-picker-wrap .el-input__wrapper,
+.el-date-range-picker__editor .el-input__wrapper {
+  background: rgba(4, 8, 13, 0.6);
+  box-shadow: 0 0 0 1px rgba(181, 139, 92, 0.24) inset;
+}
+
+.el-picker-panel .el-input__inner,
+.el-date-range-picker__editor .el-input__inner {
+  color: var(--oc-text);
+}
+
+.el-date-range-picker__time-header .el-input__wrapper,
+.el-date-range-picker__time-header .el-date-range-picker__editor,
+.el-date-range-picker__time-header .el-date-range-picker__time-picker-wrap {
+  background: #0a1118 !important;
+  box-shadow: 0 0 0 1px rgba(181, 139, 92, 0.26) inset !important;
+}
+
+.el-date-range-picker__time-header .el-input__wrapper:hover,
+.el-date-range-picker__time-header .el-input__wrapper.is-focus {
+  background: #0c151d !important;
+  box-shadow: 0 0 0 1px rgba(238, 146, 38, 0.45) inset !important;
+}
+
+.el-date-range-picker__time-header .el-input__inner {
+  background: transparent !important;
+  color: var(--oc-text) !important;
+}
+
+.el-date-range-picker__time-header .el-input__prefix,
+.el-date-range-picker__time-header .el-input__suffix,
+.el-date-range-picker__time-header .el-range-separator {
+  color: var(--oc-text-secondary) !important;
+}
+
+.el-date-range-picker__time-header input::placeholder {
+  color: var(--oc-text-muted) !important;
+}
+
+.el-date-table td.current:not(.disabled) .el-date-table-cell__text,
+.el-month-table td.current:not(.disabled) .cell,
+.el-year-table td.current:not(.disabled) .cell {
+  background: var(--oc-primary);
+  color: #21150a;
+  font-weight: 800;
+}
+
+.el-date-table td.today .el-date-table-cell__text {
+  color: var(--oc-primary);
+  font-weight: 800;
+}
+
+.el-date-table td.today.current .el-date-table-cell__text {
+  color: #21150a;
+}
+
+.el-date-table td.in-range .el-date-table-cell,
+.el-date-table td.in-range .el-date-table-cell:hover {
+  background: rgba(238, 146, 38, 0.14);
+}
+
+.el-date-table td.start-date .el-date-table-cell,
+.el-date-table td.end-date .el-date-table-cell {
+  background: rgba(238, 146, 38, 0.18);
+}
+
+.el-date-table td.disabled .el-date-table-cell {
+  background: rgba(7, 11, 16, 0.42);
+  color: var(--oc-text-muted);
+}
+
+.el-time-panel,
+.el-time-panel__footer,
+.el-time-panel__content::after,
+.el-time-panel__content::before {
+  border-color: rgba(181, 139, 92, 0.18);
+}
+
+.el-time-spinner__item:hover:not(.is-disabled):not(.is-active) {
+  background: rgba(238, 146, 38, 0.12);
+  color: var(--oc-text);
+}
+
+.el-time-spinner__item.is-active:not(.is-disabled) {
+  background: rgba(238, 146, 38, 0.2);
+  color: var(--oc-primary);
+  font-weight: 800;
+}
+
+.el-picker-panel__link-btn {
+  color: var(--oc-primary);
+  font-weight: 700;
+}
+
+.el-picker-panel__footer .el-button {
+  background: rgba(7, 11, 16, 0.46);
+}
+
+.el-picker-panel__footer .el-button--primary {
+  background: var(--oc-primary);
+  color: #21150a;
+}
+
 .el-table {
   --el-table-bg-color: transparent;
   --el-table-tr-bg-color: transparent;
