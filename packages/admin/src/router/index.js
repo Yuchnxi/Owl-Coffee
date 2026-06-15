@@ -9,6 +9,7 @@ import LoginView from '../views/login/index.vue'
 
 const ProductListView = () => import('../views/products/list/index.vue')
 const ProductCategoriesView = () => import('../views/products/categories/index.vue')
+const OrdersView = () => import('../views/orders/index.vue')
 const AdminUsersView = () => import('../views/settings/admin-users/index.vue')
 const MenusView = () => import('../views/settings/menus/index.vue')
 const RolePermissionsView = () => import('../views/settings/role-permissions/index.vue')
@@ -66,6 +67,15 @@ const routes = [
           title: '商品分类',
           menuId: 'product_categories',
           activeMenu: '/products/categories'
+        }
+      },
+      {
+        path: 'orders',
+        name: 'orders',
+        component: OrdersView,
+        meta: {
+          title: '订单管理',
+          menuId: 'orders'
         }
       },
       {
