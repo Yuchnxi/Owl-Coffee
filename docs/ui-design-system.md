@@ -94,8 +94,8 @@
 3. 表单字段按业务顺序排列，必填项靠前。
 4. 详情弹窗使用描述列表或紧凑信息块，不做大卡片堆叠。
 5. 删除、禁用、关闭、退款等危险动作必须使用确认弹窗。
-6. 功能页中的新增、编辑弹窗必须封装为子组件，放在当前功能目录的 `childComps/` 下。
-7. 页面目录示例：`src/views/settings/admin-users/index.vue`，新增编辑弹窗示例：`src/views/settings/admin-users/childComps/AccountFormDialog.vue`。
+6. 功能页中的新增、编辑、详情、重置密码等业务对话框必须封装为子组件，放在当前功能目录的 `childComps/` 下。
+7. 页面目录示例：`src/views/settings/admin-users/index.vue`，业务对话框示例：`src/views/settings/admin-users/childComps/AccountFormDialog.vue`、`src/views/products/list/childComps/ProductDetailDialog.vue`。
 8. 表单中的 `el-input-number` 控制按钮需使用咖啡橙弱强调背景、咖啡橙图标和暗色边框，禁用态使用低对比灰色。
 
 ## 6. 商品管理页补充要求

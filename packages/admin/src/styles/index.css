@@ -195,6 +195,36 @@ a {
   background: var(--el-table-border-color);
 }
 
+.el-descriptions {
+  --el-descriptions-table-border: 1px solid rgba(181, 139, 92, 0.22);
+  --el-descriptions-item-bordered-label-background: rgba(238, 146, 38, 0.1);
+}
+
+.el-descriptions__body {
+  background: transparent;
+  color: var(--oc-text-secondary);
+}
+
+.el-descriptions__label.el-descriptions__cell.is-bordered-label,
+.el-descriptions__label.is-bordered-label,
+.el-descriptions__label {
+  width: 104px;
+  background: rgba(238, 146, 38, 0.1) !important;
+  color: #d9c0a2;
+  font-weight: 700;
+}
+
+.el-descriptions__content.el-descriptions__cell.is-bordered-content,
+.el-descriptions__content.is-bordered-content,
+.el-descriptions__content {
+  background: rgba(7, 11, 16, 0.34) !important;
+  color: var(--oc-text);
+}
+
+.el-descriptions__cell {
+  border-color: rgba(181, 139, 92, 0.22) !important;
+}
+
 .el-tag {
   border-radius: 999px;
 }

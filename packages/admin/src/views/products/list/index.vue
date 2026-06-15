@@ -146,57 +146,7 @@
       @submit="submitProductForm"
     />
 
-    <el-dialog v-model="detailDialog.visible" title="商品详情" width="760px" destroy-on-close>
-      <template v-if="currentProduct">
-        <el-descriptions :column="2" border>
-          <el-descriptions-item label="商品名称">{{ currentProduct.name }}</el-descriptions-item>
-          <el-descriptions-item label="分类">{{ currentProduct.categoryName || '待补充' }}</el-descriptions-item>
-          <el-descriptions-item label="商品状态">
-            {{ getProductStatusLabel(currentProduct.productStatus) }}
-          </el-descriptions-item>
-          <el-descriptions-item label="是否推荐">
-            {{ currentProduct.isRecommended ? '推荐' : '普通' }}
-          </el-descriptions-item>
-          <el-descriptions-item label="排序">{{ currentProduct.sort }}</el-descriptions-item>
-          <el-descriptions-item label="更新时间">
-            {{ currentProduct.updatedAt ? $dayjs(currentProduct.updatedAt).format('YYYY-MM-DD HH:mm:ss') : '待补充' }}
-          </el-descriptions-item>
-          <el-descriptions-item label="商品图片" :span="2">
-            <el-image
-              v-if="currentProduct.imageUrl"
-              class="detail-cover"
-              :src="resolveAssetUrl(currentProduct.imageUrl)"
-              fit="cover"
-              :preview-src-list="[resolveAssetUrl(currentProduct.imageUrl)]"
-              preview-teleported
-            />
-            <span v-else>待补充</span>
-          </el-descriptions-item>
-          <el-descriptions-item label="商品描述" :span="2">
-            {{ currentProduct.description || '待补充' }}
-          </el-descriptions-item>
-        </el-descriptions>
-
-        <div class="detail-skus-title">SKU 明细</div>
-        <el-table :data="currentProduct.skus || []" max-height="260" empty-text="暂无 SKU">
-          <el-table-column prop="skuCode" label="SKU 编码" min-width="150" align="center" />
-          <el-table-column prop="temperature" label="温度" min-width="90" align="center" />
-          <el-table-column prop="cupSize" label="杯型" min-width="90" align="center" />
-          <el-table-column prop="sugarLevel" label="糖度" min-width="90" align="center" />
-          <el-table-column label="售价" min-width="90" align="center">
-            <template #default="{ row }">¥{{ formatMoney(row.price) }}</template>
-          </el-table-column>
-          <el-table-column prop="stock" label="库存" min-width="80" align="center" />
-          <el-table-column prop="warningStock" label="预警" min-width="80" align="center" />
-          <el-table-column label="状态" min-width="90" align="center">
-            <template #default="{ row }">{{ row.skuStatus === 'enabled' ? '启用' : '停用' }}</template>
-          </el-table-column>
-        </el-table>
-      </template>
-      <template #footer>
-        <el-button type="primary" @click="detailDialog.visible = false">知道了</el-button>
-      </template>
-    </el-dialog>
+    <ProductDetailDialog v-model:visible="detailDialog.visible" :product="currentProduct" />
   </section>
 </template>
 
@@ -222,6 +172,7 @@ import {
   updateProductStatus
 } from '../../../api/product'
 import ProductFormDialog from './childComps/ProductFormDialog.vue'
+import ProductDetailDialog from './childComps/ProductDetailDialog.vue'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 
@@ -569,26 +520,9 @@ onMounted(async () => {
   font-weight: 800;
 }
 
-.detail-cover {
-  width: 120px;
-  height: 90px;
-  border-radius: 6px;
-}
-
-.detail-skus-title {
-  margin: 18px 0 10px;
-  color: var(--oc-text);
-  font-size: 15px;
-  font-weight: 800;
-}
-
 .products-view :deep(.el-dialog) {
   border: 1px solid var(--oc-border);
   background: var(--oc-panel-solid);
-}
-
-.products-view :deep(.el-descriptions__label) {
-  width: 100px;
 }
 
 @media (max-width: 980px) {
