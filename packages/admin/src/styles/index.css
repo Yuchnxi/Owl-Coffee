@@ -129,12 +129,70 @@ a {
   --el-table-header-bg-color: rgba(238, 146, 38, 0.08);
   --el-table-border-color: rgba(181, 139, 92, 0.14);
   --el-table-row-hover-bg-color: rgba(238, 146, 38, 0.08);
+  --oc-table-fixed-bg: #080d13;
+  --oc-table-fixed-header-bg: #21180f;
+  --oc-table-fixed-hover-bg: #141812;
   border-radius: var(--oc-radius);
 }
 
 .el-table th.el-table__cell {
   color: var(--oc-text);
   font-weight: 700;
+}
+
+.el-table .el-table-fixed-column--right,
+.el-table .el-table-fixed-column--left {
+  z-index: 3;
+}
+
+.el-table th.el-table-fixed-column--right,
+.el-table th.el-table-fixed-column--left,
+.el-table th[class*="el-table-fixed-column--"] {
+  background-color: var(--oc-table-fixed-header-bg) !important;
+}
+
+.el-table td.el-table-fixed-column--right,
+.el-table td.el-table-fixed-column--left,
+.el-table td[class*="el-table-fixed-column--"] {
+  background-color: var(--oc-table-fixed-bg) !important;
+}
+
+.el-table td.el-table-fixed-column--right .cell,
+.el-table td.el-table-fixed-column--left .cell,
+.el-table td[class*="el-table-fixed-column--"] .cell {
+  position: relative;
+  z-index: 1;
+  background-color: var(--oc-table-fixed-bg);
+}
+
+.el-table tr:hover td.el-table-fixed-column--right,
+.el-table tr:hover td.el-table-fixed-column--left,
+.el-table tr:hover td[class*="el-table-fixed-column--"] {
+  background-color: var(--oc-table-fixed-hover-bg) !important;
+}
+
+.el-table tr:hover td.el-table-fixed-column--right .cell,
+.el-table tr:hover td.el-table-fixed-column--left .cell,
+.el-table tr:hover td[class*="el-table-fixed-column--"] .cell {
+  background-color: var(--oc-table-fixed-hover-bg);
+}
+
+.el-table .el-table-fixed-column--right.is-first-column {
+  box-shadow: -12px 0 18px -14px rgba(0, 0, 0, 0.86);
+}
+
+.el-table .el-table-fixed-column--left.is-last-column {
+  box-shadow: 12px 0 18px -14px rgba(0, 0, 0, 0.86);
+}
+
+.el-table__fixed,
+.el-table__fixed-right {
+  background-color: var(--oc-table-fixed-bg) !important;
+}
+
+.el-table__fixed-right::before,
+.el-table__fixed::before {
+  background: var(--el-table-border-color);
 }
 
 .el-tag {

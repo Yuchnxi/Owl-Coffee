@@ -275,13 +275,13 @@ POST /api/app/auth/refresh
 
 首版文件上传使用对象存储，采用服务端中转模式。
 
-对象存储服务商、Bucket、域名、密钥：待补充。
+对象存储服务商：腾讯云 COS。Bucket、访问域名、密钥：待补充。
 
 ```txt
 POST /api/admin/uploads
 ```
 
-说明：当前服务端首版实现为本地上传存储，文件保存在服务端 `app/public/uploads` 下；对象存储配置仍为待补充。
+说明：当前服务端上传实现为腾讯云 COS 服务端中转上传，文件对象 Key 生成规则为 `uploads/{bizType}/{yyyy}/{mm}/{dd}/{fileId}.{ext}`。COS Bucket、Region、访问域名和密钥通过服务端 `.env` 配置。
 
 请求：
 
@@ -298,7 +298,7 @@ POST /api/admin/uploads
   "message": "success",
   "data": {
     "fileId": "file_xxx",
-    "url": "https://cdn.example.com/uploads/demo.png",
+    "url": "https://cdn.example.com/uploads/product/2026/06/15/file_xxx.png",
     "name": "demo.png",
     "size": 102400,
     "mimeType": "image/png"
@@ -1654,7 +1654,7 @@ GET /api/public/miniapp-qrcode
 
 ### 14.1 配置资料
 
-- 对象存储服务商：待补充
+- 对象存储服务商：腾讯云 COS
 - 对象存储 Bucket：待补充
 - 对象存储访问域名：待补充
 - 对象存储密钥配置：待补充

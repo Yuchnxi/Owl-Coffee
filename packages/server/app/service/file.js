@@ -28,7 +28,7 @@ class FileService extends Service {
           :url,
           :size,
           :mimeType,
-          'local',
+          :storageProvider,
           :objectKey,
           NOW(3),
           :adminUserId
@@ -41,6 +41,7 @@ class FileService extends Service {
         url: data.url,
         size: data.size,
         mimeType: data.mimeType,
+        storageProvider: data.storageProvider,
         objectKey: data.objectKey,
         adminUserId,
       }

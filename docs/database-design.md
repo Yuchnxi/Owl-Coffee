@@ -540,7 +540,7 @@ JSON 使用说明：`meta` 可保存标题、缓存、隐藏等前端扩展配�
 | `url` | `VARCHAR(512)` | NOT NULL | 文件访问地址 |
 | `size` | `BIGINT` | NOT NULL | 文件大小 |
 | `mime_type` | `VARCHAR(128)` | NOT NULL | MIME 类型 |
-| `storage_provider` | `VARCHAR(64)` | NULL | 对象存储服务商，待补充 |
+| `storage_provider` | `VARCHAR(64)` | NULL | 对象存储服务商，腾讯云 COS 记为 `tencent-cos` |
 | `object_key` | `VARCHAR(255)` | NULL | 对象存储 key |
 | `created_at` | `DATETIME(3)` | NOT NULL | 创建时间 |
 | `created_by` | `VARCHAR(32)` | NULL | 上传人 |

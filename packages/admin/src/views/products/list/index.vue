@@ -102,7 +102,7 @@
             {{ row.updatedAt ? $dayjs(row.updatedAt).format('YYYY-MM-DD HH:mm:ss') : '待补充' }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" min-width="260" fixed="right" align="center">
+        <el-table-column label="操作" min-width="300" fixed="right" align="center">
           <template #default="{ row }">
             <div class="products-actions">
               <el-button link type="primary" :icon="View" @click="openDetailDialog(row)">详情</el-button>

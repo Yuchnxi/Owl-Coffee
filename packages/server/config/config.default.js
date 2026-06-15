@@ -46,5 +46,13 @@ module.exports = appInfo => {
     connectionLimit: Number(process.env.MYSQL_CONNECTION_LIMIT) || 10,
   }
 
+  config.cos = {
+    secretId: process.env.TENCENT_COS_SECRET_ID || '',
+    secretKey: process.env.TENCENT_COS_SECRET_KEY || '',
+    bucket: process.env.TENCENT_COS_BUCKET || '',
+    region: process.env.TENCENT_COS_REGION || '',
+    publicBaseUrl: process.env.TENCENT_COS_PUBLIC_BASE_URL || '',
+  }
+
   return config
 }
