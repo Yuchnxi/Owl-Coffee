@@ -114,6 +114,7 @@ class AdminSettingService extends Service {
       adminUserId,
       adminName: data.adminName,
       phone: data.phone || null,
+      avatarUrl: data.avatarUrl || null,
     }
     let passwordSql = ''
 
@@ -128,6 +129,7 @@ class AdminSettingService extends Service {
         SET
           name = :adminName,
           phone = :phone,
+          avatar_url = :avatarUrl,
           updated_at = NOW(3),
           updated_by = :adminUserId
           ${passwordSql}
@@ -186,8 +188,10 @@ class AdminSettingService extends Service {
   formatAccountSetting(adminUser) {
     return {
       id: adminUser.id,
+      account: adminUser.account,
       adminName: adminUser.name,
       phone: adminUser.phone || null,
+      avatarUrl: adminUser.avatarUrl || null,
       roleId: adminUser.roleId,
       roleName: adminUser.roleName,
     }

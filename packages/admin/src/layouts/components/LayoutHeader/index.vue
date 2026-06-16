@@ -34,15 +34,18 @@
       </el-dropdown>
     </div>
   </el-header>
+
+  <ProfileDialog v-model:visible="profileDialogVisible" />
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ArrowDown, Expand, Fold, SwitchButton, User } from '@element-plus/icons-vue'
 import { useAppStore } from '../../../stores/app'
 import { useAuthStore } from '../../../stores/auth'
+import ProfileDialog from '../ProfileDialog/index.vue'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 
@@ -54,6 +57,9 @@ const appStore = useAppStore()
 
 // 当前登录状态
 const authStore = useAuthStore()
+
+// 个人中心弹窗显示状态
+const profileDialogVisible = ref(false)
 
 // 当前管理员信息
 const adminUser = computed(() => authStore.user || {})
@@ -79,7 +85,7 @@ function resolveAssetUrl(url) {
 // 处理管理员下拉菜单命令
 async function handleUserCommand(command) {
   if (command === 'profile') {
-    ElMessage.info('个人中心待补充')
+    profileDialogVisible.value = true
     return
   }
 

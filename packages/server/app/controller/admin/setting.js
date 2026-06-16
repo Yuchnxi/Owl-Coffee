@@ -117,6 +117,7 @@ class AdminSettingController extends Controller {
     return {
       adminName: typeof body.adminName === 'string' ? body.adminName.trim() : '',
       phone: typeof body.phone === 'string' ? body.phone.trim() : '',
+      avatarUrl: typeof body.avatarUrl === 'string' ? body.avatarUrl.trim() : '',
       newPassword: typeof body.newPassword === 'string' ? body.newPassword : '',
       confirmPassword: typeof body.confirmPassword === 'string' ? body.confirmPassword : '',
     }
@@ -134,6 +135,10 @@ class AdminSettingController extends Controller {
 
     if (payload.phone.length > 32) {
       return '手机号不能超过 32 个字符'
+    }
+
+    if (payload.avatarUrl.length > 512) {
+      return '头像地址不能超过 512 个字符'
     }
 
     if (payload.newPassword || payload.confirmPassword) {

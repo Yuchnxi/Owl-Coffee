@@ -118,6 +118,7 @@ class AdminAuthService extends Service {
           au.id,
           au.account,
           au.name,
+          au.phone,
           au.avatar_url AS avatarUrl,
           au.role_id AS roleId,
           au.status,
