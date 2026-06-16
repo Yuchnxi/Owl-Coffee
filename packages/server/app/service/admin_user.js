@@ -27,6 +27,7 @@ class AdminUserService extends Service {
           au.account,
           au.name,
           au.phone,
+          au.avatar_url AS avatarUrl,
           au.role_id AS roleId,
           r.name AS roleName,
           r.code AS roleCode,
@@ -121,7 +122,7 @@ class AdminUserService extends Service {
           :passwordHash,
           :name,
           :phone,
-          NULL,
+          :avatarUrl,
           :roleId,
           :status,
           NULL,
@@ -138,6 +139,7 @@ class AdminUserService extends Service {
         passwordHash,
         name: data.name,
         phone: data.phone || null,
+        avatarUrl: data.avatarUrl || null,
         roleId: data.roleId,
         status: data.status,
         operatorId,
@@ -175,6 +177,7 @@ class AdminUserService extends Service {
         SET
           name = :name,
           phone = :phone,
+          avatar_url = :avatarUrl,
           role_id = :roleId,
           updated_at = NOW(3),
           updated_by = :operatorId
@@ -185,6 +188,7 @@ class AdminUserService extends Service {
         adminUserId,
         name: data.name,
         phone: data.phone || null,
+        avatarUrl: data.avatarUrl || null,
         roleId: data.roleId,
         operatorId,
       }

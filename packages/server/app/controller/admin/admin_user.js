@@ -160,6 +160,7 @@ class AdminUserController extends Controller {
       account: String(payload.account || '').trim(),
       name: String(payload.name || '').trim(),
       phone: String(payload.phone || '').trim(),
+      avatarUrl: String(payload.avatarUrl || '').trim(),
       roleId: String(payload.roleId || '').trim(),
       password: payload.password === undefined ? '' : String(payload.password),
       status: payload.status || 'enabled',
@@ -191,6 +192,10 @@ class AdminUserController extends Controller {
 
     if (payload.phone && payload.phone.length > 32) {
       return '手机号不能超过 32 个字符'
+    }
+
+    if (payload.avatarUrl && payload.avatarUrl.length > 512) {
+      return '头像地址不能超过 512 个字符'
     }
 
     if (!payload.roleId) {

@@ -6,6 +6,9 @@
     destroy-on-close
   >
     <el-form ref="formRef" :model="form" :rules="rules" label-width="92px">
+      <el-form-item label="头像">
+        <ImageUpload v-model="form.avatarUrl" biz-type="avatar" :limit="1" :size="88" />
+      </el-form-item>
       <el-form-item label="登录账号" prop="account">
         <el-input
           v-model.trim="form.account"
@@ -44,6 +47,7 @@
 
 <script setup>
 import { computed, nextTick, reactive, ref, watch } from 'vue'
+import ImageUpload from '../../../../components/ImageUpload/index.vue'
 
 const ACCOUNT_PATTERN = /^[A-Za-z0-9_]{4,32}$/
 
@@ -81,6 +85,7 @@ const form = reactive({
   account: '',
   name: '',
   phone: '',
+  avatarUrl: '',
   roleId: '',
   password: '',
   status: 'enabled'
@@ -134,6 +139,7 @@ function syncForm() {
   form.account = account.account || ''
   form.name = account.name || ''
   form.phone = account.phone || ''
+  form.avatarUrl = account.avatarUrl || ''
   form.roleId = account.roleId || props.roles[0]?.id || ''
   form.password = ''
   form.status = account.status || 'enabled'
@@ -152,6 +158,7 @@ async function handleSubmit() {
     account: form.account,
     name: form.name,
     phone: form.phone,
+    avatarUrl: form.avatarUrl,
     roleId: form.roleId,
     password: form.password,
     status: form.status

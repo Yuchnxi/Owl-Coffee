@@ -4,7 +4,7 @@ const path = require('path')
 const COS = require('cos-nodejs-sdk-v5')
 const Controller = require('egg').Controller
 
-const BIZ_TYPE_LIST = ['product', 'logo', 'store', 'website']
+const BIZ_TYPE_LIST = ['product', 'logo', 'store', 'website', 'avatar']
 const MIME_EXTENSION_MAP = {
   'image/jpeg': '.jpg',
   'image/png': '.png',

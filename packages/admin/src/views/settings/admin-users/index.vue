@@ -50,6 +50,11 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="48" align="center" />
+        <el-table-column label="头像" width="86" align="center">
+          <template #default="{ row }">
+            <ImagePreview :src="row.avatarUrl" width="44" height="44" empty-text="无" />
+          </template>
+        </el-table-column>
         <el-table-column prop="account" label="登录账号" min-width="140" align="center" />
         <el-table-column prop="name" label="姓名" min-width="120" align="center" />
         <el-table-column label="手机号" min-width="130" align="center">
@@ -129,6 +134,9 @@
 
     <el-dialog v-model="detailDialog.visible" title="账号详情" width="560px" destroy-on-close>
       <el-descriptions v-if="currentAccount" :column="1" border>
+        <el-descriptions-item label="头像">
+          <ImagePreview :src="currentAccount.avatarUrl" width="72" height="72" empty-text="待补充" />
+        </el-descriptions-item>
         <el-descriptions-item label="登录账号">{{ currentAccount.account }}</el-descriptions-item>
         <el-descriptions-item label="姓名">{{ currentAccount.name }}</el-descriptions-item>
         <el-descriptions-item label="手机号">{{ currentAccount.phone || '待补充' }}</el-descriptions-item>
@@ -189,7 +197,12 @@ import {
   updateAdminUser,
   updateAdminUserStatus
 } from '../../../api/adminUser'
+import ImagePreview from '../../../components/ImagePreview/index.vue'
+import { useAuthStore } from '../../../stores/auth'
 import AccountFormDialog from './childComps/AccountFormDialog.vue'
+
+// 当前登录状态
+const authStore = useAuthStore()
 
 // 页面加载状态
 const loading = ref(false)
@@ -347,6 +360,7 @@ async function submitAccountForm(form) {
         account: form.account,
         name: form.name,
         phone: form.phone || null,
+        avatarUrl: form.avatarUrl || null,
         roleId: form.roleId,
         password: form.password,
         status: form.status
@@ -357,12 +371,18 @@ async function submitAccountForm(form) {
         account: form.account,
         name: form.name,
         phone: form.phone || null,
+        avatarUrl: form.avatarUrl || null,
         roleId: form.roleId
       })
       ElMessage.success('账号已更新')
     }
 
     accountDialog.visible = false
+
+    if (form.id && form.id === authStore.user?.id) {
+      await authStore.loadCurrentUser()
+    }
+
     await loadAdminUsers()
   } finally {
     accountDialog.submitting = false

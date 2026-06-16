@@ -44,6 +44,8 @@ import { ArrowDown, Expand, Fold, SwitchButton, User } from '@element-plus/icons
 import { useAppStore } from '../../../stores/app'
 import { useAuthStore } from '../../../stores/auth'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
+
 // 路由实例
 const router = useRouter()
 
@@ -60,10 +62,19 @@ const adminUser = computed(() => authStore.user || {})
 const adminName = computed(() => adminUser.value.name || adminUser.value.account || '管理员')
 
 // 当前管理员头像
-const adminAvatar = computed(() => adminUser.value.avatarUrl || adminUser.value.avatar || '')
+const adminAvatar = computed(() => resolveAssetUrl(adminUser.value.avatarUrl || adminUser.value.avatar || ''))
 
 // 默认头像文字
 const adminInitial = computed(() => adminName.value.slice(0, 1) || '管')
+
+// 拼接上传资源访问地址
+function resolveAssetUrl(url) {
+  if (!url || /^(https?:)?\/\//.test(url) || url.startsWith('data:') || url.startsWith('blob:')) {
+    return url
+  }
+
+  return `${API_BASE_URL}${url}`
+}
 
 // 处理管理员下拉菜单命令
 async function handleUserCommand(command) {

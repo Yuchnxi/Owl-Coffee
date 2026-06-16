@@ -95,6 +95,35 @@ a {
   box-shadow: 0 0 0 1px rgba(238, 146, 38, 0.42) inset;
 }
 
+.el-input.is-disabled .el-input__wrapper,
+.el-textarea.is-disabled .el-textarea__inner,
+.el-select.is-disabled .el-select__wrapper,
+.el-input-number.is-disabled .el-input__wrapper,
+.el-date-editor.is-disabled.el-input__wrapper {
+  background: rgba(7, 11, 16, 0.58) !important;
+  box-shadow: 0 0 0 1px rgba(181, 139, 92, 0.16) inset !important;
+  cursor: not-allowed;
+}
+
+.el-input.is-disabled .el-input__inner,
+.el-textarea.is-disabled .el-textarea__inner,
+.el-select.is-disabled .el-select__placeholder,
+.el-select.is-disabled .el-select__selected-item,
+.el-input-number.is-disabled .el-input__inner,
+.el-date-editor.is-disabled .el-input__inner {
+  color: var(--oc-text-muted) !important;
+  -webkit-text-fill-color: var(--oc-text-muted);
+  cursor: not-allowed;
+}
+
+.el-input.is-disabled .el-input__wrapper:hover,
+.el-textarea.is-disabled .el-textarea__inner:hover,
+.el-select.is-disabled .el-select__wrapper:hover,
+.el-input-number.is-disabled .el-input__wrapper:hover,
+.el-date-editor.is-disabled.el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px rgba(181, 139, 92, 0.16) inset !important;
+}
+
 .el-input-number__decrease,
 .el-input-number__increase {
   border-color: rgba(181, 139, 92, 0.22);

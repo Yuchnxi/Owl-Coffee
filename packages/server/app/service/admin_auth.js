@@ -13,6 +13,7 @@ class AdminAuthService extends Service {
           au.account,
           au.password_hash AS passwordHash,
           au.name,
+          au.avatar_url AS avatarUrl,
           au.role_id AS roleId,
           au.status,
           r.name AS roleName
@@ -117,6 +118,7 @@ class AdminAuthService extends Service {
           au.id,
           au.account,
           au.name,
+          au.avatar_url AS avatarUrl,
           au.role_id AS roleId,
           au.status,
           r.name AS roleName
@@ -202,7 +204,9 @@ class AdminAuthService extends Service {
   formatAdminUser(adminUser) {
     return {
       id: adminUser.id,
+      account: adminUser.account,
       name: adminUser.name,
+      avatarUrl: adminUser.avatarUrl,
       roleId: adminUser.roleId,
       roleName: adminUser.roleName,
     }
