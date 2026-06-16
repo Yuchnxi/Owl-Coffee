@@ -15,15 +15,7 @@
           {{ product.updatedAt ? dayjs(product.updatedAt).format('YYYY-MM-DD HH:mm:ss') : '待补充' }}
         </el-descriptions-item>
         <el-descriptions-item label="商品图片" :span="2">
-          <el-image
-            v-if="product.imageUrl"
-            class="detail-cover"
-            :src="resolveAssetUrl(product.imageUrl)"
-            fit="cover"
-            :preview-src-list="[resolveAssetUrl(product.imageUrl)]"
-            preview-teleported
-          />
-          <span v-else>待补充</span>
+          <ImagePreview :src="product.imageUrl" width="120" height="90" />
         </el-descriptions-item>
         <el-descriptions-item label="商品描述" :span="2">
           {{ product.description || '待补充' }}
@@ -56,8 +48,7 @@
 <script setup>
 import { computed } from 'vue'
 import dayjs from 'dayjs'
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
+import ImagePreview from '../../../../components/ImagePreview/index.vue'
 
 const props = defineProps({
   visible: {
@@ -88,23 +79,9 @@ function getProductStatusLabel(status) {
   return status === 'onSale' ? '上架' : '下架'
 }
 
-// 拼接上传资源访问地址
-function resolveAssetUrl(url) {
-  if (!url || /^https?:\/\//.test(url)) {
-    return url
-  }
-
-  return `${API_BASE_URL}${url}`
-}
 </script>
 
 <style scoped>
-.detail-cover {
-  width: 120px;
-  height: 90px;
-  border-radius: 6px;
-}
-
 .detail-skus-title {
   margin: 18px 0 10px;
   color: var(--oc-text);

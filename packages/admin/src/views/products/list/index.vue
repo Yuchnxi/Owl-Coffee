@@ -53,15 +53,7 @@
         <el-table-column type="selection" width="48" align="center" />
         <el-table-column label="商品图片" width="96" align="center">
           <template #default="{ row }">
-            <el-image
-              v-if="row.imageUrl"
-              class="product-cover"
-              :src="resolveAssetUrl(row.imageUrl)"
-              fit="cover"
-              :preview-src-list="[resolveAssetUrl(row.imageUrl)]"
-              preview-teleported
-            />
-            <span v-else class="product-cover product-cover--empty">待补充</span>
+            <ImagePreview :src="row.imageUrl" width="64" height="48" />
           </template>
         </el-table-column>
         <el-table-column prop="name" label="商品名称" min-width="150" align="center" show-overflow-tooltip />
@@ -171,10 +163,9 @@ import {
   updateProduct,
   updateProductStatus
 } from '../../../api/product'
+import ImagePreview from '../../../components/ImagePreview/index.vue'
 import ProductFormDialog from './childComps/ProductFormDialog.vue'
 import ProductDetailDialog from './childComps/ProductDetailDialog.vue'
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 
 // 页面加载状态
 const loading = ref(false)
@@ -408,15 +399,6 @@ function getStockStatusType(status) {
   }
 
   return map[status] || 'info'
-}
-
-// 拼接上传资源访问地址
-function resolveAssetUrl(url) {
-  if (!url || /^https?:\/\//.test(url)) {
-    return url
-  }
-
-  return `${API_BASE_URL}${url}`
 }
 
 onMounted(async () => {

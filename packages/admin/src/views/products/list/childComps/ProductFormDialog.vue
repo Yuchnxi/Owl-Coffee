@@ -34,21 +34,7 @@
 
       <div class="product-form__row">
         <el-form-item label="商品图片">
-          <div class="product-image-field">
-            <el-image
-              v-if="form.imageUrl"
-              class="product-image-preview"
-              :src="resolveAssetUrl(form.imageUrl)"
-              fit="cover"
-              :preview-src-list="[resolveAssetUrl(form.imageUrl)]"
-              preview-teleported
-            />
-            <div v-else class="product-image-empty">待补充</div>
-            <el-upload :show-file-list="false" :http-request="handleUploadImage" accept="image/*">
-              <el-button :loading="uploading" :icon="Upload">上传图片</el-button>
-            </el-upload>
-            <el-button v-if="form.imageUrl" :icon="Delete" @click="form.imageUrl = ''">移除</el-button>
-          </div>
+          <ImageUpload v-model="form.imageUrl" biz-type="product" :limit="1" :size="88" />
         </el-form-item>
       </div>
 
@@ -136,10 +122,8 @@
 <script setup>
 import { computed, nextTick, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Delete, Plus, Upload } from '@element-plus/icons-vue'
-import { uploadProductImage } from '../../../../api/product'
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
+import { Delete, Plus } from '@element-plus/icons-vue'
+import ImageUpload from '../../../../components/ImageUpload/index.vue'
 
 const props = defineProps({
   visible: {
@@ -170,8 +154,6 @@ const emit = defineEmits(['update:visible', 'submit'])
 const formRef = ref(null)
 // SKU 表格引用
 const skuTableRef = ref(null)
-// 图片上传状态
-const uploading = ref(false)
 // 已勾选 SKU 行
 const selectedSkuRows = ref([])
 
@@ -292,23 +274,6 @@ function removeSelectedSkuRows() {
   })
 }
 
-// 上传商品图片
-async function handleUploadImage(options) {
-  uploading.value = true
-
-  try {
-    const result = await uploadProductImage(options.file)
-
-    form.imageUrl = result.url
-    ElMessage.success('图片已上传')
-    options.onSuccess?.(result)
-  } catch (err) {
-    options.onError?.(err)
-  } finally {
-    uploading.value = false
-  }
-}
-
 // 校验 SKU 明细
 function validateSkus() {
   if (form.skus.length === 0) {
@@ -365,15 +330,6 @@ async function handleSubmit() {
   })
 }
 
-// 拼接上传资源访问地址
-function resolveAssetUrl(url) {
-  if (!url || /^https?:\/\//.test(url)) {
-    return url
-  }
-
-  return `${API_BASE_URL}${url}`
-}
-
 watch(() => props.visible, value => {
   if (value) {
     syncForm()
@@ -411,28 +367,6 @@ watch(() => props.categories, () => {
 .product-form :deep(.el-input-number),
 .product-form :deep(.el-textarea) {
   width: 100%;
-}
-
-.product-image-field {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-
-.product-image-preview,
-.product-image-empty {
-  display: inline-flex;
-  width: 88px;
-  height: 66px;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border: 1px solid var(--oc-border);
-  border-radius: 6px;
-  background: rgba(4, 8, 13, 0.34);
-  color: var(--oc-text-muted);
-  font-size: 12px;
 }
 
 .sku-section {
