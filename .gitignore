@@ -7,3 +7,5 @@ run
 coverage
 .nyc_output
 .env
+project.private.config.json
+miniprogram_npm
