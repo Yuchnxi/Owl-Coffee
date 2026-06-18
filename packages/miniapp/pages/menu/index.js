@@ -235,6 +235,18 @@ Page({
   // 阻止弹层内容点击冒泡
   handlePreventTap() {},
 
+  // 预览商品图片
+  handlePreviewImage(event) {
+    const { url } = event.currentTarget.dataset
+
+    if (!url) return
+
+    wx.previewImage({
+      current: url,
+      urls: [url],
+    })
+  },
+
   // 选择规格值
   handleSelectSpec(event) {
     const { type, value, disabled } = event.currentTarget.dataset
