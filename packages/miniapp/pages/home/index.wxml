@@ -1,1 +1,70 @@
+<view class="home-page">
+  <view class="hero-section">
+    <swiper
+      class="hero-swiper"
+      autoplay="{{bannerList.length > 1}}"
+      circular="{{bannerList.length > 1}}"
+      indicator-dots="{{bannerList.length > 1}}"
+      indicator-color="rgba(255, 250, 242, 0.5)"
+      indicator-active-color="#e97416"
+    >
+      <swiper-item wx:for="{{bannerList}}" wx:key="id">
+        <view class="hero-slide">
+          <image class="hero-image" src="{{item.imageUrl}}" mode="aspectFill" />
+          <view class="hero-copy">
+            <view class="brand-kicker">{{item.kicker}}</view>
+            <view class="hero-title">{{item.title}}</view>
+          </view>
+        </view>
+      </swiper-item>
+    </swiper>
+  </view>
 
+  <view class="quick-grid">
+    <view
+      class="quick-card"
+      wx:for="{{quickActions}}"
+      wx:key="title"
+      data-url="{{item.url}}"
+      bindtap="handleNavigate"
+    >
+      <view class="quick-icon">{{item.icon}}</view>
+      <view class="quick-content">
+        <view class="quick-title">{{item.title}}</view>
+        <view class="quick-desc">{{item.desc}}</view>
+      </view>
+      <view class="quick-arrow">›</view>
+    </view>
+  </view>
+
+  <view class="section-block">
+    <view class="section-head">
+      <view>
+        <view class="section-title">今日推荐</view>
+      </view>
+      <view class="section-link" data-url="/pages/menu/index" bindtap="handleNavigate">全部</view>
+    </view>
+
+    <view class="recommend-list" wx:if="{{recommendList.length}}">
+      <view class="recommend-card" wx:for="{{recommendList}}" wx:key="id">
+        <view class="product-cover">
+          <image class="product-image" src="{{item.imageUrl}}" mode="aspectFill" />
+        </view>
+        <view class="product-info">
+          <view class="product-row">
+            <view class="product-name">{{item.name}}</view>
+            <view class="product-tag" wx:if="{{item.tag}}">{{item.tag}}</view>
+          </view>
+          <view class="product-desc" wx:if="{{item.desc}}">{{item.desc}}</view>
+          <view class="product-price" wx:if="{{item.priceText}}">{{item.priceText}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="order-panel">
+    <view class="order-title">当前取餐</view>
+    <view class="order-empty">暂无进行中的订单</view>
+    <view class="order-action" data-url="/pages/cart/index" bindtap="handleNavigate">去点一杯</view>
+  </view>
+</view>
