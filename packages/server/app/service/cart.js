@@ -10,13 +10,13 @@ class CartService extends Service {
         SELECT
           ci.id,
           ci.sku_id AS skuId,
+          ci.sugar_level AS sugarLevel,
           ci.quantity,
           ci.created_at AS createdAt,
           ci.updated_at AS updatedAt,
           ps.sku_code AS skuCode,
           ps.temperature,
           ps.cup_size AS cupSize,
-          ps.sugar_level AS sugarLevel,
           ps.price,
           ps.stock,
           ps.sku_status AS skuStatus,
@@ -49,7 +49,7 @@ class CartService extends Service {
       await connection.execute('DELETE FROM cart_items WHERE user_id = :userId', { userId })
 
       for (const item of items) {
-        await this.upsertCartItem(connection, userId, item.skuId, item.quantity)
+        await this.upsertCartItem(connection, userId, item.skuId, item.quantity, item.sugarLevel)
       }
 
       await connection.commit()
@@ -63,12 +63,12 @@ class CartService extends Service {
   }
 
   // 加入购物车
-  async addItem(userId, skuId, quantity) {
+  async addItem(userId, skuId, quantity, sugarLevel) {
     const connection = await this.app.mysql.getConnection()
 
     try {
       await connection.beginTransaction()
-      await this.upsertCartItem(connection, userId, skuId, quantity, true)
+      await this.upsertCartItem(connection, userId, skuId, quantity, sugarLevel, true)
       await connection.commit()
 
       return this.listCart(userId)
@@ -143,32 +143,32 @@ class CartService extends Service {
   }
 
   // 写入或增加购物车项
-  async upsertCartItem(connection, userId, skuId, quantity, increment = false) {
+  async upsertCartItem(connection, userId, skuId, quantity, sugarLevel = '不另外加糖', increment = false) {
     const id = this.service.authToken.createId('cart')
 
     if (increment) {
       await connection.execute(
         `
-          INSERT INTO cart_items (id, user_id, sku_id, quantity, created_at, updated_at)
-          VALUES (:id, :userId, :skuId, :quantity, NOW(3), NOW(3))
+          INSERT INTO cart_items (id, user_id, sku_id, sugar_level, quantity, created_at, updated_at)
+          VALUES (:id, :userId, :skuId, :sugarLevel, :quantity, NOW(3), NOW(3))
           ON DUPLICATE KEY UPDATE
             quantity = quantity + VALUES(quantity),
             updated_at = NOW(3)
         `,
-        { id, userId, skuId, quantity }
+        { id, userId, skuId, sugarLevel, quantity }
       )
       return
     }
 
     await connection.execute(
       `
-        INSERT INTO cart_items (id, user_id, sku_id, quantity, created_at, updated_at)
-        VALUES (:id, :userId, :skuId, :quantity, NOW(3), NOW(3))
+        INSERT INTO cart_items (id, user_id, sku_id, sugar_level, quantity, created_at, updated_at)
+        VALUES (:id, :userId, :skuId, :sugarLevel, :quantity, NOW(3), NOW(3))
         ON DUPLICATE KEY UPDATE
           quantity = VALUES(quantity),
           updated_at = NOW(3)
       `,
-      { id, userId, skuId, quantity }
+      { id, userId, skuId, sugarLevel, quantity }
     )
   }
 
@@ -191,7 +191,7 @@ class CartService extends Service {
       temperature: row.temperature,
       cupSize: row.cupSize,
       sugarLevel: row.sugarLevel,
-      specText: `${row.temperature || '待补充'} / ${row.cupSize || '待补充'} / ${row.sugarLevel || '待补充'}`,
+      specText: `${row.temperature || '待补充'} / ${row.cupSize || '待补充'} / ${row.sugarLevel || '不另外加糖'}`,
       price: row.price === null ? null : Number(row.price),
       stock: row.stock === null ? 0 : Number(row.stock),
       available,

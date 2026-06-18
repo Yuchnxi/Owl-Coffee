@@ -541,7 +541,6 @@ SKU 字段：
 | `skuCode` | SKU 编码 |
 | `temperature` | 温度 |
 | `cupSize` | 杯型 |
-| `sugarLevel` | 糖度 |
 | `price` | 销售价 |
 | `stock` | 当前库存 |
 | `warningStock` | 预警值 |
@@ -566,7 +565,6 @@ POST /api/admin/products
     {
       "temperature": "hot",
       "cupSize": "large",
-      "sugarLevel": "normal",
       "price": 28,
       "stock": 100,
       "warningStock": 10,
@@ -676,6 +674,7 @@ POST /api/admin/orders
   "items": [
     {
       "skuId": "sku_xxx",
+      "sugarLevel": "不另外加糖",
       "quantity": 1
     }
   ],
@@ -1311,6 +1310,16 @@ POST /api/app/cart/sync
 POST /api/app/cart/items
 ```
 
+请求体：
+
+```json
+{
+  "skuId": "sku_xxx",
+  "sugarLevel": "3分糖",
+  "quantity": 1
+}
+```
+
 ### 10.3.4 更新数量
 
 ```txt
@@ -1382,6 +1391,7 @@ POST /api/app/orders
   "items": [
     {
       "skuId": "sku_xxx",
+      "sugarLevel": "不另外加糖",
       "quantity": 1
     }
   ],

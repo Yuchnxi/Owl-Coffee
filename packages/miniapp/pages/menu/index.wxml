@@ -1,1 +1,194 @@
+<view class="menu-page">
+  <view class="search-wrap">
+    <view class="search-box">
+      <view class="search-icon"></view>
+      <input
+        class="search-input"
+        value="{{keyword}}"
+        placeholder="搜索咖啡名称"
+        confirm-type="done"
+        bindinput="handleKeywordChange"
+      />
+      <view class="search-clear" wx:if="{{keyword}}" bindtap="handleSearchClear">×</view>
+      <view class="search-button" bindtap="handleSearch">搜索</view>
+    </view>
+  </view>
 
+  <view class="menu-layout">
+    <scroll-view class="category-scroll" scroll-y>
+      <van-sidebar active-key="{{activeCategoryIndex}}" bind:change="handleCategoryChange">
+        <van-sidebar-item
+          wx:for="{{categoryList}}"
+          wx:key="id"
+          title="{{item.name}}"
+        />
+      </van-sidebar>
+    </scroll-view>
+
+    <scroll-view class="product-scroll" scroll-y>
+      <view class="loading-state" wx:if="{{loading}}">
+        <view class="loading-dot"></view>
+        <view>菜单加载中</view>
+      </view>
+
+      <view class="product-list" wx:elif="{{productList.length}}">
+        <view
+          class="product-card {{item.isSoldOut ? 'is-disabled' : ''}}"
+          wx:for="{{productList}}"
+          wx:key="id"
+          data-product-id="{{item.id}}"
+          data-disabled="{{item.isSoldOut}}"
+          bindtap="handleOpenProduct"
+        >
+          <view class="product-cover">
+            <image
+              wx:if="{{item.imageUrl}}"
+              class="product-image"
+              src="{{item.imageUrl}}"
+              mode="aspectFill"
+            />
+            <view wx:else class="image-placeholder">待补充</view>
+          </view>
+
+          <view class="product-info">
+            <view class="product-head">
+              <view class="product-name">{{item.name}}</view>
+              <view class="status-tag {{item.isSoldOut ? 'sold-out' : ''}}">
+                {{item.isSoldOut ? '售罄' : '可点'}}
+              </view>
+            </view>
+            <view class="product-desc">{{item.description || '待补充'}}</view>
+            <view class="product-bottom">
+              <view class="product-price">{{item.priceText}}</view>
+              <view
+                class="add-button {{item.isSoldOut ? 'disabled' : ''}}"
+                data-product-id="{{item.id}}"
+                data-disabled="{{item.isSoldOut}}"
+                catchtap="handleOpenProduct"
+              >
+                +
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="empty-state" wx:else>
+        <view class="empty-visual">
+          <view class="empty-circle"></view>
+          <view class="empty-line"></view>
+        </view>
+        <view class="empty-text">{{pageError || '暂无可点商品，待补充'}}</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="cart-notice" wx:if="{{cartNoticeVisible}}" bindtap="handleGoCart">
+    <view class="cart-copy">已加入购物车</view>
+    <view class="cart-action">去购物车</view>
+  </view>
+
+  <view class="detail-mask" wx:if="{{detailVisible}}" bindtap="handleCloseDetail">
+    <view class="detail-panel" wx:if="{{currentProduct}}" catchtap="handlePreventTap">
+      <view class="detail-close" bindtap="handleCloseDetail">×</view>
+      <view class="detail-head">
+        <view class="detail-cover">
+          <image
+            wx:if="{{currentProduct.imageUrl}}"
+            class="detail-image"
+            src="{{currentProduct.imageUrl}}"
+            mode="aspectFill"
+          />
+          <view wx:else class="image-placeholder">待补充</view>
+        </view>
+        <view class="detail-info">
+          <view class="detail-name">{{currentProduct.name}}</view>
+          <view class="detail-desc">{{currentProduct.description || '待补充'}}</view>
+          <view class="detail-price">
+            {{selectedSkuPriceText}}
+          </view>
+        </view>
+      </view>
+
+      <view class="spec-section">
+        <view class="spec-title">温度</view>
+        <view class="spec-options">
+          <view
+            class="spec-option {{item.active ? 'active' : ''}} {{item.disabled ? 'disabled' : ''}}"
+            wx:for="{{specGroups.temperature}}"
+            wx:key="value"
+            data-type="temperature"
+            data-value="{{item.value}}"
+            data-disabled="{{item.disabled}}"
+            bindtap="handleSelectSpec"
+          >
+            {{item.value}}
+          </view>
+        </view>
+      </view>
+
+      <view class="spec-section">
+        <view class="spec-title">杯型</view>
+        <view class="spec-options">
+          <view
+            class="spec-option {{item.active ? 'active' : ''}} {{item.disabled ? 'disabled' : ''}}"
+            wx:for="{{specGroups.cupSize}}"
+            wx:key="value"
+            data-type="cupSize"
+            data-value="{{item.value}}"
+            data-disabled="{{item.disabled}}"
+            bindtap="handleSelectSpec"
+          >
+            {{item.value}}
+          </view>
+        </view>
+      </view>
+
+      <view class="spec-section">
+        <view class="spec-title">糖度</view>
+        <view class="spec-options">
+          <view
+            class="spec-option {{item === selectedSugarLevel ? 'active' : ''}}"
+            wx:for="{{sugarOptions}}"
+            wx:key="*this"
+            data-value="{{item}}"
+            bindtap="handleSelectSugar"
+          >
+            {{item}}
+          </view>
+        </view>
+      </view>
+
+      <view class="quantity-row">
+        <view>
+          <view class="quantity-title">数量</view>
+          <view class="stock-text">
+            {{selectedSku ? '库存 ' + selectedSku.stock : '暂无可售规格'}}
+          </view>
+        </view>
+        <van-stepper
+          value="{{quantity}}"
+          min="1"
+          max="{{selectedSku ? selectedSku.stock : 1}}"
+          disabled="{{!selectedSku}}"
+          button-size="28"
+          bind:change="handleQuantityChange"
+        />
+      </view>
+
+      <button
+        class="cart-button"
+        loading="{{addLoading}}"
+        disabled="{{!selectedSku || addLoading}}"
+        bindtap="handleAddCart"
+      >
+        {{selectedSku ? '加入购物车' : '暂无可售规格'}}
+      </button>
+    </view>
+
+    <view class="detail-loading detail-panel" wx:else catchtap="handlePreventTap">
+      <view class="loading-dot"></view>
+      <view>详情加载中</view>
+    </view>
+  </view>
+</view>

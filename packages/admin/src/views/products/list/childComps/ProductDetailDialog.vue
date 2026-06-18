@@ -27,7 +27,6 @@
         <el-table-column prop="skuCode" label="SKU 编码" min-width="150" align="center" />
         <el-table-column prop="temperature" label="温度" min-width="90" align="center" />
         <el-table-column prop="cupSize" label="杯型" min-width="90" align="center" />
-        <el-table-column prop="sugarLevel" label="糖度" min-width="90" align="center" />
         <el-table-column label="售价" min-width="90" align="center">
           <template #default="{ row }">¥{{ formatMoney(row.price) }}</template>
         </el-table-column>

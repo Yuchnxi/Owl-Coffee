@@ -30,8 +30,8 @@ class AppCartController extends Controller {
   // 加入购物车
   async addItem() {
     const { ctx } = this
-    const { skuId, quantity } = this.normalizeItem(ctx.request.body || {})
-    const errorMessage = await this.validateItems([{ skuId, quantity }])
+    const { skuId, quantity, sugarLevel } = this.normalizeItem(ctx.request.body || {})
+    const errorMessage = await this.validateItems([{ skuId, quantity, sugarLevel }])
 
     if (errorMessage) {
       ctx.status = 400
@@ -39,7 +39,7 @@ class AppCartController extends Controller {
       return
     }
 
-    const result = await ctx.service.cart.addItem(ctx.state.appUser.id, skuId, quantity)
+    const result = await ctx.service.cart.addItem(ctx.state.appUser.id, skuId, quantity, sugarLevel)
 
     ctx.success(result)
   }
@@ -99,13 +99,15 @@ class AppCartController extends Controller {
 
     for (const item of items) {
       const normalizedItem = this.normalizeItem(item)
-      itemMap.set(normalizedItem.skuId, (itemMap.get(normalizedItem.skuId) || 0) + normalizedItem.quantity)
+      const key = `${normalizedItem.skuId}__${normalizedItem.sugarLevel}`
+      itemMap.set(key, {
+        skuId: normalizedItem.skuId,
+        sugarLevel: normalizedItem.sugarLevel,
+        quantity: (itemMap.get(key)?.quantity || 0) + normalizedItem.quantity,
+      })
     }
 
-    return Array.from(itemMap.entries()).map(([skuId, quantity]) => ({
-      skuId,
-      quantity,
-    }))
+    return Array.from(itemMap.values())
   }
 
   // 标准化购物车明细
@@ -113,6 +115,7 @@ class AppCartController extends Controller {
     return {
       skuId: item.skuId || '',
       quantity: Number.isInteger(Number(item.quantity)) ? Number(item.quantity) : 0,
+      sugarLevel: typeof item.sugarLevel === 'string' && item.sugarLevel.trim() ? item.sugarLevel.trim() : '不另外加糖',
     }
   }
 
