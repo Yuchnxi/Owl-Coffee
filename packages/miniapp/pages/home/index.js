@@ -6,7 +6,7 @@ Page({
         id: 'home-hero',
         kicker: 'Owl Coffee',
         title: '醒来，喝一杯好咖啡',
-        imageUrl: '/assets/home/home-hero.png'
+        imageUrl: '/assets/home/home-hero.jpg'
       }
     ],
 
@@ -31,12 +31,12 @@ Page({
       {
         id: 'recommend-coffee',
         name: '推荐咖啡',
-        imageUrl: '/assets/home/recommend-coffee.png'
+        imageUrl: '/assets/home/recommend-coffee.jpg'
       },
       {
         id: 'season-drink',
         name: '季节饮品',
-        imageUrl: '/assets/home/recommend-season.png'
+        imageUrl: '/assets/home/recommend-season.jpg'
       }
     ]
   },
