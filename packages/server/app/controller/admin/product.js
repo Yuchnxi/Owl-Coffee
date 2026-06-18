@@ -150,7 +150,6 @@ class AdminProductController extends Controller {
     return {
       temperature: typeof sku.temperature === 'string' ? sku.temperature.trim() : '',
       cupSize: typeof sku.cupSize === 'string' ? sku.cupSize.trim() : '',
-      sugarLevel: typeof sku.sugarLevel === 'string' ? sku.sugarLevel.trim() : '',
       price: Number(sku.price),
       stock: Number.isInteger(Number(sku.stock)) ? Number(sku.stock) : -1,
       warningStock: Number.isInteger(Number(sku.warningStock)) ? Number(sku.warningStock) : -1,
@@ -203,8 +202,8 @@ class AdminProductController extends Controller {
 
   // 校验 SKU 请求体
   validateSku(sku) {
-    if (!sku.temperature || !sku.cupSize || !sku.sugarLevel) {
-      return 'SKU 温度、杯型和糖度不能为空'
+    if (!sku.temperature || !sku.cupSize) {
+      return 'SKU 温度和杯型不能为空'
     }
 
     if (!Number.isFinite(sku.price) || sku.price < 0) {

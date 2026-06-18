@@ -115,21 +115,26 @@ class AppOrderController extends Controller {
     }
   }
 
-  // 合并重复 SKU 明细
+  // 合并重复 SKU 和糖度明细
   mergeItems(items) {
     const itemMap = new Map()
 
     for (const item of items) {
       const skuId = item.skuId || ''
       const quantity = Number.isInteger(Number(item.quantity)) ? Number(item.quantity) : 0
+      const sugarLevel = typeof item.sugarLevel === 'string' && item.sugarLevel.trim()
+        ? item.sugarLevel.trim()
+        : '不另外加糖'
+      const key = `${skuId}__${sugarLevel}`
 
-      itemMap.set(skuId, (itemMap.get(skuId) || 0) + quantity)
+      itemMap.set(key, {
+        skuId,
+        sugarLevel,
+        quantity: (itemMap.get(key)?.quantity || 0) + quantity,
+      })
     }
 
-    return Array.from(itemMap.entries()).map(([skuId, quantity]) => ({
-      skuId,
-      quantity,
-    }))
+    return Array.from(itemMap.values())
   }
 
   // 校验下单请求体

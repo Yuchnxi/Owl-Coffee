@@ -375,6 +375,7 @@ class OrderService extends Service {
 
         normalizedItems.push({
           ...sku,
+          sugarLevel: item.sugarLevel || '不另外加糖',
           quantity: item.quantity,
           subtotalAmount: Number(sku.price) * item.quantity,
         })
@@ -975,7 +976,6 @@ class OrderService extends Service {
           ps.sku_code AS skuCode,
           ps.temperature,
           ps.cup_size AS cupSize,
-          ps.sugar_level AS sugarLevel,
           ps.price,
           ps.stock,
           ps.sku_status AS skuStatus,
@@ -1039,7 +1039,7 @@ class OrderService extends Service {
         imageUrl: item.imageUrl,
         temperature: item.temperature,
         cupSize: item.cupSize,
-        sugarLevel: item.sugarLevel,
+        sugarLevel: item.sugarLevel || '不另外加糖',
         unitPrice: Number(item.price),
         quantity: item.quantity,
         subtotalAmount: item.subtotalAmount,

@@ -25,7 +25,7 @@ class InventoryService extends Service {
 
     if (filters.skuKeyword) {
       conditions.push(
-        '(ps.sku_code LIKE :skuKeyword OR ps.temperature LIKE :skuKeyword OR ps.cup_size LIKE :skuKeyword OR ps.sugar_level LIKE :skuKeyword)'
+        '(ps.sku_code LIKE :skuKeyword OR ps.temperature LIKE :skuKeyword OR ps.cup_size LIKE :skuKeyword)'
       )
       params.skuKeyword = `%${filters.skuKeyword}%`
     }
@@ -42,7 +42,6 @@ class InventoryService extends Service {
           ps.sku_code AS skuCode,
           ps.temperature,
           ps.cup_size AS cupSize,
-          ps.sugar_level AS sugarLevel,
           ps.stock,
           ps.warning_stock AS warningStock,
           ps.sku_status AS skuStatus,
@@ -259,10 +258,9 @@ class InventoryService extends Service {
       skuCode: row.skuCode,
       productId: row.productId,
       productName: row.productName,
-      specText: `${row.temperature} / ${row.cupSize} / ${row.sugarLevel}`,
+      specText: `${row.temperature} / ${row.cupSize}`,
       temperature: row.temperature,
       cupSize: row.cupSize,
-      sugarLevel: row.sugarLevel,
       stock: Number(row.stock),
       warningStock: Number(row.warningStock),
       stockStatus: this.getStockStatus(Number(row.stock), Number(row.warningStock)),

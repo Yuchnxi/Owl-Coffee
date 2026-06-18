@@ -80,11 +80,6 @@
               <el-input v-model.trim="row.cupSize" placeholder="待补充" />
             </template>
           </el-table-column>
-          <el-table-column label="糖度" min-width="120" align="center">
-            <template #default="{ row }">
-              <el-input v-model.trim="row.sugarLevel" placeholder="待补充" />
-            </template>
-          </el-table-column>
           <el-table-column label="售价" min-width="130" align="center">
             <template #default="{ row }">
               <el-input-number v-model="row.price" :min="0" :precision="2" :step="1" controls-position="right" />
@@ -218,7 +213,7 @@ function syncForm() {
     ? product.skus.map(sku => ({
         temperature: sku.temperature || '',
         cupSize: sku.cupSize || '',
-        sugarLevel: sku.sugarLevel || '',
+        sugarLevel: 'standard',
         price: Number(sku.price) || 0,
         stock: Number(sku.stock) || 0,
         warningStock: Number(sku.warningStock) || 0,
@@ -238,7 +233,7 @@ function createEmptySku() {
   return {
     temperature: '',
     cupSize: '',
-    sugarLevel: '',
+    sugarLevel: 'standard',
     price: 0,
     stock: 0,
     warningStock: 0,
@@ -285,8 +280,8 @@ function validateSkus() {
     const sku = form.skus[index]
     const rowText = `第 ${index + 1} 行 SKU`
 
-    if (!sku.temperature || !sku.cupSize || !sku.sugarLevel) {
-      ElMessage.warning(`${rowText} 的温度、杯型和糖度不能为空`)
+    if (!sku.temperature || !sku.cupSize) {
+      ElMessage.warning(`${rowText} 的温度和杯型不能为空`)
       return false
     }
 

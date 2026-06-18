@@ -303,7 +303,7 @@ function addOrderItem() {
       productName: sku.productName,
       temperature: sku.temperature,
       cupSize: sku.cupSize,
-      sugarLevel: sku.sugarLevel,
+      sugarLevel: '不另外加糖',
       price: Number(sku.price) || 0,
       stock: Number(sku.stock) || 0,
       quantity: Math.min(Number(selectedQuantity.value) || 1, Number(sku.stock) || 1)
@@ -348,7 +348,7 @@ function formatSkuOption(sku) {
 
 // 格式化 SKU 规格
 function formatSkuText(item) {
-  return [item.temperature, item.cupSize, item.sugarLevel].filter(Boolean).join(' / ') || '待补充'
+  return [item.temperature, item.cupSize].filter(Boolean).join(' / ') || '待补充'
 }
 
 // 格式化金额

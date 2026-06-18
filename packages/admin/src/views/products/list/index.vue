@@ -304,7 +304,7 @@ async function submitProductForm(form) {
       skus: form.skus.map(sku => ({
         temperature: sku.temperature,
         cupSize: sku.cupSize,
-        sugarLevel: sku.sugarLevel,
+        sugarLevel: 'standard',
         price: Number(sku.price),
         stock: Number(sku.stock),
         warningStock: Number(sku.warningStock),

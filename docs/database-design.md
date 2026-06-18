@@ -336,7 +336,6 @@ JSON 使用说明：`meta` 可保存标题、缓存、隐藏等前端扩展配�
 | `sku_code` | `VARCHAR(64)` | UNIQUE, NOT NULL | SKU 编码 |
 | `temperature` | `VARCHAR(32)` | NOT NULL | 温度 |
 | `cup_size` | `VARCHAR(32)` | NOT NULL | 杯型 |
-| `sugar_level` | `VARCHAR(32)` | NOT NULL | 糖度 |
 | `price` | `DECIMAL(10,2)` | NOT NULL | 售价 |
 | `stock` | `INT` | NOT NULL DEFAULT 0 | 当前库存 |
 | `warning_stock` | `INT` | NOT NULL DEFAULT 0 | 预警库存 |
@@ -381,13 +380,14 @@ JSON 使用说明：`meta` 可保存标题、缓存、隐藏等前端扩展配�
 | `id` | `VARCHAR(32)` | PK | 购物车项 ID |
 | `user_id` | `VARCHAR(32)` | NOT NULL, INDEX | 用户 ID |
 | `sku_id` | `VARCHAR(32)` | NOT NULL, INDEX | SKU ID |
+| `sugar_level` | `VARCHAR(32)` | NOT NULL | 糖度偏好 |
 | `quantity` | `INT` | NOT NULL | 数量 |
 | `created_at` | `DATETIME(3)` | NOT NULL | 创建时间 |
 | `updated_at` | `DATETIME(3)` | NOT NULL | 更新时间 |
 
 索引：
 
-- `uk_cart_items_user_sku (user_id, sku_id)`
+- `uk_cart_items_user_sku_sugar (user_id, sku_id, sugar_level)`
 
 ---
 
@@ -747,7 +747,6 @@ CREATE TABLE product_skus (
   sku_code VARCHAR(64) NOT NULL,
   temperature VARCHAR(32) NOT NULL,
   cup_size VARCHAR(32) NOT NULL,
-  sugar_level VARCHAR(32) NOT NULL,
   price DECIMAL(10,2) NOT NULL,
   stock INT NOT NULL DEFAULT 0,
   warning_stock INT NOT NULL DEFAULT 0,
@@ -906,7 +905,7 @@ CREATE TABLE coupons (
 5. 文档明确金额字段使用 `DECIMAL(10,2)`。
 6. 文档明确软删除字段为 `deleted_at`。
 7. 文档覆盖后台、小程序、官网三端 MVP 所需表。
-8. 文档支持完整 SKU 和固定规格列。
+8. 文档支持 SKU 固定规格列，糖度作为下单偏好保存。
 9. 文档支持 SKU 库存和库存流水。
 10. 文档支持购物车登录后同步。
 11. 文档支持用户优惠券领取和核销。
@@ -923,7 +922,7 @@ CREATE TABLE coupons (
 ## 14. 开发注意事项
 
 1. 首版数据库以支撑三端闭环为优先，不引入过度复杂模型。
-2. 商品 SKU 使用固定列，不使用规格矩阵表。
+2. 商品 SKU 使用固定列，不使用规格矩阵表；糖度不参与 SKU 库存维度。
 3. 核心业务字段不要依赖 JSON。
 4. 支付成功扣库存时必须同时写入 `inventory_logs` 和 `payment_records`。
 5. 订单明细必须保存商品与 SKU 快照。
