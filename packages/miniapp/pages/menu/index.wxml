@@ -71,6 +71,7 @@
             </view>
           </view>
         </view>
+        <view class="list-end">没有更多了</view>
       </view>
 
       <view class="empty-state" wx:else>
@@ -92,14 +93,21 @@
     <view class="detail-panel" wx:if="{{currentProduct}}" catchtap="handlePreventTap">
       <view class="detail-close" bindtap="handleCloseDetail">×</view>
       <view class="detail-head">
-        <view class="detail-cover">
+        <view
+          wx:if="{{currentProduct.imageUrl}}"
+          class="detail-cover is-previewable"
+          data-url="{{currentProduct.imageUrl}}"
+          catchtap="handlePreviewImage"
+        >
           <image
-            wx:if="{{currentProduct.imageUrl}}"
             class="detail-image"
             src="{{currentProduct.imageUrl}}"
             mode="aspectFill"
           />
-          <view wx:else class="image-placeholder">待补充</view>
+          <view class="preview-icon"></view>
+        </view>
+        <view wx:else class="detail-cover">
+          <view class="image-placeholder">待补充</view>
         </view>
         <view class="detail-info">
           <view class="detail-name">{{currentProduct.name}}</view>
