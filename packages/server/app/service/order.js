@@ -1,5 +1,7 @@
 'use strict'
 
+const PICKUP_CODE_LOCK_NAME = 'owl_coffee_pickup_code_daily'
+
 const Service = require('egg').Service
 
 const ORDER_STATUS_TO_DB = {
@@ -197,6 +199,7 @@ class OrderService extends Service {
   // 后台补单并扣减库存
   async createAdminOrder(data, adminUserId) {
     const connection = await this.app.mysql.getConnection()
+    let pickupCodeLocked = false
 
     try {
       await connection.beginTransaction()
@@ -247,7 +250,8 @@ class OrderService extends Service {
 
       const orderId = this.service.authToken.createId('order')
       const orderNo = this.createOrderNo()
-      const pickupCode = this.createPickupCode()
+      const pickupCode = await this.createPickupCode(connection)
+      pickupCodeLocked = true
       const totalAmount = normalizedItems.reduce((sum, item) => sum + item.subtotalAmount, 0)
       const discountAmount = Math.min(data.discountAmount, totalAmount)
       const payAmount = Math.max(totalAmount - discountAmount, 0)
@@ -337,6 +341,9 @@ class OrderService extends Service {
       await connection.rollback()
       throw err
     } finally {
+      if (pickupCodeLocked) {
+        await this.releasePickupCodeLock(connection)
+      }
       connection.release()
     }
   }
@@ -491,6 +498,7 @@ class OrderService extends Service {
   // 小程序模拟支付
   async mockPay(orderId, userId, result) {
     const connection = await this.app.mysql.getConnection()
+    let pickupCodeLocked = false
 
     try {
       await connection.beginTransaction()
@@ -590,7 +598,8 @@ class OrderService extends Service {
         }, userId)
       }
 
-      const pickupCode = this.createPickupCode()
+      const pickupCode = await this.createPickupCode(connection)
+      pickupCodeLocked = true
       await connection.execute(
         `
           UPDATE orders
@@ -632,6 +641,9 @@ class OrderService extends Service {
       await connection.rollback()
       throw err
     } finally {
+      if (pickupCodeLocked) {
+        await this.releasePickupCodeLock(connection)
+      }
       connection.release()
     }
   }
@@ -1347,9 +1359,48 @@ class OrderService extends Service {
     return `OC${date}${suffix}`
   }
 
-  // 生成取餐码
-  createPickupCode() {
-    return Math.floor(1000 + Math.random() * 9000).toString()
+  // 按当天已支付订单顺序生成取餐码
+  async createPickupCode(connection) {
+    const [lockRows] = await connection.execute(
+      'SELECT GET_LOCK(:lockName, 5) AS acquired',
+      { lockName: PICKUP_CODE_LOCK_NAME }
+    )
+
+    if (!lockRows[0] || Number(lockRows[0].acquired) !== 1) {
+      throw new Error('取餐码生成繁忙，请稍后重试')
+    }
+
+    try {
+      const [rows] = await connection.execute(
+        `
+          SELECT MAX(CAST(pickup_code AS UNSIGNED)) AS maxPickupCode
+          FROM orders
+          WHERE
+            paid_at >= CURRENT_DATE()
+            AND paid_at < CURRENT_DATE() + INTERVAL 1 DAY
+            AND pickup_code REGEXP '^[0-9]{3,5}$'
+            AND deleted_at IS NULL
+        `
+      )
+      const nextSequence = Number((rows[0] || {}).maxPickupCode) + 1
+
+      if (nextSequence > 99999) {
+        throw new Error('当日取餐码数量已达上限')
+      }
+
+      return String(nextSequence).padStart(3, '0')
+    } catch (err) {
+      await this.releasePickupCodeLock(connection)
+      throw err
+    }
+  }
+
+  // 释放取餐码顺序生成锁
+  async releasePickupCodeLock(connection) {
+    await connection.execute(
+      'SELECT RELEASE_LOCK(:lockName) AS released',
+      { lockName: PICKUP_CODE_LOCK_NAME }
+    )
   }
 
   // 生成模拟支付流水号

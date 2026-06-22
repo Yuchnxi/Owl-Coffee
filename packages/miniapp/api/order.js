@@ -17,6 +17,13 @@ function fetchOrders(statusGroup = 'all') {
   })
 }
 
+// 查询订单详情
+function fetchOrderDetail(orderId) {
+  return request({
+    url: `/api/app/orders/${orderId}`,
+  })
+}
+
 // 发起模拟支付
 function mockPay(orderId, result = 'success') {
   return request({
@@ -28,6 +35,7 @@ function mockPay(orderId, result = 'success') {
 
 module.exports = {
   createOrder,
+  fetchOrderDetail,
   fetchOrders,
   mockPay,
 }

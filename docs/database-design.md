@@ -409,7 +409,7 @@ JSON 使用说明：`meta` 可保存标题、缓存、隐藏等前端扩展配�
 | `discount_amount` | `DECIMAL(10,2)` | NOT NULL DEFAULT 0.00 | 优惠金额 |
 | `pay_amount` | `DECIMAL(10,2)` | NOT NULL | 实付金额 |
 | `user_coupon_id` | `VARCHAR(32)` | NULL, INDEX | 用户优惠券 |
-| `pickup_code` | `VARCHAR(32)` | NULL, INDEX | 取餐码 |
+| `pickup_code` | `VARCHAR(32)` | NULL, INDEX | 当日顺序取餐码，三至五位数字 |
 | `remark` | `VARCHAR(500)` | NULL | 用户或店员备注 |
 | `paid_at` | `DATETIME(3)` | NULL | 支付时间 |
 | `making_at` | `DATETIME(3)` | NULL | 制作中时间 |
@@ -430,6 +430,8 @@ JSON 使用说明：`meta` 可保存标题、缓存、隐藏等前端扩展配�
 - `idx_orders_status_time (order_status, created_at)`
 - `idx_orders_payment_status (payment_status)`
 - `idx_orders_pickup_code (pickup_code)`
+
+取餐码在支付成功时按支付日期每日从 `001` 开始递增，超过 `999` 后自然增加位数；生成过程需要串行化，避免并发支付取得重复号码。
 
 ---
 

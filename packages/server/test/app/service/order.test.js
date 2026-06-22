@@ -48,7 +48,7 @@ describe('test/app/service/order.test.js', () => {
     }
   }
 
-  function createMockConnection({ order, items, skus }) {
+  function createMockConnection({ order, items, skus, maxPickupCode = null }) {
     const calls = []
     let cartVersion = 0
     const connection = {
@@ -59,6 +59,18 @@ describe('test/app/service/order.test.js', () => {
       release: () => calls.push({ type: 'release' }),
       execute: async (sql, params = {}) => {
         calls.push({ type: 'execute', sql, params })
+
+        if (sql.includes('GET_LOCK')) {
+          return [[{ acquired: 1 }]]
+        }
+
+        if (sql.includes('RELEASE_LOCK')) {
+          return [[{ released: 1 }]]
+        }
+
+        if (sql.includes('MAX(CAST(pickup_code AS UNSIGNED))')) {
+          return [[{ maxPickupCode }]]
+        }
 
         if (sql.includes('UPDATE users SET cart_version')) {
           cartVersion += 1
@@ -118,7 +130,7 @@ describe('test/app/service/order.test.js', () => {
     assert(result.orderId === 'order_001')
     assert(result.orderStatus === 'paid')
     assert(result.paymentStatus === 'paid')
-    assert(result.pickupCode)
+    assert(result.pickupCode === '001')
     assert(result.cart.cartVersion === 1)
     assert(hasExecuteCall(connection.calls, 'UPDATE product_skus', call => call.params.afterStock === 3))
     assert(hasExecuteCall(connection.calls, 'INSERT INTO inventory_logs', call => {
@@ -148,6 +160,24 @@ describe('test/app/service/order.test.js', () => {
     assert(hasExecuteCall(connection.calls, 'cart_version = cart_version + 1'))
     assert(connection.calls.some(call => call.type === 'commit'))
     assert(!connection.calls.some(call => call.type === 'rollback'))
+    assert(hasExecuteCall(connection.calls, 'RELEASE_LOCK'))
+  })
+
+  it('mockPay increments the daily pickup code beyond three digits', async () => {
+    const ctx = app.mockContext()
+    ctx.service.cart.listCart = async () => ({ cartVersion: 1, list: [] })
+    const connection = createMockConnection({
+      order: createPendingOrder(),
+      items: [{ skuId: 'sku_001', sugarLevel: '半糖', quantity: 1 }],
+      skus: [createSku()],
+      maxPickupCode: '999',
+    })
+
+    const result = await ctx.service.order.mockPay('order_001', 'user_001', 'success')
+
+    assert(result.pickupCode === '1000')
+    assert(hasExecuteCall(connection.calls, 'GET_LOCK'))
+    assert(hasExecuteCall(connection.calls, 'RELEASE_LOCK'))
   })
 
   it('mockPay returns stock error and rolls back when stock is insufficient', async () => {
