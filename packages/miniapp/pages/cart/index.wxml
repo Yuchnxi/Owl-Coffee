@@ -22,20 +22,37 @@
 
     <view class="section-card product-card">
       <view class="section-title">商品信息</view>
-      <view class="cart-item" wx:for="{{cartItems}}" wx:key="key">
-        <view class="item-cover">
-          <image wx:if="{{item.imageUrl}}" class="item-image" src="{{item.imageUrl}}" mode="aspectFill" />
-          <view wx:else class="image-placeholder">待补充</view>
+      <van-swipe-cell wx:for="{{cartItems}}" wx:key="key" right-width="72">
+        <view class="cart-item">
+          <view class="item-cover">
+            <image wx:if="{{item.imageUrl}}" class="item-image" src="{{item.imageUrl}}" mode="aspectFill" />
+            <view wx:else class="image-placeholder">待补充</view>
+          </view>
+          <view class="item-info">
+            <view class="item-name">{{item.productName}}</view>
+            <view class="item-spec">{{item.specText}}</view>
+            <view class="item-stepper">
+              <van-stepper
+                value="{{item.quantity}}"
+                min="1"
+                max="{{item.stock || 1}}"
+                button-size="27"
+                data-key="{{item.key}}"
+                bind:change="handleQuantityChange"
+              />
+            </view>
+          </view>
+          <view class="item-summary">
+            <view class="item-price">{{item.subtotalText}}</view>
+          </view>
         </view>
-        <view class="item-info">
-          <view class="item-name">{{item.productName}}</view>
-          <view class="item-spec">{{item.specText}}</view>
-        </view>
-        <view class="item-summary">
-          <view class="item-quantity">×{{item.quantity}}</view>
-          <view class="item-price">{{item.subtotalText}}</view>
-        </view>
-      </view>
+        <view
+          slot="right"
+          class="swipe-delete"
+          data-key="{{item.key}}"
+          bindtap="handleRemoveItem"
+        >删除</view>
+      </van-swipe-cell>
     </view>
 
     <view class="section-card option-card">
@@ -43,14 +60,24 @@
         <view class="row-label">优惠</view>
         <view class="option-value">
           <text>暂无可用优惠</text>
-          <van-icon name="arrow" size="18px" color="#9a8e85" />
+          <van-icon
+            name="arrow"
+            size="16px"
+            color="#9a8e85"
+            custom-style="display: inline-flex; width: 16px; height: 16px; padding: 0; border: 0; background: transparent; box-sizing: border-box;"
+          />
         </view>
       </view>
       <view class="option-row" bindtap="handleOpenRemark">
         <view class="row-label">订单备注</view>
         <view class="option-value">
           <text class="option-copy">{{remark || '选填，请填写口味等要求'}}</text>
-          <van-icon name="arrow" size="18px" color="#9a8e85" />
+          <van-icon
+            name="arrow"
+            size="16px"
+            color="#9a8e85"
+            custom-style="display: inline-flex; width: 16px; height: 16px; padding: 0; border: 0; background: transparent; box-sizing: border-box;"
+          />
         </view>
       </view>
     </view>

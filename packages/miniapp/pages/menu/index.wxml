@@ -60,14 +60,17 @@
             <view class="product-desc">{{item.description || '待补充'}}</view>
             <view class="product-bottom">
               <view class="product-price">{{item.priceText}}</view>
-              <view
-                class="add-button {{item.isSoldOut ? 'disabled' : ''}}"
+              <van-button
+                type="primary"
+                icon="plus"
+                round
+                color="#e97416"
+                custom-style="width: 24px; min-width: 24px; height: 24px; padding: 0; flex: none; font-size: 14px; line-height: 24px;"
+                disabled="{{item.isSoldOut}}"
                 data-product-id="{{item.id}}"
                 data-disabled="{{item.isSoldOut}}"
-                catchtap="handleOpenProduct"
-              >
-                +
-              </view>
+                bind:click="handleOpenProduct"
+              />
             </view>
           </view>
         </view>
@@ -96,33 +99,41 @@
       </view>
 
       <scroll-view class="cart-drawer-list" scroll-y>
-        <view class="cart-drawer-item" wx:for="{{cartItems}}" wx:key="key">
-          <view class="cart-item-cover">
-            <image
-              wx:if="{{item.imageUrl}}"
-              class="cart-item-image"
-              src="{{item.imageUrl}}"
-              mode="aspectFill"
-            />
-            <view wx:else class="image-placeholder">待补充</view>
-          </view>
-
-          <view class="cart-item-info">
-            <view class="cart-item-name">{{item.productName}}</view>
-            <view class="cart-item-spec">{{item.specText}}</view>
-            <view class="cart-item-bottom">
-              <view class="cart-item-price">{{item.priceText}}</view>
-              <van-stepper
-                value="{{item.quantity}}"
-                min="1"
-                max="{{item.stock || 1}}"
-                button-size="27"
-                data-key="{{item.key}}"
-                bind:change="handleCartQuantityChange"
+        <van-swipe-cell wx:for="{{cartItems}}" wx:key="key" right-width="72">
+          <view class="cart-drawer-item">
+            <view class="cart-item-cover">
+              <image
+                wx:if="{{item.imageUrl}}"
+                class="cart-item-image"
+                src="{{item.imageUrl}}"
+                mode="aspectFill"
               />
+              <view wx:else class="image-placeholder">待补充</view>
+            </view>
+
+            <view class="cart-item-info">
+              <view class="cart-item-name">{{item.productName}}</view>
+              <view class="cart-item-spec">{{item.specText}}</view>
+              <view class="cart-item-bottom">
+                <view class="cart-item-price">{{item.priceText}}</view>
+                <van-stepper
+                  value="{{item.quantity}}"
+                  min="1"
+                  max="{{item.stock || 1}}"
+                  button-size="27"
+                  data-key="{{item.key}}"
+                  bind:change="handleCartQuantityChange"
+                />
+              </view>
             </view>
           </view>
-        </view>
+          <view
+            slot="right"
+            class="swipe-delete"
+            data-key="{{item.key}}"
+            bindtap="handleRemoveCartItem"
+          >删除</view>
+        </van-swipe-cell>
       </scroll-view>
     </view>
   </view>

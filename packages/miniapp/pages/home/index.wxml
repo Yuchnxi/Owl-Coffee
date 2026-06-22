@@ -10,7 +10,8 @@
     >
       <swiper-item wx:for="{{bannerList}}" wx:key="id">
         <view class="hero-slide">
-          <image class="hero-image" src="{{item.imageUrl}}" mode="aspectFill" />
+          <image wx:if="{{item.imageUrl}}" class="hero-image" src="{{item.imageUrl}}" mode="aspectFill" />
+          <view wx:else class="hero-placeholder">待补充</view>
           <view class="hero-copy">
             <view class="brand-kicker">{{item.kicker}}</view>
             <view class="hero-title">{{item.title}}</view>
@@ -45,10 +46,12 @@
       <view class="section-link" data-url="/pages/menu/index" bindtap="handleNavigate">全部</view>
     </view>
 
-    <view class="recommend-list" wx:if="{{recommendList.length}}">
+    <view class="recommend-loading" wx:if="{{recommendLoading}}">推荐商品加载中...</view>
+    <view class="recommend-list" wx:elif="{{recommendList.length}}">
       <view class="recommend-card" wx:for="{{recommendList}}" wx:key="id">
         <view class="product-cover">
-          <image class="product-image" src="{{item.imageUrl}}" mode="aspectFill" />
+          <image wx:if="{{item.imageUrl}}" class="product-image" src="{{item.imageUrl}}" mode="aspectFill" />
+          <view wx:else class="product-placeholder">待补充</view>
         </view>
         <view class="product-info">
           <view class="product-row">
@@ -60,6 +63,7 @@
         </view>
       </view>
     </view>
+    <view class="recommend-empty" wx:else>暂无推荐商品，待补充</view>
   </view>
 
   <view class="order-panel">

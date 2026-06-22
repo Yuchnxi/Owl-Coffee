@@ -1,5 +1,9 @@
 const { createOrder, mockPay } = require('../../api/order')
-const { getCartItems } = require('../../utils/cart')
+const {
+  getCartItems,
+  updateCartItemQuantity,
+  removeCartItem,
+} = require('../../utils/cart')
 
 Page({
   data: {
@@ -49,6 +53,28 @@ Page({
       title: '暂无可用优惠',
       icon: 'none',
     })
+  },
+
+  // 更新购物车商品数量
+  handleQuantityChange(event) {
+    if (this.data.submitting) return
+
+    const { key } = event.currentTarget.dataset
+    const items = updateCartItemQuantity(key, Number(event.detail) || 1)
+
+    this.refreshCart(items)
+    this.syncCartSilently(items)
+  },
+
+  // 删除购物车中的单个商品
+  handleRemoveItem(event) {
+    if (this.data.submitting) return
+
+    const { key } = event.currentTarget.dataset
+    const items = removeCartItem(key)
+
+    this.refreshCart(items)
+    this.syncCartSilently(items)
   },
 
   // 打开订单备注编辑层
@@ -150,6 +176,18 @@ Page({
       totalCount,
       totalAmountText: this.formatPrice(totalAmount),
     })
+  },
+
+  // 已登录时静默同步购物车
+  async syncCartSilently(items) {
+    if (!wx.getStorageSync('accessToken')) return
+
+    try {
+      const result = await getApp().syncCartItems(items)
+      this.refreshCart(result.list || [])
+    } catch (err) {
+      // 保留本地购物车，后续进入页面时再次同步
+    }
   },
 
   // 格式化价格文案

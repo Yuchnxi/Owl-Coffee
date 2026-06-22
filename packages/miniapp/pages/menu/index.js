@@ -8,6 +8,7 @@ const {
   getCartItems,
   addCartItem,
   updateCartItemQuantity,
+  removeCartItem,
   clearCart,
 } = require('../../utils/cart')
 
@@ -409,6 +410,21 @@ Page({
 
     this.updateCartSummary(items)
     this.syncCartSilently(items)
+  },
+
+  // 删除菜单购物车中的单个商品
+  handleRemoveCartItem(event) {
+    if (this.isCheckoutLocked()) return
+
+    const { key } = event.currentTarget.dataset
+    const items = removeCartItem(key)
+
+    this.updateCartSummary(items)
+    this.syncCartSilently(items)
+
+    if (!items.length) {
+      this.setData({ cartDrawerVisible: false })
+    }
   },
 
   // 清空菜单内购物车
