@@ -4,7 +4,12 @@ const {
   fetchProductDetail,
   fetchSkuAvailability,
 } = require('../../api/product')
-const { addCartItem } = require('../../api/cart')
+const {
+  getCartItems,
+  addCartItem,
+  updateCartItemQuantity,
+  clearCart,
+} = require('../../utils/cart')
 
 Page({
   data: {
@@ -38,7 +43,16 @@ Page({
     selectedSkuPriceText: '待补充',
     quantity: 1,
     addLoading: false,
-    cartNoticeVisible: false,
+
+    // 本地购物车汇总信息
+    cartSummary: {
+      count: 0,
+      amountText: '¥0.00',
+    },
+
+    // 菜单内购物车详情状态
+    cartDrawerVisible: false,
+    cartItems: [],
   },
 
   // 页面加载时初始化分类和商品
@@ -48,6 +62,8 @@ Page({
 
   // 页面显示时保留当前筛选并刷新商品
   onShow() {
+    this.updateCartSummary(getCartItems())
+
     if (this.data.categoryList.length > 1 || this.data.productList.length) {
       this.loadProducts()
     }
@@ -133,7 +149,6 @@ Page({
     this.setData({
       activeCategoryIndex,
       activeCategoryId: category.id,
-      cartNoticeVisible: false,
     })
     this.loadProducts()
   },
@@ -149,7 +164,6 @@ Page({
   handleSearch(event) {
     this.setData({
       keyword: (typeof event.detail === 'string' ? event.detail : event.detail.value) || this.data.keyword,
-      cartNoticeVisible: false,
     })
     this.loadProducts()
   },
@@ -158,7 +172,6 @@ Page({
   handleSearchClear() {
     this.setData({
       keyword: '',
-      cartNoticeVisible: false,
     })
     this.loadProducts()
   },
@@ -286,16 +299,6 @@ Page({
 
   // 加入购物车
   async handleAddCart() {
-    const token = wx.getStorageSync('accessToken')
-
-    if (!token) {
-      wx.showToast({
-        title: '请先授权登录后加入购物车',
-        icon: 'none',
-      })
-      return
-    }
-
     if (!this.data.selectedSku) {
       wx.showToast({
         title: '请选择可售规格',
@@ -327,11 +330,20 @@ Page({
         return
       }
 
-      await addCartItem({
+      const cartItems = addCartItem({
         skuId: this.data.selectedSku.id,
+        productId: this.data.currentProduct.id,
+        productName: this.data.currentProduct.name,
+        imageUrl: this.data.currentProduct.imageUrl,
+        temperature: this.data.selectedSku.temperature,
+        cupSize: this.data.selectedSku.cupSize,
+        price: Number(availability.price),
+        stock: Number(availability.stock),
         quantity: this.data.quantity,
         sugarLevel: this.data.selectedSugarLevel,
       })
+
+      this.updateCartSummary(cartItems)
 
       wx.showToast({
         title: '已加入购物车',
@@ -339,7 +351,6 @@ Page({
       })
       this.setData({
         detailVisible: false,
-        cartNoticeVisible: true,
       })
     } catch (err) {
       wx.showToast({
@@ -351,10 +362,65 @@ Page({
     }
   },
 
-  // 跳转购物车
-  handleGoCart() {
-    wx.switchTab({
-      url: '/pages/cart/index',
+  // 提示结算功能尚未接入
+  handleCheckout() {
+    wx.showToast({
+      title: '结算功能待补充',
+      icon: 'none',
+    })
+  },
+
+  // 打开菜单内购物车详情
+  handleOpenCartDrawer() {
+    this.updateCartSummary(getCartItems())
+    this.setData({ cartDrawerVisible: true })
+  },
+
+  // 关闭菜单内购物车详情
+  handleCloseCartDrawer() {
+    this.setData({ cartDrawerVisible: false })
+  },
+
+  // 更新菜单内购物车商品数量
+  handleCartQuantityChange(event) {
+    const { key } = event.currentTarget.dataset
+    const quantity = Number(event.detail) || 1
+
+    this.updateCartSummary(updateCartItemQuantity(key, quantity))
+  },
+
+  // 清空菜单内购物车
+  handleClearCart() {
+    wx.showModal({
+      title: '清空购物车',
+      content: '确定清空全部已选商品吗？',
+      confirmColor: '#e97416',
+      success: result => {
+        if (!result.confirm) return
+
+        this.updateCartSummary(clearCart())
+        this.setData({ cartDrawerVisible: false })
+      },
+    })
+  },
+
+  // 更新菜单购物车汇总信息
+  updateCartSummary(items) {
+    const count = items.reduce((total, item) => total + item.quantity, 0)
+    const amount = items.reduce((total, item) => {
+      return total + Number(item.price) * Number(item.quantity)
+    }, 0)
+
+    this.setData({
+      cartItems: items.map(item => ({
+        ...item,
+        specText: [item.temperature, item.cupSize, item.sugarLevel].filter(Boolean).join(' / '),
+        priceText: this.formatPrice(item.price),
+      })),
+      cartSummary: {
+        count,
+        amountText: this.formatPrice(amount),
+      },
     })
   },
 

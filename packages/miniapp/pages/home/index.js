@@ -19,10 +19,10 @@ Page({
         url: '/pages/menu/index'
       },
       {
-        title: '购物车',
-        desc: '确认已选商品',
+        title: '订单',
+        desc: '查看订单状态',
         icon: '🧺',
-        url: '/pages/cart/index'
+        url: '/pages/orders/index'
       }
     ],
 

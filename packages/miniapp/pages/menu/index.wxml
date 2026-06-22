@@ -25,7 +25,7 @@
       </van-sidebar>
     </scroll-view>
 
-    <scroll-view class="product-scroll" scroll-y>
+    <scroll-view class="product-scroll {{cartSummary.count ? 'has-cart' : ''}}" scroll-y>
       <view class="loading-state" wx:if="{{loading}}">
         <view class="loading-dot"></view>
         <view>菜单加载中</view>
@@ -84,9 +84,65 @@
     </scroll-view>
   </view>
 
-  <view class="cart-notice" wx:if="{{cartNoticeVisible}}" bindtap="handleGoCart">
-    <view class="cart-copy">已加入购物车</view>
-    <view class="cart-action">去购物车</view>
+  <view
+    class="cart-drawer-mask"
+    wx:if="{{cartDrawerVisible}}"
+    bindtap="handleCloseCartDrawer"
+  >
+    <view class="cart-drawer" catchtap="handlePreventTap">
+      <view class="cart-drawer-head">
+        <view class="cart-drawer-title">已选商品（{{cartSummary.count}}件）</view>
+        <view class="cart-clear" bindtap="handleClearCart">清空购物车</view>
+      </view>
+
+      <scroll-view class="cart-drawer-list" scroll-y>
+        <view class="cart-drawer-item" wx:for="{{cartItems}}" wx:key="key">
+          <view class="cart-item-cover">
+            <image
+              wx:if="{{item.imageUrl}}"
+              class="cart-item-image"
+              src="{{item.imageUrl}}"
+              mode="aspectFill"
+            />
+            <view wx:else class="image-placeholder">待补充</view>
+          </view>
+
+          <view class="cart-item-info">
+            <view class="cart-item-name">{{item.productName}}</view>
+            <view class="cart-item-spec">{{item.specText}}</view>
+            <view class="cart-item-bottom">
+              <view class="cart-item-price">{{item.priceText}}</view>
+              <van-stepper
+                value="{{item.quantity}}"
+                min="1"
+                max="{{item.stock || 1}}"
+                button-size="27"
+                data-key="{{item.key}}"
+                bind:change="handleCartQuantityChange"
+              />
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <view class="cart-summary" wx:if="{{cartSummary.count}}">
+    <view class="cart-summary-main" bindtap="handleOpenCartDrawer">
+      <view class="cart-summary-icon-wrap">
+        <image
+          class="cart-summary-icon"
+          src="/assets/menu/shopping.png"
+          mode="aspectFit"
+        />
+        <view class="cart-summary-badge">{{cartSummary.count > 99 ? '99+' : cartSummary.count}}</view>
+      </view>
+      <view class="cart-summary-copy">
+        <view class="cart-summary-price">{{cartSummary.amountText}}</view>
+        <view class="cart-summary-count">已选{{cartSummary.count}}件商品</view>
+      </view>
+    </view>
+    <button class="cart-summary-action" bindtap="handleCheckout">去结算</button>
   </view>
 
   <view class="detail-mask" wx:if="{{detailVisible}}" bindtap="handleCloseDetail">

@@ -2,7 +2,7 @@
   "pages": [
     "pages/home/index",
     "pages/menu/index",
-    "pages/cart/index",
+    "pages/orders/index",
     "pages/mine/index"
   ],
   "window": {
@@ -30,8 +30,8 @@
         "selectedIconPath": "assets/tabbar/menu-active.png"
       },
       {
-        "pagePath": "pages/cart/index",
-        "text": "购物车",
+        "pagePath": "pages/orders/index",
+        "text": "订单",
         "iconPath": "assets/tabbar/cart.png",
         "selectedIconPath": "assets/tabbar/cart-active.png"
       },

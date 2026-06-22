@@ -65,6 +65,6 @@
   <view class="order-panel">
     <view class="order-title">当前取餐</view>
     <view class="order-empty">暂无进行中的订单</view>
-    <view class="order-action" data-url="/pages/cart/index" bindtap="handleNavigate">去点一杯</view>
+    <view class="order-action" data-url="/pages/menu/index" bindtap="handleNavigate">去点一杯</view>
   </view>
 </view>

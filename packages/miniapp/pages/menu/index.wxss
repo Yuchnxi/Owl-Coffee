@@ -133,6 +133,10 @@
   gap: 18rpx;
 }
 
+.product-scroll.has-cart .product-list {
+  padding-bottom: 132rpx;
+}
+
 .product-card {
   display: flex;
   min-height: 174rpx;
@@ -369,40 +373,207 @@
   font-size: 25rpx;
 }
 
-.cart-notice {
+.cart-drawer-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(47, 33, 24, 0.42);
+}
+
+.cart-drawer {
+  width: 100%;
+  max-height: 62vh;
+  box-sizing: border-box;
+  padding: 0 26rpx 142rpx;
+  overflow: hidden;
+  border-radius: 24rpx 24rpx 0 0;
+  background: #fffaf2;
+  box-shadow: 0 -16rpx 42rpx rgba(58, 39, 28, 0.12);
+}
+
+.cart-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 92rpx;
+  border-bottom: 1rpx solid rgba(111, 75, 48, 0.1);
+}
+
+.cart-drawer-title {
+  color: #2f2118;
+  font-size: 27rpx;
+  font-weight: 800;
+}
+
+.cart-clear {
+  padding: 16rpx 0 16rpx 20rpx;
+  color: #9b897a;
+  font-size: 23rpx;
+}
+
+.cart-drawer-list {
+  max-height: calc(62vh - 234rpx);
+}
+
+.cart-drawer-item {
+  display: flex;
+  min-height: 176rpx;
+  box-sizing: border-box;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid rgba(111, 75, 48, 0.08);
+}
+
+.cart-item-cover {
+  flex: 0 0 132rpx;
+  width: 132rpx;
+  height: 132rpx;
+  overflow: hidden;
+  border-radius: 12rpx;
+  background: #f7ead8;
+}
+
+.cart-item-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cart-item-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  margin-left: 22rpx;
+}
+
+.cart-item-name {
+  overflow: hidden;
+  color: #2f2118;
+  font-size: 29rpx;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cart-item-spec {
+  overflow: hidden;
+  margin-top: 10rpx;
+  color: #8f8072;
+  font-size: 22rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cart-item-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18rpx;
+  margin-top: auto;
+}
+
+.cart-item-price {
+  color: #e97416;
+  font-size: 28rpx;
+  font-weight: 900;
+}
+
+.cart-summary {
   position: fixed;
   right: 28rpx;
-  bottom: 134rpx;
+  bottom: 26rpx;
   left: 28rpx;
   z-index: 10;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  min-height: 88rpx;
+  min-height: 104rpx;
   box-sizing: border-box;
-  padding: 0 24rpx;
-  border-radius: 14rpx;
+  padding: 12rpx 14rpx 12rpx 24rpx;
+  border-radius: 52rpx;
   background: #3a271c;
   box-shadow: 0 20rpx 42rpx rgba(58, 39, 28, 0.24);
 }
 
-.cart-copy {
-  color: #fffaf2;
-  font-size: 26rpx;
-  font-weight: 700;
+.cart-summary-main {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
 }
 
-.cart-action {
+.cart-summary-icon-wrap {
+  position: relative;
+  flex: 0 0 62rpx;
+  width: 62rpx;
+  height: 62rpx;
+}
+
+.cart-summary-icon {
+  width: 62rpx;
+  height: 62rpx;
+  filter: brightness(0) invert(1);
+  opacity: 0.96;
+}
+
+.cart-summary-badge {
+  position: absolute;
+  top: -10rpx;
+  right: -12rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 58rpx;
-  padding: 0 26rpx;
-  border-radius: 10rpx;
+  min-width: 34rpx;
+  height: 34rpx;
+  box-sizing: border-box;
+  padding: 0 8rpx;
+  border: 3rpx solid #3a271c;
+  border-radius: 17rpx;
+  background: #fffaf2;
+  color: #e97416;
+  font-size: 19rpx;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.cart-summary-copy {
+  min-width: 0;
+  margin-left: 22rpx;
+}
+
+.cart-summary-price {
+  color: #fffaf2;
+  font-size: 30rpx;
+  font-weight: 900;
+  line-height: 1.05;
+}
+
+.cart-summary-count {
+  margin-top: 8rpx;
+  color: #d8c8bb;
+  font-size: 20rpx;
+}
+
+.cart-summary-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 196rpx;
+  width: 196rpx;
+  height: 76rpx;
+  margin: 0;
+  padding: 0;
+  border-radius: 38rpx;
   background: #e97416;
   color: #fffaf2;
-  font-size: 24rpx;
+  font-size: 27rpx;
   font-weight: 800;
+  line-height: 76rpx;
+}
+
+.cart-summary-action::after {
+  border: 0;
 }
 
 .detail-mask {
