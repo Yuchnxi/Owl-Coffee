@@ -46,9 +46,9 @@ class AppAuthController extends Controller {
     const { ctx } = this
     const { phoneCode } = ctx.request.body || {}
 
-    if (!phoneCode) {
+    if (!phoneCode || phoneCode === '待补充') {
       ctx.status = 400
-      ctx.fail(10001, 'phoneCode 不能为空')
+      ctx.fail(10001, '手机号授权凭证无效')
       return
     }
 

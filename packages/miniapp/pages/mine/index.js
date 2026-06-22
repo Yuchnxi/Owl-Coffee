@@ -26,7 +26,15 @@ Page({
 
   // 处理微信手机号授权
   async handlePhoneAuthorization(event) {
-    const phoneCode = event.detail.code || '待补充'
+    const phoneCode = (event.detail || {}).code
+
+    if (!phoneCode) {
+      wx.showToast({
+        title: '已取消手机号授权',
+        icon: 'none',
+      })
+      return
+    }
 
     this.setData({ loading: true })
 

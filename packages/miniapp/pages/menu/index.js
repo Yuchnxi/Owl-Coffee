@@ -10,7 +10,6 @@ const {
   updateCartItemQuantity,
   clearCart,
 } = require('../../utils/cart')
-const { syncCart } = require('../../api/cart')
 
 Page({
   data: {
@@ -451,11 +450,7 @@ Page({
     if (!wx.getStorageSync('accessToken')) return
 
     try {
-      await syncCart(items.map(item => ({
-        skuId: item.skuId,
-        sugarLevel: item.sugarLevel,
-        quantity: item.quantity,
-      })))
+      await getApp().syncCartItems(items)
     } catch (err) {
       // 保留本地购物车，进入结算页后再次同步
     }

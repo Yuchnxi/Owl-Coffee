@@ -1,6 +1,5 @@
 const { bindPhone } = require('../../api/auth')
 const { createOrder, mockPay } = require('../../api/order')
-const { syncCart } = require('../../api/cart')
 const {
   getCartItems,
   saveCartItems,
@@ -10,6 +9,9 @@ const {
 } = require('../../utils/cart')
 
 Page({
+  // 当前购物车同步版本
+  cartSyncVersion: 0,
+
   data: {
     // 购物车商品列表
     cartItems: [],
@@ -56,7 +58,15 @@ Page({
 
   // 处理微信手机号授权
   async handlePhoneAuthorization(event) {
-    const phoneCode = event.detail.code || '待补充'
+    const phoneCode = (event.detail || {}).code
+
+    if (!phoneCode) {
+      wx.showToast({
+        title: '已取消手机号授权',
+        icon: 'none',
+      })
+      return
+    }
 
     this.setData({ loading: true })
 
@@ -137,7 +147,7 @@ Page({
       const payment = await mockPay(order.id, 'success')
 
       clearCart()
-      await syncCart([])
+      await this.syncCurrentCart([], false)
       this.refreshCart([])
 
       wx.showModal({
@@ -191,15 +201,15 @@ Page({
   },
 
   // 同步当前购物车到服务端
-  async syncCurrentCart(items) {
-    try {
-      const result = await syncCart(items.map(item => ({
-        skuId: item.skuId,
-        sugarLevel: item.sugarLevel,
-        quantity: item.quantity,
-      })))
+  async syncCurrentCart(items, refreshAfterSync = true) {
+    const syncVersion = ++this.cartSyncVersion
 
-      this.refreshCart(saveCartItems(result.list || []))
+    try {
+      const result = await getApp().syncCartItems(items)
+
+      if (refreshAfterSync && syncVersion === this.cartSyncVersion) {
+        this.refreshCart(saveCartItems(result.list || []))
+      }
     } catch (err) {
       wx.showToast({
         title: err.message || '购物车同步失败',

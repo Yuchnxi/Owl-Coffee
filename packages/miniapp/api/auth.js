@@ -9,6 +9,15 @@ function login(code) {
   })
 }
 
+// 使用 Refresh Token 刷新登录凭证
+function refreshAccessToken(refreshToken) {
+  return request({
+    url: '/api/app/auth/refresh',
+    method: 'POST',
+    data: { refreshToken },
+  })
+}
+
 // 绑定微信手机号
 function bindPhone(phoneCode) {
   return request({
@@ -27,6 +36,7 @@ function fetchCurrentUser() {
 
 module.exports = {
   login,
+  refreshAccessToken,
   bindPhone,
   fetchCurrentUser,
 }

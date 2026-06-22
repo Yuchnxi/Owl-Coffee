@@ -1,4 +1,8 @@
-const { login, fetchCurrentUser } = require('./api/auth')
+const {
+  login,
+  refreshAccessToken,
+  fetchCurrentUser,
+} = require('./api/auth')
 const { fetchCart, syncCart } = require('./api/cart')
 const {
   getCartItems,
@@ -7,6 +11,9 @@ const {
 } = require('./utils/cart')
 
 App({
+  // 购物车同步队列
+  cartSyncQueue: Promise.resolve(),
+
   globalData: {
     // 当前登录用户
     currentUser: null,
@@ -22,8 +29,13 @@ App({
         this.globalData.currentUser = user
         return user
       } catch (err) {
-        wx.removeStorageSync('accessToken')
-        wx.removeStorageSync('refreshToken')
+        if (err.statusCode !== 401) {
+          throw err
+        }
+
+        const user = await this.tryRefreshLogin()
+
+        if (user) return user
       }
     }
 
@@ -38,18 +50,58 @@ App({
     return result.user
   },
 
+  // 尝试刷新登录凭证
+  async tryRefreshLogin() {
+    const refreshToken = wx.getStorageSync('refreshToken')
+
+    if (!refreshToken) {
+      wx.removeStorageSync('accessToken')
+      return null
+    }
+
+    try {
+      const result = await refreshAccessToken(refreshToken)
+
+      wx.setStorageSync('accessToken', result.accessToken)
+      wx.setStorageSync('refreshToken', result.refreshToken)
+
+      const user = await fetchCurrentUser()
+      this.globalData.currentUser = user
+      return user
+    } catch (err) {
+      if (err.statusCode !== 401) {
+        throw err
+      }
+
+      wx.removeStorageSync('accessToken')
+      wx.removeStorageSync('refreshToken')
+      return null
+    }
+  },
+
   // 登录后合并本地与服务端购物车
   async syncLocalCart() {
     const localItems = getCartItems()
     const remoteCart = await fetchCart()
     const mergedItems = mergeCartItems(localItems, remoteCart.list || [])
-    const syncedCart = await syncCart(mergedItems.map(item => ({
+    const syncedCart = await this.syncCartItems(mergedItems)
+
+    return saveCartItems(syncedCart.list || [])
+  },
+
+  // 按操作顺序同步购物车
+  syncCartItems(items) {
+    const payload = items.map(item => ({
       skuId: item.skuId,
       sugarLevel: item.sugarLevel,
       quantity: item.quantity,
-    })))
+    }))
 
-    return saveCartItems(syncedCart.list || [])
+    this.cartSyncQueue = this.cartSyncQueue
+      .catch(() => {})
+      .then(() => syncCart(payload))
+
+    return this.cartSyncQueue
   },
 
   // 获取微信登录临时凭证
