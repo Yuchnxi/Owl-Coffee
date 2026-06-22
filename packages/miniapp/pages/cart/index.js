@@ -1,24 +1,20 @@
 const { createOrder, mockPay } = require('../../api/order')
-const {
-  getCartItems,
-  saveCartItems,
-  removeCartItem,
-} = require('../../utils/cart')
+const { getCartItems } = require('../../utils/cart')
 
 Page({
-  // 当前购物车同步版本
-  cartSyncVersion: 0,
-
   data: {
     // 购物车商品列表
     cartItems: [],
     totalCount: 0,
     totalAmountText: '¥0.00',
+    discountAmountText: '-¥0.00',
     loading: false,
     submitting: false,
 
-    // 当前订单备注
+    // 当前订单备注编辑状态
     remark: '',
+    remarkDraft: '',
+    remarkVisible: false,
   },
 
   // 页面显示时刷新购物车与登录状态
@@ -47,22 +43,42 @@ Page({
     }
   },
 
-  // 删除购物车商品
-  async handleRemoveItem(event) {
-    if (this.data.submitting) return
-
-    const items = removeCartItem(event.currentTarget.dataset.key)
-
-    this.refreshCart(items)
-    await this.syncCurrentCart(items)
-  },
-
-  // 更新订单备注
-  handleRemarkInput(event) {
-    this.setData({
-      remark: event.detail.value || '',
+  // 展示暂无可用优惠提示
+  handleCouponTap() {
+    wx.showToast({
+      title: '暂无可用优惠',
+      icon: 'none',
     })
   },
+
+  // 打开订单备注编辑层
+  handleOpenRemark() {
+    this.setData({
+      remarkDraft: this.data.remark,
+      remarkVisible: true,
+    })
+  },
+
+  // 更新订单备注草稿
+  handleRemarkInput(event) {
+    this.setData({ remarkDraft: event.detail.value || '' })
+  },
+
+  // 关闭订单备注编辑层
+  handleCloseRemark() {
+    this.setData({ remarkVisible: false })
+  },
+
+  // 保存订单备注
+  handleSaveRemark() {
+    this.setData({
+      remark: this.data.remarkDraft.trim(),
+      remarkVisible: false,
+    })
+  },
+
+  // 阻止编辑面板点击冒泡
+  handlePreventTap() {},
 
   // 提交订单并完成模拟支付
   async handleSubmitOrder() {
@@ -82,7 +98,6 @@ Page({
       })
       const payment = await mockPay(order.id, 'success')
 
-      ++this.cartSyncVersion
       getApp().saveCartState(payment.cart || { cartVersion: 0, list: [] })
       this.refreshCart((payment.cart || {}).list || [])
 
@@ -135,24 +150,6 @@ Page({
       totalCount,
       totalAmountText: this.formatPrice(totalAmount),
     })
-  },
-
-  // 同步当前购物车到服务端
-  async syncCurrentCart(items, refreshAfterSync = true) {
-    const syncVersion = ++this.cartSyncVersion
-
-    try {
-      const result = await getApp().syncCartItems(items)
-
-      if (refreshAfterSync && syncVersion === this.cartSyncVersion) {
-        this.refreshCart(saveCartItems(result.list || []))
-      }
-    } catch (err) {
-      wx.showToast({
-        title: err.message || '购物车同步失败',
-        icon: 'none',
-      })
-    }
   },
 
   // 格式化价格文案

@@ -1,20 +1,27 @@
-
 <view class="cart-page">
-  <view class="loading-card" wx:if="{{loading}}">正在同步购物车...</view>
+  <view class="loading-card" wx:if="{{loading}}">正在同步订单信息...</view>
 
   <block wx:elif="{{cartItems.length}}">
     <view class="section-card pickup-card">
-      <view class="section-label">取餐方式</view>
-      <view class="pickup-title">到店自提</view>
-      <view class="pickup-desc">门店信息待补充，请以现场指引为准</view>
+      <view class="pickup-head">
+        <view class="pickup-heading">
+          <van-icon name="shop-o" size="28px" color="#2f2118" />
+          <view class="pickup-title">到店自提</view>
+        </view>
+        <view class="store-tag">单店</view>
+      </view>
+      <view class="info-row">
+        <view class="row-label">自提门店</view>
+        <view class="row-value">待补充</view>
+      </view>
+      <view class="info-row">
+        <view class="row-label">取餐时间</view>
+        <view class="row-value">立即取餐</view>
+      </view>
     </view>
 
-    <view class="section-card">
-      <view class="section-head">
-        <view class="section-title">商品清单</view>
-        <view class="section-count">共 {{totalCount}} 件</view>
-      </view>
-
+    <view class="section-card product-card">
+      <view class="section-title">商品信息</view>
       <view class="cart-item" wx:for="{{cartItems}}" wx:key="key">
         <view class="item-cover">
           <image wx:if="{{item.imageUrl}}" class="item-image" src="{{item.imageUrl}}" mode="aspectFill" />
@@ -23,26 +30,45 @@
         <view class="item-info">
           <view class="item-name">{{item.productName}}</view>
           <view class="item-spec">{{item.specText}}</view>
-          <view class="item-actions">
-            <view class="item-price">{{item.subtotalText}}</view>
-            <view class="item-quantity">× {{item.quantity}}</view>
-          </view>
+        </view>
+        <view class="item-summary">
+          <view class="item-quantity">×{{item.quantity}}</view>
+          <view class="item-price">{{item.subtotalText}}</view>
         </view>
       </view>
     </view>
 
-    <view class="section-card">
-      <view class="section-title">订单备注</view>
-      <textarea
-        class="remark-input"
-        value="{{remark}}"
-        maxlength="500"
-        placeholder="如有需要请填写，待补充"
-        bindinput="handleRemarkInput"
-      />
+    <view class="section-card option-card">
+      <view class="option-row" bindtap="handleCouponTap">
+        <view class="row-label">优惠</view>
+        <view class="option-value">
+          <text>暂无可用优惠</text>
+          <van-icon name="arrow" size="18px" color="#9a8e85" />
+        </view>
+      </view>
+      <view class="option-row" bindtap="handleOpenRemark">
+        <view class="row-label">订单备注</view>
+        <view class="option-value">
+          <text class="option-copy">{{remark || '选填，请填写口味等要求'}}</text>
+          <van-icon name="arrow" size="18px" color="#9a8e85" />
+        </view>
+      </view>
     </view>
 
-    <view class="payment-tip">首版使用模拟支付，点击提交后直接演示支付成功</view>
+    <view class="section-card amount-card">
+      <view class="amount-row">
+        <view>商品金额</view>
+        <view class="amount-value">{{totalAmountText}}</view>
+      </view>
+      <view class="amount-row">
+        <view>优惠金额</view>
+        <view class="amount-value">{{discountAmountText}}</view>
+      </view>
+      <view class="amount-row payable-row">
+        <view>应付金额</view>
+        <view class="payable-value">{{totalAmountText}}</view>
+      </view>
+    </view>
   </block>
 
   <view class="empty-card" wx:else>
@@ -56,11 +82,33 @@
       <view class="total-label">合计</view>
       <view class="total-price">{{totalAmountText}}</view>
     </view>
+    <view class="checkout-divider"></view>
     <button
       class="submit-button"
       disabled="{{submitting}}"
       loading="{{submitting}}"
       bindtap="handleSubmitOrder"
     >提交订单</button>
+  </view>
+
+  <view class="remark-mask" wx:if="{{remarkVisible}}" bindtap="handleCloseRemark">
+    <view class="remark-panel" catchtap="handlePreventTap">
+      <view class="remark-head">
+        <view class="remark-title">订单备注</view>
+        <view class="remark-limit">{{remarkDraft.length}}/500</view>
+      </view>
+      <textarea
+        class="remark-input"
+        value="{{remarkDraft}}"
+        maxlength="500"
+        focus
+        placeholder="请输入口味等要求"
+        bindinput="handleRemarkInput"
+      />
+      <view class="remark-actions">
+        <button class="remark-button cancel" bindtap="handleCloseRemark">取消</button>
+        <button class="remark-button confirm" bindtap="handleSaveRemark">确认</button>
+      </view>
+    </view>
   </view>
 </view>
