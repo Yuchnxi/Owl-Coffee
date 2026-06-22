@@ -330,6 +330,11 @@ Page({
         return
       }
 
+      const previousItem = getCartItems().find(item => {
+        return item.skuId === this.data.selectedSku.id
+          && item.sugarLevel === this.data.selectedSugarLevel
+      })
+      const previousQuantity = previousItem ? Number(previousItem.quantity) : 0
       const cartItems = addCartItem({
         skuId: this.data.selectedSku.id,
         productId: this.data.currentProduct.id,
@@ -342,12 +347,21 @@ Page({
         quantity: this.data.quantity,
         sugarLevel: this.data.selectedSugarLevel,
       })
+      const currentItem = cartItems.find(item => {
+        return item.skuId === this.data.selectedSku.id
+          && item.sugarLevel === this.data.selectedSugarLevel
+      })
+      const addedQuantity = currentItem ? Number(currentItem.quantity) - previousQuantity : 0
 
       this.updateCartSummary(cartItems)
 
       wx.showToast({
-        title: '已加入购物车',
-        icon: 'success',
+        title: addedQuantity <= 0
+          ? '已达库存上限'
+          : addedQuantity < this.data.quantity
+            ? '已添加至库存上限'
+            : '已加入购物车',
+        icon: addedQuantity > 0 ? 'success' : 'none',
       })
       this.setData({
         detailVisible: false,

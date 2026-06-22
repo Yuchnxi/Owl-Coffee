@@ -1,1 +1,7 @@
-
+<view class="orders-page">
+  <view class="empty-card">
+    <view class="empty-title">订单功能开发中</view>
+    <view class="empty-desc">完成结算后，可在这里查看订单状态和取餐信息</view>
+    <button class="menu-button" bindtap="handleGoMenu">去菜单看看</button>
+  </view>
+</view>

@@ -1,1 +1,50 @@
+.orders-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 160rpx 28rpx 40rpx;
+  background: #fffaf2;
+  color: #2f2118;
+}
 
+.empty-card {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 72rpx 36rpx;
+  border: 1rpx solid rgba(111, 75, 48, 0.08);
+  border-radius: 16rpx;
+  background: #fffdf8;
+  box-shadow: 0 14rpx 36rpx rgba(83, 55, 35, 0.06);
+  text-align: center;
+}
+
+.empty-title {
+  font-size: 32rpx;
+  font-weight: 800;
+}
+
+.empty-desc {
+  max-width: 500rpx;
+  margin-top: 18rpx;
+  color: #8f8072;
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
+.menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 260rpx;
+  height: 76rpx;
+  margin-top: 40rpx;
+  border-radius: 10rpx;
+  background: #e97416;
+  color: #fffaf2;
+  font-size: 26rpx;
+  font-weight: 800;
+}
+
+.menu-button::after {
+  border: 0;
+}
