@@ -1295,6 +1295,7 @@ POST /api/app/cart/sync
 
 ```json
 {
+  "cartVersion": 3,
   "items": [
     {
       "skuId": "sku_xxx",
@@ -1303,6 +1304,12 @@ POST /api/app/cart/sync
   ]
 }
 ```
+
+规则：
+
+- 查询购物车会返回 `cartVersion`。
+- 同步时必须携带最近一次服务端返回的 `cartVersion`。
+- 版本过期时返回 `409` 和错误码 `30006`，`data` 为最新购物车。
 
 ### 10.3.3 加入购物车
 

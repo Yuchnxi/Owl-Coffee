@@ -8,11 +8,11 @@ function fetchCart() {
 }
 
 // 同步购物车
-function syncCart(items) {
+function syncCart(items, cartVersion) {
   return request({
     url: '/api/app/cart/sync',
     method: 'POST',
-    data: { items },
+    data: { items, cartVersion },
   })
 }
 

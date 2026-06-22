@@ -1,4 +1,5 @@
 const CART_STORAGE_KEY = 'localCartItems'
+const CART_VERSION_STORAGE_KEY = 'localCartVersion'
 
 // 读取本地购物车
 function getCartItems() {
@@ -98,6 +99,18 @@ function clearCart() {
   return saveCartItems([])
 }
 
+// 读取本地记录的服务端购物车版本
+function getCartVersion() {
+  const cartVersion = Number(wx.getStorageSync(CART_VERSION_STORAGE_KEY))
+
+  return Number.isInteger(cartVersion) && cartVersion >= 0 ? cartVersion : null
+}
+
+// 保存服务端购物车版本
+function saveCartVersion(cartVersion) {
+  wx.setStorageSync(CART_VERSION_STORAGE_KEY, Number(cartVersion) || 0)
+}
+
 // 生成本地购物车商品唯一标识
 function createItemKey(skuId, sugarLevel) {
   return `${skuId}__${sugarLevel || '不另外加糖'}`
@@ -111,4 +124,6 @@ module.exports = {
   updateCartItemQuantity,
   removeCartItem,
   clearCart,
+  getCartVersion,
+  saveCartVersion,
 }

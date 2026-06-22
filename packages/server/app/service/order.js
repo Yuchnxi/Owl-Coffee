@@ -537,6 +537,7 @@ class OrderService extends Service {
         }
       }
 
+      await this.service.cart.lockCartVersion(connection, userId)
       const items = await this.lockOrderItems(connection, orderId)
       const skuRows = await this.lockSkus(connection, items.map(item => item.skuId))
       const skuMap = new Map(skuRows.map(sku => [sku.skuId, sku]))
@@ -613,8 +614,11 @@ class OrderService extends Service {
       }, 'success')
       await this.updateUserOrderStats(connection, userId, Number(order.payAmount))
       await this.removePurchasedCartItems(connection, userId, items)
+      await this.service.cart.incrementCartVersion(connection, userId)
 
       await connection.commit()
+
+      const cart = await this.service.cart.listCart(userId)
 
       return {
         orderId: order.id,
@@ -622,6 +626,7 @@ class OrderService extends Service {
         orderStatus: 'paid',
         paymentStatus: 'paid',
         pickupCode,
+        cart,
       }
     } catch (err) {
       await connection.rollback()

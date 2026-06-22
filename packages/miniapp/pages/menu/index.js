@@ -299,6 +299,8 @@ Page({
 
   // 加入购物车
   async handleAddCart() {
+    if (this.isCheckoutLocked()) return
+
     if (!this.data.selectedSku) {
       wx.showToast({
         title: '请选择可售规格',
@@ -398,6 +400,8 @@ Page({
 
   // 更新菜单内购物车商品数量
   handleCartQuantityChange(event) {
+    if (this.isCheckoutLocked()) return
+
     const { key } = event.currentTarget.dataset
     const quantity = Number(event.detail) || 1
 
@@ -415,6 +419,7 @@ Page({
       confirmColor: '#e97416',
       success: result => {
         if (!result.confirm) return
+        if (this.isCheckoutLocked()) return
 
         const items = clearCart()
 
@@ -450,10 +455,22 @@ Page({
     if (!wx.getStorageSync('accessToken')) return
 
     try {
-      await getApp().syncCartItems(items)
+      const result = await getApp().syncCartItems(items)
+      this.updateCartSummary(result.list || [])
     } catch (err) {
       // 保留本地购物车，进入结算页后再次同步
     }
+  },
+
+  // 判断购物车是否处于结算锁定状态
+  isCheckoutLocked() {
+    if (!getApp().checkoutInProgress) return false
+
+    wx.showToast({
+      title: '订单提交中，请稍候',
+      icon: 'none',
+    })
+    return true
   },
 
   // 刷新规格组选项

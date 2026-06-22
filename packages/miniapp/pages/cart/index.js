@@ -5,7 +5,6 @@ const {
   saveCartItems,
   updateCartItemQuantity,
   removeCartItem,
-  clearCart,
 } = require('../../utils/cart')
 
 Page({
@@ -138,6 +137,7 @@ Page({
     }
 
     this.setData({ submitting: true })
+    getApp().checkoutInProgress = true
 
     try {
       const order = await createOrder({
@@ -150,9 +150,9 @@ Page({
       })
       const payment = await mockPay(order.id, 'success')
 
-      clearCart()
       ++this.cartSyncVersion
-      this.refreshCart([])
+      getApp().saveCartState(payment.cart || { cartVersion: 0, list: [] })
+      this.refreshCart((payment.cart || {}).list || [])
 
       wx.showModal({
         title: '支付成功',
@@ -172,6 +172,7 @@ Page({
         icon: 'none',
       })
     } finally {
+      getApp().checkoutInProgress = false
       this.setData({ submitting: false })
     }
   },

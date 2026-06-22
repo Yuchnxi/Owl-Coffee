@@ -13,8 +13,16 @@ class AppCartController extends Controller {
   // 同步购物车
   async sync() {
     const { ctx } = this
-    const items = this.normalizeItems((ctx.request.body || {}).items)
+    const body = ctx.request.body || {}
+    const items = this.normalizeItems(body.items)
+    const cartVersion = Number(body.cartVersion)
     const errorMessage = await this.validateItems(items)
+
+    if (!Number.isInteger(cartVersion) || cartVersion < 0) {
+      ctx.status = 400
+      ctx.fail(10001, '购物车版本无效')
+      return
+    }
 
     if (errorMessage) {
       ctx.status = 400
@@ -22,7 +30,13 @@ class AppCartController extends Controller {
       return
     }
 
-    const result = await ctx.service.cart.syncCart(ctx.state.appUser.id, items)
+    const result = await ctx.service.cart.syncCart(ctx.state.appUser.id, items, cartVersion)
+
+    if (result.conflict) {
+      ctx.status = 409
+      ctx.fail(30006, '购物车已在其他设备更新', result.cart)
+      return
+    }
 
     ctx.success(result)
   }

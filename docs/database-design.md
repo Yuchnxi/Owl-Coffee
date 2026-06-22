@@ -267,6 +267,7 @@ JSON 使用说明：`meta` 可保存标题、缓存、隐藏等前端扩展配�
 | `order_count` | `INT` | NOT NULL DEFAULT 0 | 订单数冗余 |
 | `total_consume_amount` | `DECIMAL(10,2)` | NOT NULL DEFAULT 0.00 | 累计消费金额 |
 | `last_order_at` | `DATETIME(3)` | NULL | 最近下单时间 |
+| `cart_version` | `INT` | NOT NULL DEFAULT 0 | 购物车并发版本号 |
 | `created_at` | `DATETIME(3)` | NOT NULL | 创建时间 |
 | `updated_at` | `DATETIME(3)` | NOT NULL | 更新时间 |
 | `deleted_at` | `DATETIME(3)` | NULL | 软删除时间 |
@@ -687,6 +688,7 @@ CREATE TABLE users (
   order_count INT NOT NULL DEFAULT 0,
   total_consume_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   last_order_at DATETIME(3) NULL,
+  cart_version INT NOT NULL DEFAULT 0,
   created_at DATETIME(3) NOT NULL,
   updated_at DATETIME(3) NOT NULL,
   deleted_at DATETIME(3) NULL,

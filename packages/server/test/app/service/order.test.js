@@ -50,6 +50,7 @@ describe('test/app/service/order.test.js', () => {
 
   function createMockConnection({ order, items, skus }) {
     const calls = []
+    let cartVersion = 0
     const connection = {
       calls,
       beginTransaction: async () => calls.push({ type: 'begin' }),
@@ -58,6 +59,15 @@ describe('test/app/service/order.test.js', () => {
       release: () => calls.push({ type: 'release' }),
       execute: async (sql, params = {}) => {
         calls.push({ type: 'execute', sql, params })
+
+        if (sql.includes('UPDATE users SET cart_version')) {
+          cartVersion += 1
+          return [{ affectedRows: 1 }]
+        }
+
+        if (sql.includes('SELECT cart_version') && sql.includes('FOR UPDATE')) {
+          return [[{ cartVersion }]]
+        }
 
         if (sql.includes('FROM orders') && sql.includes('FOR UPDATE')) {
           return [[order]]
@@ -90,6 +100,7 @@ describe('test/app/service/order.test.js', () => {
 
   it('mockPay success deducts stock and writes order payment logs', async () => {
     const ctx = app.mockContext()
+    ctx.service.cart.listCart = async () => ({ cartVersion: 1, list: [] })
     const connection = createMockConnection({
       order: createPendingOrder(),
       items: [
@@ -108,6 +119,7 @@ describe('test/app/service/order.test.js', () => {
     assert(result.orderStatus === 'paid')
     assert(result.paymentStatus === 'paid')
     assert(result.pickupCode)
+    assert(result.cart.cartVersion === 1)
     assert(hasExecuteCall(connection.calls, 'UPDATE product_skus', call => call.params.afterStock === 3))
     assert(hasExecuteCall(connection.calls, 'INSERT INTO inventory_logs', call => {
       return call.params.changeQuantity === -2 && call.params.beforeStock === 5 && call.params.afterStock === 3
@@ -133,6 +145,7 @@ describe('test/app/service/order.test.js', () => {
         call.params.skuId === 'sku_001' &&
         call.params.sugarLevel === '半糖'
     }))
+    assert(hasExecuteCall(connection.calls, 'cart_version = cart_version + 1'))
     assert(connection.calls.some(call => call.type === 'commit'))
     assert(!connection.calls.some(call => call.type === 'rollback'))
   })

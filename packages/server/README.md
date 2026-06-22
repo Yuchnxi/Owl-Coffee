@@ -209,6 +209,12 @@ GET /api/admin/logs/operation
 mysql --default-character-set=utf8mb4 -u root -p -e "SOURCE E:/Owl-Coffee/packages/server/database/init.sql"
 ```
 
+已有数据库升级时继续执行：
+
+```bash
+mysql --default-character-set=utf8mb4 -u root -p -e "SOURCE E:/Owl-Coffee/packages/server/database/20260622_add_cart_version.sql"
+```
+
 如果在项目根目录执行，也可以直接使用脚本里的 `CREATE DATABASE IF NOT EXISTS` 和 `USE owl_coffee`，重复执行不会清空已有业务数据。
 
 Windows PowerShell 不建议使用 `< packages/server/database/init.sql` 这种输入重定向，可能导致中文种子数据转码异常。

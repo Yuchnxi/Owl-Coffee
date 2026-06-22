@@ -31,6 +31,8 @@ function request(options = {}) {
         if (res.statusCode < 200 || res.statusCode >= 300) {
           const error = new Error(response.message || '请求失败')
           error.statusCode = res.statusCode
+          error.code = response.code
+          error.data = response.data
           reject(error)
           return
         }

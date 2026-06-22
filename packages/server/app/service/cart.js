@@ -5,6 +5,10 @@ const Service = require('egg').Service
 class CartService extends Service {
   // 查询购物车
   async listCart(userId) {
+    const [userRows] = await this.app.mysql.execute(
+      'SELECT cart_version AS cartVersion FROM users WHERE id = :userId LIMIT 1',
+      { userId }
+    )
     const [rows] = await this.app.mysql.execute(
       `
         SELECT
@@ -36,21 +40,34 @@ class CartService extends Service {
     )
 
     return {
+      cartVersion: Number((userRows[0] || {}).cartVersion) || 0,
       list: rows.map(row => this.formatCartItem(row)),
     }
   }
 
   // 同步购物车
-  async syncCart(userId, items) {
+  async syncCart(userId, items, cartVersion) {
     const connection = await this.app.mysql.getConnection()
 
     try {
       await connection.beginTransaction()
+      const currentVersion = await this.lockCartVersion(connection, userId)
+
+      if (currentVersion !== cartVersion) {
+        await connection.rollback()
+        return {
+          conflict: true,
+          cart: await this.listCart(userId),
+        }
+      }
+
       await connection.execute('DELETE FROM cart_items WHERE user_id = :userId', { userId })
 
       for (const item of items) {
         await this.upsertCartItem(connection, userId, item.skuId, item.quantity, item.sugarLevel)
       }
+
+      await this.incrementCartVersion(connection, userId)
 
       await connection.commit()
       return this.listCart(userId)
@@ -62,13 +79,35 @@ class CartService extends Service {
     }
   }
 
+  // 锁定并读取购物车版本
+  async lockCartVersion(connection, userId) {
+    const [rows] = await connection.execute(
+      'SELECT cart_version AS cartVersion FROM users WHERE id = :userId LIMIT 1 FOR UPDATE',
+      { userId }
+    )
+
+    return Number((rows[0] || {}).cartVersion) || 0
+  }
+
+  // 递增购物车版本
+  async incrementCartVersion(connection, userId) {
+    await connection.execute(
+      'UPDATE users SET cart_version = cart_version + 1 WHERE id = :userId',
+      { userId }
+    )
+
+    return this.lockCartVersion(connection, userId)
+  }
+
   // 加入购物车
   async addItem(userId, skuId, quantity, sugarLevel) {
     const connection = await this.app.mysql.getConnection()
 
     try {
       await connection.beginTransaction()
+      await this.lockCartVersion(connection, userId)
       await this.upsertCartItem(connection, userId, skuId, quantity, sugarLevel, true)
+      await this.incrementCartVersion(connection, userId)
       await connection.commit()
 
       return this.listCart(userId)
@@ -82,43 +121,85 @@ class CartService extends Service {
 
   // 更新购物车项数量
   async updateItem(userId, cartItemId, quantity) {
-    const [result] = await this.app.mysql.execute(
-      `
-        UPDATE cart_items
-        SET quantity = :quantity, updated_at = NOW(3)
-        WHERE id = :cartItemId
-          AND user_id = :userId
-      `,
-      { userId, cartItemId, quantity }
-    )
+    const connection = await this.app.mysql.getConnection()
 
-    if (result.affectedRows === 0) {
-      return null
+    try {
+      await connection.beginTransaction()
+      await this.lockCartVersion(connection, userId)
+      const [result] = await connection.execute(
+        `
+          UPDATE cart_items
+          SET quantity = :quantity, updated_at = NOW(3)
+          WHERE id = :cartItemId
+            AND user_id = :userId
+        `,
+        { userId, cartItemId, quantity }
+      )
+
+      if (result.affectedRows === 0) {
+        await connection.rollback()
+        return null
+      }
+
+      await this.incrementCartVersion(connection, userId)
+      await connection.commit()
+      return this.listCart(userId)
+    } catch (err) {
+      await connection.rollback()
+      throw err
+    } finally {
+      connection.release()
     }
-
-    return this.listCart(userId)
   }
 
   // 删除购物车项
   async deleteItem(userId, cartItemId) {
-    const [result] = await this.app.mysql.execute(
-      `
-        DELETE FROM cart_items
-        WHERE id = :cartItemId
-          AND user_id = :userId
-      `,
-      { userId, cartItemId }
-    )
+    const connection = await this.app.mysql.getConnection()
 
-    return result.affectedRows > 0
+    try {
+      await connection.beginTransaction()
+      await this.lockCartVersion(connection, userId)
+      const [result] = await connection.execute(
+        `
+          DELETE FROM cart_items
+          WHERE id = :cartItemId
+            AND user_id = :userId
+        `,
+        { userId, cartItemId }
+      )
+
+      if (result.affectedRows === 0) {
+        await connection.rollback()
+        return false
+      }
+
+      await this.incrementCartVersion(connection, userId)
+      await connection.commit()
+      return true
+    } catch (err) {
+      await connection.rollback()
+      throw err
+    } finally {
+      connection.release()
+    }
   }
 
   // 清空购物车
   async clearCart(userId) {
-    await this.app.mysql.execute(
-      'DELETE FROM cart_items WHERE user_id = :userId',
-      { userId }
-    )
+    const connection = await this.app.mysql.getConnection()
+
+    try {
+      await connection.beginTransaction()
+      await this.lockCartVersion(connection, userId)
+      await connection.execute('DELETE FROM cart_items WHERE user_id = :userId', { userId })
+      await this.incrementCartVersion(connection, userId)
+      await connection.commit()
+    } catch (err) {
+      await connection.rollback()
+      throw err
+    } finally {
+      connection.release()
+    }
   }
 
   // 校验 SKU 是否存在
