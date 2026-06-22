@@ -1,4 +1,5 @@
 const CART_STORAGE_KEY = 'localCartItems'
+const CART_CLEAR_PENDING_KEY = 'pendingCartClearUserId'
 
 // 读取本地购物车
 function getCartItems() {
@@ -98,6 +99,21 @@ function clearCart() {
   return saveCartItems([])
 }
 
+// 标记指定用户的服务端购物车等待清空
+function markCartClearPending(userId) {
+  wx.setStorageSync(CART_CLEAR_PENDING_KEY, userId || true)
+}
+
+// 读取等待清空购物车的用户标识
+function getPendingCartClearUserId() {
+  return wx.getStorageSync(CART_CLEAR_PENDING_KEY)
+}
+
+// 清除购物车待清空标记
+function clearCartClearPending() {
+  wx.removeStorageSync(CART_CLEAR_PENDING_KEY)
+}
+
 // 生成本地购物车商品唯一标识
 function createItemKey(skuId, sugarLevel) {
   return `${skuId}__${sugarLevel || '不另外加糖'}`
@@ -111,4 +127,7 @@ module.exports = {
   updateCartItemQuantity,
   removeCartItem,
   clearCart,
+  markCartClearPending,
+  getPendingCartClearUserId,
+  clearCartClearPending,
 }

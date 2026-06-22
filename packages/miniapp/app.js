@@ -8,11 +8,16 @@ const {
   getCartItems,
   saveCartItems,
   mergeCartItems,
+  getPendingCartClearUserId,
+  clearCartClearPending,
 } = require('./utils/cart')
 
 App({
   // 购物车同步队列
   cartSyncQueue: Promise.resolve(),
+
+  // 登录恢复任务
+  loginPromise: null,
 
   globalData: {
     // 当前登录用户
@@ -20,7 +25,18 @@ App({
   },
 
   // 确保用户已完成微信登录
-  async ensureLogin() {
+  ensureLogin() {
+    if (!this.loginPromise) {
+      this.loginPromise = this.resolveLogin().finally(() => {
+        this.loginPromise = null
+      })
+    }
+
+    return this.loginPromise
+  },
+
+  // 恢复或创建小程序登录态
+  async resolveLogin() {
     const accessToken = wx.getStorageSync('accessToken')
 
     if (accessToken) {
@@ -81,12 +97,31 @@ App({
 
   // 登录后合并本地与服务端购物车
   async syncLocalCart() {
+    await this.retryPendingCartClear()
+
     const localItems = getCartItems()
     const remoteCart = await fetchCart()
     const mergedItems = mergeCartItems(localItems, remoteCart.list || [])
     const syncedCart = await this.syncCartItems(mergedItems)
 
     return saveCartItems(syncedCart.list || [])
+  },
+
+  // 重试支付后未完成的服务端购物车清理
+  async retryPendingCartClear() {
+    const pendingUserId = getPendingCartClearUserId()
+
+    if (!pendingUserId) return
+
+    const currentUserId = (this.globalData.currentUser || {}).id
+
+    if (pendingUserId !== true && currentUserId && pendingUserId !== currentUserId) {
+      clearCartClearPending()
+      return
+    }
+
+    await this.syncCartItems([])
+    clearCartClearPending()
   },
 
   // 按操作顺序同步购物车

@@ -6,6 +6,7 @@ const {
   updateCartItemQuantity,
   removeCartItem,
   clearCart,
+  markCartClearPending,
 } = require('../../utils/cart')
 
 Page({
@@ -147,8 +148,10 @@ Page({
       const payment = await mockPay(order.id, 'success')
 
       clearCart()
-      await this.syncCurrentCart([], false)
+      markCartClearPending((this.data.user || {}).id)
+      ++this.cartSyncVersion
       this.refreshCart([])
+      await this.retryCartClear()
 
       wx.showModal({
         title: '支付成功',
@@ -169,6 +172,18 @@ Page({
       })
     } finally {
       this.setData({ submitting: false })
+    }
+  },
+
+  // 重试支付后的服务端购物车清理
+  async retryCartClear() {
+    try {
+      await getApp().retryPendingCartClear()
+    } catch (err) {
+      wx.showToast({
+        title: '订单已支付，购物车稍后同步',
+        icon: 'none',
+      })
     }
   },
 
