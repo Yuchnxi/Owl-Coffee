@@ -1,6 +1,26 @@
 <view class="orders-page">
-  <view class="empty-card">
-    <view class="empty-title">订单功能开发中</view>
+  <view class="loading-card" wx:if="{{loading}}">订单加载中...</view>
+
+  <view class="order-list" wx:elif="{{orderList.length}}">
+    <view class="order-card" wx:for="{{orderList}}" wx:key="id">
+      <view class="order-head">
+        <view class="order-no">{{item.orderNo}}</view>
+        <view class="order-status">{{item.statusText}}</view>
+      </view>
+      <view class="order-time">{{item.createdAtText}}</view>
+      <view class="pickup-row" wx:if="{{item.pickupCode}}">
+        <view class="pickup-label">取餐码</view>
+        <view class="pickup-code">{{item.pickupCode}}</view>
+      </view>
+      <view class="order-bottom">
+        <view class="payment-status">{{item.paymentStatus === 'paid' ? '模拟支付成功' : '待支付'}}</view>
+        <view class="order-amount">{{item.amountText}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-card" wx:else>
+    <view class="empty-title">暂无订单</view>
     <view class="empty-desc">完成结算后，可在这里查看订单状态和取餐信息</view>
     <button class="menu-button" bindtap="handleGoMenu">去菜单看看</button>
   </view>

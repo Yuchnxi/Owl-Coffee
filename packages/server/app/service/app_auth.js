@@ -121,8 +121,8 @@ class AppAuthService extends Service {
   }
 
   // 绑定演示手机号
-  async bindPhone(userId, phoneCode) {
-    const phone = phoneCode === '待补充' ? '待补充' : phoneCode
+  async bindPhone(userId) {
+    const phone = '待补充'
 
     await this.app.mysql.execute(
       `

@@ -15,6 +15,34 @@ function saveCartItems(items) {
   return safeItems
 }
 
+// 合并本地与服务端购物车，相同商品以本地编辑结果为准
+function mergeCartItems(localItems, remoteItems) {
+  const itemMap = new Map()
+
+  for (const item of remoteItems) {
+    const key = createItemKey(item.skuId, item.sugarLevel)
+
+    itemMap.set(key, {
+      ...item,
+      key,
+      quantity: Number(item.quantity) || 0,
+    })
+  }
+
+  for (const item of localItems) {
+    const key = createItemKey(item.skuId, item.sugarLevel)
+
+    itemMap.set(key, {
+      ...(itemMap.get(key) || {}),
+      ...item,
+      key,
+      quantity: Number(item.quantity) || 0,
+    })
+  }
+
+  return Array.from(itemMap.values()).filter(item => item.quantity > 0)
+}
+
 // 加入本地购物车，相同 SKU 和糖度自动合并
 function addCartItem(item) {
   const items = getCartItems()
@@ -77,6 +105,8 @@ function createItemKey(skuId, sugarLevel) {
 
 module.exports = {
   getCartItems,
+  saveCartItems,
+  mergeCartItems,
   addCartItem,
   updateCartItemQuantity,
   removeCartItem,

@@ -10,6 +10,7 @@ const {
   updateCartItemQuantity,
   clearCart,
 } = require('../../utils/cart')
+const { syncCart } = require('../../api/cart')
 
 Page({
   data: {
@@ -354,6 +355,7 @@ Page({
       const addedQuantity = currentItem ? Number(currentItem.quantity) - previousQuantity : 0
 
       this.updateCartSummary(cartItems)
+      this.syncCartSilently(cartItems)
 
       wx.showToast({
         title: addedQuantity <= 0
@@ -378,9 +380,9 @@ Page({
 
   // 提示结算功能尚未接入
   handleCheckout() {
-    wx.showToast({
-      title: '结算功能待补充',
-      icon: 'none',
+    this.setData({ cartDrawerVisible: false })
+    wx.switchTab({
+      url: '/pages/cart/index',
     })
   },
 
@@ -400,7 +402,10 @@ Page({
     const { key } = event.currentTarget.dataset
     const quantity = Number(event.detail) || 1
 
-    this.updateCartSummary(updateCartItemQuantity(key, quantity))
+    const items = updateCartItemQuantity(key, quantity)
+
+    this.updateCartSummary(items)
+    this.syncCartSilently(items)
   },
 
   // 清空菜单内购物车
@@ -412,7 +417,10 @@ Page({
       success: result => {
         if (!result.confirm) return
 
-        this.updateCartSummary(clearCart())
+        const items = clearCart()
+
+        this.updateCartSummary(items)
+        this.syncCartSilently(items)
         this.setData({ cartDrawerVisible: false })
       },
     })
@@ -436,6 +444,21 @@ Page({
         amountText: this.formatPrice(amount),
       },
     })
+  },
+
+  // 已登录时静默同步购物车
+  async syncCartSilently(items) {
+    if (!wx.getStorageSync('accessToken')) return
+
+    try {
+      await syncCart(items.map(item => ({
+        skuId: item.skuId,
+        sugarLevel: item.sugarLevel,
+        quantity: item.quantity,
+      })))
+    } catch (err) {
+      // 保留本地购物车，进入结算页后再次同步
+    }
   },
 
   // 刷新规格组选项

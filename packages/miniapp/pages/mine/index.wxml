@@ -1,1 +1,32 @@
 
+<view class="mine-page">
+  <view class="profile-card">
+    <view class="avatar-placeholder">OWL</view>
+    <view class="profile-info">
+      <view class="profile-name">{{user.nickname || 'Owl Coffee 用户'}}</view>
+      <view class="profile-status">{{loading ? '正在登录...' : '微信登录已完成'}}</view>
+    </view>
+  </view>
+
+  <view class="action-card">
+    <view class="action-copy">
+      <view class="action-title">手机号授权</view>
+      <view class="action-desc">{{user.phoneBound ? (user.phone || '已完成授权') : '下单前需要完成授权'}}</view>
+    </view>
+    <button
+      wx:if="{{!user.phoneBound}}"
+      class="auth-button"
+      open-type="getPhoneNumber"
+      bindgetphonenumber="handlePhoneAuthorization"
+    >立即授权</button>
+    <view wx:else class="done-status">已授权</view>
+  </view>
+
+  <view class="menu-card" bindtap="handleOpenOrders">
+    <view>
+      <view class="action-title">我的订单</view>
+      <view class="action-desc">查看订单状态与取餐码</view>
+    </view>
+    <view class="arrow">›</view>
+  </view>
+</view>

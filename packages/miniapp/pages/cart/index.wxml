@@ -1,1 +1,88 @@
 
+<view class="cart-page">
+  <view class="loading-card" wx:if="{{loading}}">正在同步购物车...</view>
+
+  <block wx:elif="{{cartItems.length}}">
+    <view class="section-card pickup-card">
+      <view class="section-label">取餐方式</view>
+      <view class="pickup-title">到店自提</view>
+      <view class="pickup-desc">门店信息待补充，请以现场指引为准</view>
+    </view>
+
+    <view class="section-card">
+      <view class="section-head">
+        <view class="section-title">商品清单</view>
+        <view class="section-count">共 {{totalCount}} 件</view>
+      </view>
+
+      <view class="cart-item" wx:for="{{cartItems}}" wx:key="key">
+        <view class="item-cover">
+          <image wx:if="{{item.imageUrl}}" class="item-image" src="{{item.imageUrl}}" mode="aspectFill" />
+          <view wx:else class="image-placeholder">待补充</view>
+        </view>
+        <view class="item-info">
+          <view class="item-name">{{item.productName}}</view>
+          <view class="item-spec">{{item.specText}}</view>
+          <view class="item-actions">
+            <view class="item-price">{{item.subtotalText}}</view>
+            <van-stepper
+              value="{{item.quantity}}"
+              min="1"
+              max="{{item.stock || 1}}"
+              button-size="27"
+              data-key="{{item.key}}"
+              bind:change="handleQuantityChange"
+            />
+          </view>
+          <view class="remove-button" data-key="{{item.key}}" bindtap="handleRemoveItem">删除</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section-card auth-card">
+      <view>
+        <view class="section-title">手机号授权</view>
+        <view class="auth-desc">{{phoneBound ? '已完成授权，可接收订单取餐信息' : '提交订单前需完成微信手机号授权'}}</view>
+      </view>
+      <button
+        wx:if="{{!phoneBound}}"
+        class="auth-button"
+        open-type="getPhoneNumber"
+        bindgetphonenumber="handlePhoneAuthorization"
+      >立即授权</button>
+      <view wx:else class="auth-status">已授权</view>
+    </view>
+
+    <view class="section-card">
+      <view class="section-title">订单备注</view>
+      <textarea
+        class="remark-input"
+        value="{{remark}}"
+        maxlength="500"
+        placeholder="如有需要请填写，待补充"
+        bindinput="handleRemarkInput"
+      />
+    </view>
+
+    <view class="payment-tip">首版使用模拟支付，点击提交后直接演示支付成功</view>
+  </block>
+
+  <view class="empty-card" wx:else>
+    <view class="empty-title">购物车还是空的</view>
+    <view class="empty-desc">先去菜单选择喜欢的咖啡吧</view>
+    <button class="menu-button" bindtap="handleGoMenu">去点单</button>
+  </view>
+
+  <view class="checkout-bar" wx:if="{{cartItems.length}}">
+    <view class="checkout-total">
+      <view class="total-label">合计</view>
+      <view class="total-price">{{totalAmountText}}</view>
+    </view>
+    <button
+      class="submit-button"
+      disabled="{{!phoneBound || submitting}}"
+      loading="{{submitting}}"
+      bindtap="handleSubmitOrder"
+    >{{phoneBound ? '提交并模拟支付' : '请先授权手机号'}}</button>
+  </view>
+</view>

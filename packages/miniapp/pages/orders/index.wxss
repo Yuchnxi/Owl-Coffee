@@ -1,15 +1,94 @@
 .orders-page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 160rpx 28rpx 40rpx;
+  padding: 28rpx;
   background: #fffaf2;
   color: #2f2118;
+}
+
+.loading-card,
+.order-card {
+  margin-bottom: 20rpx;
+  padding: 28rpx;
+  border: 1rpx solid rgba(111, 75, 48, 0.08);
+  border-radius: 16rpx;
+  background: #fffdf8;
+  box-shadow: 0 14rpx 36rpx rgba(83, 55, 35, 0.06);
+}
+
+.loading-card {
+  color: #8f8072;
+  font-size: 25rpx;
+  text-align: center;
+}
+
+.order-head,
+.pickup-row,
+.order-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.order-no {
+  color: #2f2118;
+  font-size: 26rpx;
+  font-weight: 800;
+}
+
+.order-status {
+  color: #e97416;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.order-time,
+.payment-status {
+  margin-top: 12rpx;
+  color: #8f8072;
+  font-size: 22rpx;
+}
+
+.pickup-row {
+  margin-top: 24rpx;
+  padding: 22rpx 24rpx;
+  border-radius: 12rpx;
+  background: #f7ead8;
+}
+
+.pickup-label {
+  color: #6f4b30;
+  font-size: 24rpx;
+}
+
+.pickup-code {
+  color: #e97416;
+  font-size: 42rpx;
+  font-weight: 900;
+  letter-spacing: 8rpx;
+}
+
+.order-bottom {
+  margin-top: 22rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid rgba(111, 75, 48, 0.08);
+}
+
+.payment-status {
+  margin-top: 0;
+}
+
+.order-amount {
+  color: #2f2118;
+  font-size: 29rpx;
+  font-weight: 900;
 }
 
 .empty-card {
   display: flex;
   align-items: center;
   flex-direction: column;
+  margin-top: 120rpx;
   padding: 72rpx 36rpx;
   border: 1rpx solid rgba(111, 75, 48, 0.08);
   border-radius: 16rpx;
