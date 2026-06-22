@@ -612,6 +612,7 @@ class OrderService extends Service {
         pickupCode,
       }, 'success')
       await this.updateUserOrderStats(connection, userId, Number(order.payAmount))
+      await this.removePurchasedCartItems(connection, userId, items)
 
       await connection.commit()
 
@@ -945,6 +946,7 @@ class OrderService extends Service {
       `
         SELECT
           sku_id AS skuId,
+          sugar_level AS sugarLevel,
           quantity
         FROM order_items
         WHERE order_id = :orderId
@@ -955,8 +957,47 @@ class OrderService extends Service {
 
     return rows.map(row => ({
       skuId: row.skuId,
+      sugarLevel: row.sugarLevel || '不另外加糖',
       quantity: Number(row.quantity),
     }))
+  }
+
+  // 从购物车扣除本次订单已购买数量
+  async removePurchasedCartItems(connection, userId, items) {
+    for (const item of items) {
+      await connection.execute(
+        `
+          UPDATE cart_items
+          SET
+            quantity = GREATEST(quantity - :quantity, 0),
+            updated_at = NOW(3)
+          WHERE user_id = :userId
+            AND sku_id = :skuId
+            AND sugar_level = :sugarLevel
+        `,
+        {
+          userId,
+          skuId: item.skuId,
+          sugarLevel: item.sugarLevel || '不另外加糖',
+          quantity: item.quantity,
+        }
+      )
+
+      await connection.execute(
+        `
+          DELETE FROM cart_items
+          WHERE user_id = :userId
+            AND sku_id = :skuId
+            AND sugar_level = :sugarLevel
+            AND quantity <= 0
+        `,
+        {
+          userId,
+          skuId: item.skuId,
+          sugarLevel: item.sugarLevel || '不另外加糖',
+        }
+      )
+    }
   }
 
   // 锁定 SKU 并读取商品快照

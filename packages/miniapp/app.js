@@ -8,8 +8,6 @@ const {
   getCartItems,
   saveCartItems,
   mergeCartItems,
-  getPendingCartClearUserId,
-  clearCartClearPending,
 } = require('./utils/cart')
 
 App({
@@ -97,31 +95,12 @@ App({
 
   // 登录后合并本地与服务端购物车
   async syncLocalCart() {
-    await this.retryPendingCartClear()
-
     const localItems = getCartItems()
     const remoteCart = await fetchCart()
     const mergedItems = mergeCartItems(localItems, remoteCart.list || [])
     const syncedCart = await this.syncCartItems(mergedItems)
 
     return saveCartItems(syncedCart.list || [])
-  },
-
-  // 重试支付后未完成的服务端购物车清理
-  async retryPendingCartClear() {
-    const pendingUserId = getPendingCartClearUserId()
-
-    if (!pendingUserId) return
-
-    const currentUserId = (this.globalData.currentUser || {}).id
-
-    if (pendingUserId !== true && currentUserId && pendingUserId !== currentUserId) {
-      clearCartClearPending()
-      return
-    }
-
-    await this.syncCartItems([])
-    clearCartClearPending()
   },
 
   // 按操作顺序同步购物车

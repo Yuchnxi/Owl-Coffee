@@ -130,6 +130,10 @@
   font-size: 22rpx;
 }
 
+.remove-button.disabled {
+  opacity: 0.45;
+}
+
 .auth-card {
   gap: 24rpx;
 }

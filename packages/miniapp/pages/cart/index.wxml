@@ -29,12 +29,13 @@
               value="{{item.quantity}}"
               min="1"
               max="{{item.stock || 1}}"
+              disabled="{{submitting}}"
               button-size="27"
               data-key="{{item.key}}"
               bind:change="handleQuantityChange"
             />
           </view>
-          <view class="remove-button" data-key="{{item.key}}" bindtap="handleRemoveItem">删除</view>
+          <view class="remove-button {{submitting ? 'disabled' : ''}}" data-key="{{item.key}}" bindtap="handleRemoveItem">删除</view>
         </view>
       </view>
     </view>

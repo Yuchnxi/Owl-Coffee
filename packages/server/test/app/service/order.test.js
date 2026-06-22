@@ -95,6 +95,7 @@ describe('test/app/service/order.test.js', () => {
       items: [
         {
           skuId: 'sku_001',
+          sugarLevel: '半糖',
           quantity: 2,
         },
       ],
@@ -119,6 +120,18 @@ describe('test/app/service/order.test.js', () => {
     }))
     assert(hasExecuteCall(connection.calls, 'UPDATE users', call => {
       return call.params.userId === 'user_001' && call.params.payAmount === 40
+    }))
+    assert(hasExecuteCall(connection.calls, 'UPDATE cart_items', call => {
+      return call.sql.includes('GREATEST') &&
+        call.params.userId === 'user_001' &&
+        call.params.skuId === 'sku_001' &&
+        call.params.sugarLevel === '半糖' &&
+        call.params.quantity === 2
+    }))
+    assert(hasExecuteCall(connection.calls, 'DELETE FROM cart_items', call => {
+      return call.params.userId === 'user_001' &&
+        call.params.skuId === 'sku_001' &&
+        call.params.sugarLevel === '半糖'
     }))
     assert(connection.calls.some(call => call.type === 'commit'))
     assert(!connection.calls.some(call => call.type === 'rollback'))
@@ -149,6 +162,7 @@ describe('test/app/service/order.test.js', () => {
     assert(!hasExecuteCall(connection.calls, 'INSERT INTO inventory_logs'))
     assert(!hasExecuteCall(connection.calls, 'INSERT INTO payment_records'))
     assert(!hasExecuteCall(connection.calls, 'UPDATE orders'))
+    assert(!hasExecuteCall(connection.calls, 'UPDATE cart_items'))
   })
 
   it('mockPay fail keeps order unpaid and does not deduct stock', async () => {
@@ -172,6 +186,7 @@ describe('test/app/service/order.test.js', () => {
     assert(!hasExecuteCall(connection.calls, 'UPDATE product_skus'))
     assert(!hasExecuteCall(connection.calls, 'INSERT INTO inventory_logs'))
     assert(!hasExecuteCall(connection.calls, 'UPDATE orders'))
+    assert(!hasExecuteCall(connection.calls, 'UPDATE cart_items'))
     assert(connection.calls.some(call => call.type === 'commit'))
     assert(!connection.calls.some(call => call.type === 'rollback'))
   })
