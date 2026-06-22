@@ -1,9 +1,7 @@
-const { bindPhone } = require('../../api/auth')
 const { createOrder, mockPay } = require('../../api/order')
 const {
   getCartItems,
   saveCartItems,
-  updateCartItemQuantity,
   removeCartItem,
 } = require('../../utils/cart')
 
@@ -19,9 +17,7 @@ Page({
     loading: false,
     submitting: false,
 
-    // 当前用户授权状态
-    user: null,
-    phoneBound: false,
+    // 当前订单备注
     remark: '',
   },
 
@@ -37,13 +33,9 @@ Page({
 
     try {
       const app = getApp()
-      const user = await app.ensureLogin()
+      await app.ensureLogin()
       const cartItems = await app.syncLocalCart()
 
-      this.setData({
-        user,
-        phoneBound: Boolean(user.phoneBound),
-      })
       this.refreshCart(cartItems)
     } catch (err) {
       wx.showToast({
@@ -53,58 +45,6 @@ Page({
     } finally {
       this.setData({ loading: false })
     }
-  },
-
-  // 处理微信手机号授权
-  async handlePhoneAuthorization(event) {
-    const phoneCode = (event.detail || {}).code
-
-    if (!phoneCode) {
-      wx.showToast({
-        title: '已取消手机号授权',
-        icon: 'none',
-      })
-      return
-    }
-
-    this.setData({ loading: true })
-
-    try {
-      const result = await bindPhone(phoneCode)
-      const user = {
-        ...(this.data.user || {}),
-        ...result,
-      }
-
-      getApp().globalData.currentUser = user
-      this.setData({
-        user,
-        phoneBound: Boolean(result.phoneBound),
-      })
-      wx.showToast({
-        title: '手机号授权成功',
-        icon: 'success',
-      })
-    } catch (err) {
-      wx.showToast({
-        title: err.message || '手机号授权失败',
-        icon: 'none',
-      })
-    } finally {
-      this.setData({ loading: false })
-    }
-  },
-
-  // 更新购物车商品数量
-  async handleQuantityChange(event) {
-    if (this.data.submitting) return
-
-    const { key } = event.currentTarget.dataset
-    const quantity = Number(event.detail) || 1
-    const items = updateCartItemQuantity(key, quantity)
-
-    this.refreshCart(items)
-    await this.syncCurrentCart(items)
   },
 
   // 删除购物车商品
@@ -128,14 +68,6 @@ Page({
   async handleSubmitOrder() {
     if (!this.data.cartItems.length || this.data.submitting) return
 
-    if (!this.data.phoneBound) {
-      wx.showToast({
-        title: '请先授权手机号',
-        icon: 'none',
-      })
-      return
-    }
-
     this.setData({ submitting: true })
     getApp().checkoutInProgress = true
 
@@ -154,15 +86,15 @@ Page({
       getApp().saveCartState(payment.cart || { cartVersion: 0, list: [] })
       this.refreshCart((payment.cart || {}).list || [])
 
-      wx.showModal({
-        title: '支付成功',
-        content: `取餐码：${payment.pickupCode || '生成中'}`,
-        showCancel: false,
-        confirmText: '查看订单',
-        confirmColor: '#e97416',
+      wx.switchTab({
+        url: '/pages/orders/index',
         success: () => {
-          wx.switchTab({
-            url: '/pages/orders/index',
+          wx.showModal({
+            title: '支付成功',
+            content: `取餐码：${payment.pickupCode || '生成中'}`,
+            showCancel: false,
+            confirmText: '确认',
+            confirmColor: '#e97416',
           })
         },
       })

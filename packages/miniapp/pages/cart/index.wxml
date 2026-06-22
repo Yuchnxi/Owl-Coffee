@@ -25,33 +25,10 @@
           <view class="item-spec">{{item.specText}}</view>
           <view class="item-actions">
             <view class="item-price">{{item.subtotalText}}</view>
-            <van-stepper
-              value="{{item.quantity}}"
-              min="1"
-              max="{{item.stock || 1}}"
-              disabled="{{submitting}}"
-              button-size="27"
-              data-key="{{item.key}}"
-              bind:change="handleQuantityChange"
-            />
+            <view class="item-quantity">× {{item.quantity}}</view>
           </view>
-          <view class="remove-button {{submitting ? 'disabled' : ''}}" data-key="{{item.key}}" bindtap="handleRemoveItem">删除</view>
         </view>
       </view>
-    </view>
-
-    <view class="section-card auth-card">
-      <view>
-        <view class="section-title">手机号授权</view>
-        <view class="auth-desc">{{phoneBound ? '已完成授权，可接收订单取餐信息' : '提交订单前需完成微信手机号授权'}}</view>
-      </view>
-      <button
-        wx:if="{{!phoneBound}}"
-        class="auth-button"
-        open-type="getPhoneNumber"
-        bindgetphonenumber="handlePhoneAuthorization"
-      >立即授权</button>
-      <view wx:else class="auth-status">已授权</view>
     </view>
 
     <view class="section-card">
@@ -81,9 +58,9 @@
     </view>
     <button
       class="submit-button"
-      disabled="{{!phoneBound || submitting}}"
+      disabled="{{submitting}}"
       loading="{{submitting}}"
       bindtap="handleSubmitOrder"
-    >{{phoneBound ? '提交并模拟支付' : '请先授权手机号'}}</button>
+    >提交订单</button>
   </view>
 </view>

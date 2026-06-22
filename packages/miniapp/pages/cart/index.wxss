@@ -27,7 +27,6 @@
 .section-label,
 .section-count,
 .pickup-desc,
-.auth-desc,
 .payment-tip,
 .empty-desc {
   color: #8f8072;
@@ -47,14 +46,12 @@
   font-size: 34rpx;
 }
 
-.pickup-desc,
-.auth-desc {
+.pickup-desc {
   margin-top: 10rpx;
   line-height: 1.5;
 }
 
 .section-head,
-.auth-card,
 .checkout-bar,
 .item-actions {
   display: flex;
@@ -134,11 +131,6 @@
   opacity: 0.45;
 }
 
-.auth-card {
-  gap: 24rpx;
-}
-
-.auth-button,
 .menu-button {
   flex: 0 0 auto;
   margin: 0;
@@ -149,23 +141,9 @@
   font-weight: 800;
 }
 
-.auth-button {
-  width: 176rpx;
-  height: 68rpx;
-  padding: 0;
-  line-height: 68rpx;
-}
-
-.auth-button::after,
 .menu-button::after,
 .submit-button::after {
   border: 0;
-}
-
-.auth-status {
-  color: #4e8b57;
-  font-size: 24rpx;
-  font-weight: 800;
 }
 
 .remark-input {
@@ -230,15 +208,25 @@
 }
 
 .submit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 340rpx;
   height: 82rpx;
   margin: 0;
+  padding: 0;
   border-radius: 41rpx;
   background: #e97416;
   color: #fffaf2;
   font-size: 25rpx;
   font-weight: 800;
-  line-height: 82rpx;
+  line-height: 1;
+}
+
+.item-quantity {
+  color: #6f6258;
+  font-size: 25rpx;
+  font-weight: 700;
 }
 
 .submit-button[disabled] {

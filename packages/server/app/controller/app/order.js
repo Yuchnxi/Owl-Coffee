@@ -25,12 +25,6 @@ class AppOrderController extends Controller {
       return
     }
 
-    if (!user.phoneBound) {
-      ctx.status = 409
-      ctx.fail(30005, '提交订单前请先授权手机号')
-      return
-    }
-
     const result = await ctx.service.order.createAppOrder(payload, user)
 
     if (result.errorCode) {

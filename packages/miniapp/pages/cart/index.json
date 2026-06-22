@@ -1,6 +1,3 @@
 {
-  "navigationBarTitleText": "确认订单",
-  "usingComponents": {
-    "van-stepper": "@vant/weapp/stepper/index"
-  }
+  "navigationBarTitleText": "确认订单"
 }
