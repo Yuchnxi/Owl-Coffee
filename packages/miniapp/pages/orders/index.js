@@ -1,4 +1,6 @@
 const { fetchOrderDetail, fetchOrders, mockPay } = require('../../api/order')
+const { fetchSkuAvailability } = require('../../api/product')
+const { addCartItem, getCartItems } = require('../../utils/cart')
 
 const STATUS_TEXT_MAP = {
   pendingPayment: '待付款',
@@ -34,6 +36,7 @@ Page({
     orderList: [],
     loading: false,
     payingOrderId: '',
+    reorderingOrderId: '',
   },
 
   // 页面显示时加载订单
@@ -118,11 +121,70 @@ Page({
     }
   },
 
-  // 再来一单并返回点单页
-  handleOrderAgain() {
-    wx.switchTab({
-      url: '/pages/menu/index',
-    })
+  // 将历史订单中的可售商品重新加入购物车
+  async handleOrderAgain(event) {
+    const { orderId } = event.currentTarget.dataset
+    const order = this.data.orderList.find(item => item.id === orderId)
+
+    if (!order || !order.items.length || this.data.reorderingOrderId) return
+
+    this.setData({ reorderingOrderId: orderId })
+
+    try {
+      const itemResults = await Promise.all(order.items.map(async item => {
+        const availability = await fetchSkuAvailability(item.skuId)
+
+        if (!availability.available || Number(availability.stock) <= 0) {
+          return null
+        }
+
+        return {
+          skuId: item.skuId,
+          productId: item.productId,
+          productName: item.productName,
+          imageUrl: item.imageUrl,
+          temperature: item.temperature,
+          cupSize: item.cupSize,
+          sugarLevel: item.sugarLevel,
+          price: Number(availability.price),
+          stock: Number(availability.stock),
+          quantity: Math.min(Number(item.quantity) || 1, Number(availability.stock)),
+        }
+      }))
+      const availableItems = itemResults.filter(Boolean)
+
+      if (!availableItems.length) {
+        wx.showToast({
+          title: '原订单商品暂不可售',
+          icon: 'none',
+        })
+        return
+      }
+
+      for (const item of availableItems) {
+        addCartItem(item)
+      }
+
+      await getApp().syncCartItems(getCartItems())
+
+      if (availableItems.length < order.items.length) {
+        wx.showToast({
+          title: '部分商品暂不可售',
+          icon: 'none',
+        })
+      }
+
+      wx.navigateTo({
+        url: '/pages/cart/index',
+      })
+    } catch (err) {
+      wx.showToast({
+        title: err.message || '加入购物车失败',
+        icon: 'none',
+      })
+    } finally {
+      this.setData({ reorderingOrderId: '' })
+    }
   },
 
   // 返回菜单继续点单
