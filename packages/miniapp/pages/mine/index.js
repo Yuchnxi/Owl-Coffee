@@ -63,7 +63,7 @@ Page({
 
   // 查看我的订单
   handleOpenOrders() {
-    wx.navigateTo({
+    wx.switchTab({
       url: '/pages/orders/index',
     })
   },

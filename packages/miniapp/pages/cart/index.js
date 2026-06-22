@@ -161,8 +161,8 @@ Page({
         confirmText: '查看订单',
         confirmColor: '#e97416',
         success: () => {
-          wx.navigateTo({
-            url: `/pages/orders/index?orderId=${order.id}`,
+          wx.switchTab({
+            url: '/pages/orders/index',
           })
         },
       })

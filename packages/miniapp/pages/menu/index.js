@@ -379,10 +379,10 @@ Page({
     }
   },
 
-  // 提示结算功能尚未接入
+  // 进入购物车确认订单
   handleCheckout() {
     this.setData({ cartDrawerVisible: false })
-    wx.switchTab({
+    wx.navigateTo({
       url: '/pages/cart/index',
     })
   },
