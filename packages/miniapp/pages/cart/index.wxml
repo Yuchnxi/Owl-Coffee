@@ -60,24 +60,14 @@
         <view class="row-label">优惠</view>
         <view class="option-value">
           <text>暂无可用优惠</text>
-          <van-icon
-            name="arrow"
-            size="16px"
-            color="#9a8e85"
-            custom-style="display: inline-flex; width: 16px; height: 16px; padding: 0; border: 0; background: transparent; box-sizing: border-box;"
-          />
+          <text class="option-arrow">›</text>
         </view>
       </view>
       <view class="option-row" bindtap="handleOpenRemark">
         <view class="row-label">订单备注</view>
         <view class="option-value">
           <text class="option-copy">{{remark || '选填，请填写口味等要求'}}</text>
-          <van-icon
-            name="arrow"
-            size="16px"
-            color="#9a8e85"
-            custom-style="display: inline-flex; width: 16px; height: 16px; padding: 0; border: 0; background: transparent; box-sizing: border-box;"
-          />
+          <text class="option-arrow">›</text>
         </view>
       </view>
     </view>

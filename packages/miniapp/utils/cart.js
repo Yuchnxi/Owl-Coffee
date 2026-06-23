@@ -1,5 +1,6 @@
 const CART_STORAGE_KEY = 'localCartItems'
 const CART_VERSION_STORAGE_KEY = 'localCartVersion'
+const BUY_NOW_STORAGE_KEY = 'buyNowCartItems'
 
 // 读取本地购物车
 function getCartItems() {
@@ -14,6 +15,26 @@ function saveCartItems(items) {
 
   wx.setStorageSync(CART_STORAGE_KEY, safeItems)
   return safeItems
+}
+
+// 读取立即下单临时商品
+function getBuyNowItems() {
+  const items = wx.getStorageSync(BUY_NOW_STORAGE_KEY)
+
+  return Array.isArray(items) ? items : []
+}
+
+// 保存立即下单临时商品
+function saveBuyNowItems(items) {
+  const safeItems = Array.isArray(items) ? items : []
+
+  wx.setStorageSync(BUY_NOW_STORAGE_KEY, safeItems)
+  return safeItems
+}
+
+// 清空立即下单临时商品
+function clearBuyNowItems() {
+  wx.removeStorageSync(BUY_NOW_STORAGE_KEY)
 }
 
 // 合并本地与服务端购物车，相同商品以本地编辑结果为准
@@ -119,6 +140,9 @@ function createItemKey(skuId, sugarLevel) {
 module.exports = {
   getCartItems,
   saveCartItems,
+  getBuyNowItems,
+  saveBuyNowItems,
+  clearBuyNowItems,
   mergeCartItems,
   addCartItem,
   updateCartItemQuantity,

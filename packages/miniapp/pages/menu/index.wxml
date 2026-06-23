@@ -251,14 +251,24 @@
         />
       </view>
 
-      <button
-        class="cart-button"
-        loading="{{addLoading}}"
-        disabled="{{!selectedSku || addLoading}}"
-        bindtap="handleAddCart"
-      >
-        {{selectedSku ? '加入购物车' : '暂无可售规格'}}
-      </button>
+      <view class="detail-actions">
+        <button
+          class="cart-button secondary"
+          loading="{{addLoading}}"
+          disabled="{{!selectedSku || addLoading || buyNowLoading}}"
+          bindtap="handleAddCart"
+        >
+          {{selectedSku ? '加入购物车' : '暂无可售规格'}}
+        </button>
+        <button
+          class="cart-button"
+          loading="{{buyNowLoading}}"
+          disabled="{{!selectedSku || addLoading || buyNowLoading}}"
+          bindtap="handleBuyNow"
+        >
+          立即下单
+        </button>
+      </view>
     </view>
 
     <view class="detail-loading detail-panel" wx:else catchtap="handlePreventTap">

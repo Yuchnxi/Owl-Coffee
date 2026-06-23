@@ -7,6 +7,7 @@ const {
 const {
   getCartItems,
   addCartItem,
+  saveBuyNowItems,
   updateCartItemQuantity,
   removeCartItem,
   clearCart,
@@ -44,6 +45,7 @@ Page({
     selectedSkuPriceText: '待补充',
     quantity: 1,
     addLoading: false,
+    buyNowLoading: false,
 
     // 本地购物车汇总信息
     cartSummary: {
@@ -243,6 +245,7 @@ Page({
       selectedSugarLevel: '不另外加糖',
       quantity: 1,
       addLoading: false,
+      buyNowLoading: false,
     })
   },
 
@@ -377,6 +380,70 @@ Page({
       })
     } finally {
       this.setData({ addLoading: false })
+    }
+  },
+
+  // 立即下单当前选择的商品
+  async handleBuyNow() {
+    if (this.isCheckoutLocked()) return
+
+    if (!this.data.selectedSku) {
+      wx.showToast({
+        title: '请选择可售规格',
+        icon: 'none',
+      })
+      return
+    }
+
+    this.setData({ buyNowLoading: true })
+
+    try {
+      const availability = await fetchSkuAvailability(this.data.selectedSku.id)
+
+      if (!availability.available) {
+        wx.showToast({
+          title: '该规格暂不可售',
+          icon: 'none',
+        })
+        this.updateSkuStock(availability)
+        return
+      }
+
+      if (availability.stock < this.data.quantity) {
+        wx.showToast({
+          title: '库存不足，请调整数量',
+          icon: 'none',
+        })
+        this.updateSkuStock(availability)
+        return
+      }
+
+      saveBuyNowItems([{
+        skuId: this.data.selectedSku.id,
+        productId: this.data.currentProduct.id,
+        productName: this.data.currentProduct.name,
+        imageUrl: this.data.currentProduct.imageUrl,
+        temperature: this.data.selectedSku.temperature,
+        cupSize: this.data.selectedSku.cupSize,
+        price: Number(availability.price),
+        stock: Number(availability.stock),
+        quantity: this.data.quantity,
+        sugarLevel: this.data.selectedSugarLevel,
+      }])
+
+      this.setData({
+        detailVisible: false,
+      })
+      wx.navigateTo({
+        url: '/pages/cart/index?mode=buyNow',
+      })
+    } catch (err) {
+      wx.showToast({
+        title: err.message || '立即下单失败',
+        icon: 'none',
+      })
+    } finally {
+      this.setData({ buyNowLoading: false })
     }
   },
 

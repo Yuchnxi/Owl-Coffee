@@ -1,6 +1,9 @@
 const { createOrder, mockPay } = require('../../api/order')
 const {
   getCartItems,
+  getBuyNowItems,
+  saveBuyNowItems,
+  clearBuyNowItems,
   updateCartItemQuantity,
   removeCartItem,
 } = require('../../utils/cart')
@@ -14,6 +17,7 @@ Page({
     discountAmountText: '-¥0.00',
     loading: false,
     submitting: false,
+    buyNowMode: false,
 
     // 当前订单备注编辑状态
     remark: '',
@@ -21,10 +25,39 @@ Page({
     remarkVisible: false,
   },
 
+  // 页面加载时记录订单来源
+  onLoad(options = {}) {
+    this.setData({
+      buyNowMode: options.mode === 'buyNow',
+    })
+  },
+
   // 页面显示时刷新购物车与登录状态
   async onShow() {
+    if (this.data.buyNowMode) {
+      this.refreshCart(getBuyNowItems())
+      await this.loadUserOnly()
+      return
+    }
+
     this.refreshCart(getCartItems())
     await this.loadUserAndSyncCart()
+  },
+
+  // 仅确认登录状态，不同步立即下单商品
+  async loadUserOnly() {
+    this.setData({ loading: true })
+
+    try {
+      await getApp().ensureLogin()
+    } catch (err) {
+      wx.showToast({
+        title: err.message || '登录失败，请重试',
+        icon: 'none',
+      })
+    } finally {
+      this.setData({ loading: false })
+    }
   },
 
   // 登录并同步购物车
@@ -60,6 +93,21 @@ Page({
     if (this.data.submitting) return
 
     const { key } = event.currentTarget.dataset
+    if (this.data.buyNowMode) {
+      const items = this.data.cartItems.map(item => {
+        if (item.key !== key) return item
+
+        return {
+          ...item,
+          quantity: Math.min(Math.max(Number(event.detail) || 1, 1), item.stock || 1),
+        }
+      })
+
+      saveBuyNowItems(items)
+      this.refreshCart(items)
+      return
+    }
+
     const items = updateCartItemQuantity(key, Number(event.detail) || 1)
 
     this.refreshCart(items)
@@ -71,6 +119,14 @@ Page({
     if (this.data.submitting) return
 
     const { key } = event.currentTarget.dataset
+    if (this.data.buyNowMode) {
+      const items = this.data.cartItems.filter(item => item.key !== key)
+
+      saveBuyNowItems(items)
+      this.refreshCart(items)
+      return
+    }
+
     const items = removeCartItem(key)
 
     this.refreshCart(items)
@@ -124,8 +180,12 @@ Page({
       })
       const payment = await mockPay(order.id, 'success')
 
-      getApp().saveCartState(payment.cart || { cartVersion: 0, list: [] })
-      this.refreshCart((payment.cart || {}).list || [])
+      if (this.data.buyNowMode) {
+        clearBuyNowItems()
+      } else {
+        getApp().saveCartState(payment.cart || { cartVersion: 0, list: [] })
+        this.refreshCart((payment.cart || {}).list || [])
+      }
 
       wx.switchTab({
         url: '/pages/orders/index',

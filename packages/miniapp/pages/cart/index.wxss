@@ -199,6 +199,21 @@
   white-space: nowrap;
 }
 
+.option-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24rpx;
+  height: 36rpx;
+  flex: 0 0 24rpx;
+  border: 0;
+  background: transparent;
+  color: #9a8e85;
+  font-size: 42rpx;
+  font-weight: 300;
+  line-height: 1;
+}
+
 .amount-card {
   padding-top: 12rpx;
 }
