@@ -1,32 +1,66 @@
-
 <view class="mine-page">
-  <view class="profile-card">
-    <view class="avatar-placeholder">OWL</view>
-    <view class="profile-info">
-      <view class="profile-name">{{user.nickname || 'Owl Coffee 用户'}}</view>
-      <view class="profile-status">{{loading ? '正在登录...' : '微信登录已完成'}}</view>
+  <view class="hero-section">
+    <view class="hero-top">
+      <view class="profile-content">
+        <view class="avatar">
+          <view class="avatar-eye-row">
+            <view class="avatar-eye"></view>
+            <view class="avatar-eye"></view>
+          </view>
+          <view class="avatar-beak"></view>
+        </view>
+
+        <view class="profile-main">
+          <view class="profile-name">{{user.phoneBound ? (user.nickname || 'Owl Coffee 用户') : '欢迎来到 Owl Coffee'}}</view>
+        </view>
+      </view>
+
+      <button
+        wx:if="{{!user.phoneBound}}"
+        class="auth-hit-area"
+        open-type="getPhoneNumber"
+        bindgetphonenumber="handlePhoneAuthorization"
+        loading="{{loading}}"
+      ></button>
     </view>
   </view>
 
-  <view class="action-card">
-    <view class="action-copy">
-      <view class="action-title">手机号授权</view>
-      <view class="action-desc">{{user.phoneBound ? (user.phone || '已完成授权') : '下单前需要完成授权'}}</view>
+  <view class="summary-card">
+    <view
+      wx:for="{{summaryList}}"
+      wx:key="key"
+      class="summary-item"
+      data-key="{{item.key}}"
+      bindtap="handleMenuTap"
+    >
+      <view class="summary-value">{{item.value}}</view>
+      <view class="summary-label">{{item.label}}</view>
     </view>
-    <button
-      wx:if="{{!user.phoneBound}}"
-      class="auth-button"
-      open-type="getPhoneNumber"
-      bindgetphonenumber="handlePhoneAuthorization"
-    >立即授权</button>
-    <view wx:else class="done-status">已授权</view>
   </view>
 
-  <view class="menu-card" bindtap="handleOpenOrders">
-    <view>
-      <view class="action-title">我的订单</view>
-      <view class="action-desc">查看订单状态与取餐码</view>
+  <view class="section-block">
+    <view class="menu-card">
+      <view
+        wx:for="{{menuList}}"
+        wx:key="key"
+        class="menu-row"
+        data-key="{{item.key}}"
+        bindtap="handleMenuTap"
+      >
+        <view class="menu-left">
+          <view class="menu-icon">
+            <image wx:if="{{item.iconUrl}}" class="icon-image" src="{{item.iconUrl}}" mode="aspectFit" />
+            <text wx:else>{{item.iconText}}</text>
+          </view>
+          <view class="menu-copy">
+            <view class="menu-title">{{item.title}}</view>
+          </view>
+        </view>
+        <view class="menu-right">
+          <text wx:if="{{item.badge}}" class="menu-badge">{{item.badge}}</text>
+          <text class="menu-arrow">›</text>
+        </view>
+      </view>
     </view>
-    <view class="arrow">›</view>
   </view>
 </view>
