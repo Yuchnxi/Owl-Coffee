@@ -34,6 +34,7 @@ Page({
 
     // 当前用户订单列表
     orderList: [],
+    needLogin: false,
     loading: false,
     payingOrderId: '',
     reorderingOrderId: '',
@@ -51,10 +52,22 @@ Page({
     this.setData({
       loading: true,
       orderList: [],
+      needLogin: false,
     })
 
     try {
-      await getApp().ensureLogin()
+      const user = await getApp().restoreLogin()
+
+      if (!user) {
+        if (requestVersion !== this.requestVersion) return
+
+        this.setData({
+          needLogin: true,
+          orderList: [],
+        })
+        return
+      }
+
       const data = await fetchOrders(this.data.activeStatus)
       const orderList = await Promise.all((data.list || []).map(async order => {
         try {
@@ -82,6 +95,23 @@ Page({
       if (requestVersion === this.requestVersion) {
         this.setData({ loading: false })
       }
+    }
+  },
+
+  // 用户主动登录后加载订单
+  async handleLoginAndLoadOrders() {
+    this.setData({ loading: true })
+
+    try {
+      await getApp().ensureLogin()
+      await this.loadOrders()
+    } catch (err) {
+      wx.showToast({
+        title: err.message || '登录失败',
+        icon: 'none',
+      })
+    } finally {
+      this.setData({ loading: false })
     }
   },
 

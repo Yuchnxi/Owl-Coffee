@@ -17,6 +17,7 @@ Page({
     discountAmountText: '-¥0.00',
     loading: false,
     submitting: false,
+    needLogin: false,
     buyNowMode: false,
 
     // 当前订单备注编辑状态
@@ -44,15 +45,20 @@ Page({
     await this.loadUserAndSyncCart()
   },
 
-  // 仅确认登录状态，不同步立即下单商品
+  // 仅恢复已有登录状态，不同步立即下单商品
   async loadUserOnly() {
-    this.setData({ loading: true })
+    this.setData({
+      loading: true,
+      needLogin: false,
+    })
 
     try {
-      await getApp().ensureLogin()
+      const user = await getApp().restoreLogin()
+
+      this.setData({ needLogin: !user })
     } catch (err) {
       wx.showToast({
-        title: err.message || '登录失败，请重试',
+        title: err.message || '登录状态恢复失败',
         icon: 'none',
       })
     } finally {
@@ -60,19 +66,29 @@ Page({
     }
   },
 
-  // 登录并同步购物车
+  // 恢复已有登录并同步购物车
   async loadUserAndSyncCart() {
-    this.setData({ loading: true })
+    this.setData({
+      loading: true,
+      needLogin: false,
+    })
 
     try {
       const app = getApp()
-      await app.ensureLogin()
+
+      const user = await app.restoreLogin()
+
+      if (!user) {
+        this.setData({ needLogin: true })
+        return
+      }
+
       const cartItems = await app.syncLocalCart()
 
       this.refreshCart(cartItems)
     } catch (err) {
       wx.showToast({
-        title: err.message || '登录失败，请重试',
+        title: err.message || '登录状态恢复失败',
         icon: 'none',
       })
     } finally {
@@ -166,6 +182,10 @@ Page({
   async handleSubmitOrder() {
     if (!this.data.cartItems.length || this.data.submitting) return
 
+    const loggedIn = await this.ensureSubmitLogin()
+
+    if (!loggedIn) return
+
     this.setData({ submitting: true })
     getApp().checkoutInProgress = true
 
@@ -208,6 +228,47 @@ Page({
       getApp().checkoutInProgress = false
       this.setData({ submitting: false })
     }
+  },
+
+  // 提交订单前由用户确认是否登录
+  async ensureSubmitLogin() {
+    if (wx.getStorageSync('accessToken') && getApp().globalData.currentUser) {
+      return true
+    }
+
+    const confirmed = await this.confirmLogin()
+
+    if (!confirmed) return false
+
+    this.setData({ loading: true })
+
+    try {
+      await getApp().ensureLogin()
+      this.setData({ needLogin: false })
+      return true
+    } catch (err) {
+      wx.showToast({
+        title: err.message || '登录失败',
+        icon: 'none',
+      })
+      return false
+    } finally {
+      this.setData({ loading: false })
+    }
+  },
+
+  // 弹出登录确认框
+  confirmLogin() {
+    return new Promise(resolve => {
+      wx.showModal({
+        title: '登录后提交订单',
+        content: '当前已退出登录，确认登录并继续提交订单？',
+        confirmText: '登录提交',
+        confirmColor: '#e97416',
+        success: result => resolve(Boolean(result.confirm)),
+        fail: () => resolve(false),
+      })
+    })
   },
 
   // 返回菜单继续选购

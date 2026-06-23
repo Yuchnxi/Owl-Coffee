@@ -98,14 +98,16 @@
     <view class="checkout-total">
       <view class="total-label">合计</view>
       <view class="total-price">{{totalAmountText}}</view>
+      <view wx:if="{{needLogin}}" class="login-hint">登录后提交订单</view>
     </view>
     <view class="checkout-divider"></view>
-    <button
-      class="submit-button"
-      disabled="{{submitting}}"
+    <van-button
+      custom-class="submit-button"
+      custom-style="width: 220rpx; height: 80rpx; border: 0; border-radius: 999rpx; background: #e97416; color: #ffffff; font-size: 28rpx; font-weight: 700;"
+      disabled="{{submitting || loading}}"
       loading="{{submitting}}"
-      bindtap="handleSubmitOrder"
-    >提交订单</button>
+      bind:click="handleSubmitOrder"
+    >{{needLogin ? '登录提交' : '提交订单'}}</van-button>
   </view>
 
   <view class="remark-mask" wx:if="{{remarkVisible}}" bindtap="handleCloseRemark">

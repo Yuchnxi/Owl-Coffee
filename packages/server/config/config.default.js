@@ -57,6 +57,7 @@ module.exports = appInfo => {
   config.wechatMiniapp = {
     appId: process.env.WECHAT_MINIAPP_APP_ID || '',
     appSecret: process.env.WECHAT_MINIAPP_APP_SECRET || '',
+    mockLogin: process.env.WECHAT_MINIAPP_MOCK_LOGIN === 'true',
   }
 
   return config

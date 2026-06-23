@@ -302,6 +302,12 @@
   font-size: 34rpx;
 }
 
+.login-hint {
+  margin-top: 4rpx;
+  color: #9a8e85;
+  font-size: 21rpx;
+}
+
 .checkout-divider {
   width: 1rpx;
   height: 66rpx;

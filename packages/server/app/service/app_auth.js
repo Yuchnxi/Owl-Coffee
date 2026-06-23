@@ -3,13 +3,16 @@
 const Service = require('egg').Service
 
 class AppAuthService extends Service {
-  // 小程序演示登录，真实微信 openid 换取待补充
+  // 小程序微信登录
   async login(code) {
-    const openid = `mock_${code}`
+    const session = await this.codeToSession(code)
+    const { openid, unionid } = session
     let user = await this.findUserByOpenid(openid)
 
     if (!user) {
-      user = await this.createUser(openid)
+      user = await this.createUser(openid, unionid)
+    } else if (unionid && !user.unionid) {
+      user = await this.updateUnionid(user.id, unionid)
     }
 
     const accessToken = this.service.authToken.createAppAccessToken(user)
@@ -32,6 +35,7 @@ class AppAuthService extends Service {
         SELECT
           id,
           openid,
+          unionid,
           phone,
           phone_bound AS phoneBound,
           user_status AS userStatus,
@@ -56,6 +60,7 @@ class AppAuthService extends Service {
         SELECT
           id,
           openid,
+          unionid,
           phone,
           phone_bound AS phoneBound,
           user_status AS userStatus,
@@ -73,8 +78,8 @@ class AppAuthService extends Service {
     return rows[0] || null
   }
 
-  // 创建演示小程序用户
-  async createUser(openid) {
+  // 创建小程序用户
+  async createUser(openid, unionid = null) {
     const id = this.service.authToken.createId('user')
 
     await this.app.mysql.execute(
@@ -101,7 +106,7 @@ class AppAuthService extends Service {
         VALUES (
           :id,
           :openid,
-          NULL,
+          :unionid,
           NULL,
           NULL,
           'secret',
@@ -118,10 +123,60 @@ class AppAuthService extends Service {
           NULL
         )
       `,
-      { id, openid }
+      { id, openid, unionid: unionid || null }
     )
 
     return this.findUserById(id)
+  }
+
+  // 更新微信 unionid
+  async updateUnionid(userId, unionid) {
+    await this.app.mysql.execute(
+      `
+        UPDATE users
+        SET
+          unionid = :unionid,
+          updated_at = NOW(3),
+          updated_by = :userId
+        WHERE id = :userId
+          AND deleted_at IS NULL
+      `,
+      { userId, unionid }
+    )
+
+    return this.findUserById(userId)
+  }
+
+  // 通过 wx.login code 换取微信 openid
+  async codeToSession(code) {
+    const { appId, appSecret, mockLogin } = this.config.wechatMiniapp
+
+    if (mockLogin) {
+      return {
+        openid: `mock_${code}`,
+        unionid: null,
+      }
+    }
+
+    this.ensureWechatConfig()
+
+    const url = 'https://api.weixin.qq.com/sns/jscode2session'
+      + `?appid=${encodeURIComponent(appId)}`
+      + `&secret=${encodeURIComponent(appSecret)}`
+      + `&js_code=${encodeURIComponent(code)}`
+      + '&grant_type=authorization_code'
+    const data = await this.fetchWechatJson(url, {
+      failMessage: '微信登录凭证换取失败',
+    })
+
+    if (!data.openid) {
+      this.throwHttpError(400, '微信登录未返回 openid')
+    }
+
+    return {
+      openid: data.openid,
+      unionid: data.unionid || null,
+    }
   }
 
   // 绑定微信授权手机号
@@ -148,19 +203,14 @@ class AppAuthService extends Service {
   // 通过微信手机号授权 code 换取真实手机号
   async fetchWechatPhoneNumber(phoneCode) {
     const accessToken = await this.getWechatAccessToken()
-    const response = await fetch(
+    const data = await this.fetchWechatJson(
       `https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token=${accessToken}`,
       {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ code: phoneCode }),
+        body: { code: phoneCode },
+        failMessage: '微信手机号授权失败',
       }
     )
-    const data = await response.json()
-
-    if (data.errcode) {
-      this.throwHttpError(400, `微信手机号授权失败：${data.errmsg || data.errcode}`)
-    }
 
     const phoneInfo = data.phone_info || {}
     const phone = phoneInfo.purePhoneNumber || phoneInfo.phoneNumber
@@ -176,9 +226,7 @@ class AppAuthService extends Service {
   async getWechatAccessToken() {
     const { appId, appSecret } = this.config.wechatMiniapp
 
-    if (!appId || !appSecret || appId === '待补充' || appSecret === '待补充') {
-      this.throwHttpError(400, '请先配置微信小程序 appId 和 appSecret')
-    }
+    this.ensureWechatConfig()
 
     const cache = this.app.wechatMiniappAccessToken
 
@@ -189,12 +237,9 @@ class AppAuthService extends Service {
     const url = 'https://api.weixin.qq.com/cgi-bin/token'
       + `?grant_type=client_credential&appid=${encodeURIComponent(appId)}`
       + `&secret=${encodeURIComponent(appSecret)}`
-    const response = await fetch(url)
-    const data = await response.json()
-
-    if (data.errcode) {
-      this.throwHttpError(400, `微信 access_token 获取失败：${data.errmsg || data.errcode}`)
-    }
+    const data = await this.fetchWechatJson(url, {
+      failMessage: '微信 access_token 获取失败',
+    })
 
     if (!data.access_token) {
       this.throwHttpError(400, '微信 access_token 获取失败')
@@ -206,6 +251,48 @@ class AppAuthService extends Service {
     }
 
     return data.access_token
+  }
+
+  // 校验微信小程序服务端配置
+  ensureWechatConfig() {
+    const { appId, appSecret } = this.config.wechatMiniapp
+
+    if (!appId || !appSecret || appId === '待补充' || appSecret === '待补充') {
+      this.throwHttpError(400, '请先配置微信小程序 appId 和 appSecret')
+    }
+  }
+
+  // 请求微信接口并统一处理错误
+  async fetchWechatJson(url, options = {}) {
+    let response
+
+    try {
+      response = await fetch(url, {
+        method: options.method || 'GET',
+        headers: options.body ? { 'content-type': 'application/json' } : undefined,
+        body: options.body ? JSON.stringify(options.body) : undefined,
+      })
+    } catch (err) {
+      this.throwHttpError(502, `${options.failMessage || '微信接口请求失败'}：${err.message}`)
+    }
+
+    let data
+
+    try {
+      data = await response.json()
+    } catch (err) {
+      this.throwHttpError(502, `${options.failMessage || '微信接口响应解析失败'}：${err.message}`)
+    }
+
+    if (!response.ok) {
+      this.throwHttpError(502, `${options.failMessage || '微信接口请求失败'}：HTTP ${response.status}`)
+    }
+
+    if (data.errcode) {
+      this.throwHttpError(400, `${options.failMessage || '微信接口返回错误'}：${data.errmsg || data.errcode}`)
+    }
+
+    return data
   }
 
   // 更新小程序用户资料

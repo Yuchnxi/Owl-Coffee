@@ -1,5 +1,6 @@
 const { bindPhone, logout, updateProfile } = require('../../api/auth')
 const { uploadFile } = require('../../api/upload')
+const config = require('../../config/index')
 
 const GENDER_OPTIONS = [
   { text: '男', value: 'male' },
@@ -29,6 +30,8 @@ Page({
     genderPickerIndex: 2,
     // 性别选择项
     genderColumns: GENDER_OPTIONS.map(item => item.text),
+    // 是否启用微信手机号授权
+    phoneAuthEnabled: Boolean(config.phoneAuthEnabled),
   },
 
   // 页面加载时初始化安全区
@@ -62,10 +65,19 @@ Page({
     this.setData({
       user,
       displayNickname: user.nickname || '待补充',
-      displayPhone: user.phoneBound ? this.maskPhone(user.phone) : '待补充',
+      displayPhone: this.getPhoneDisplayText(user),
       displayGender: this.getGenderLabel(user.gender),
       genderPickerIndex: this.getGenderIndex(user.gender),
     })
+  },
+
+  // 获取手机号展示文案
+  getPhoneDisplayText(user = {}) {
+    if (user.phoneBound) {
+      return this.maskPhone(user.phone)
+    }
+
+    return this.data.phoneAuthEnabled ? '待补充' : '暂不可用'
   },
 
   // 返回上一页
@@ -222,11 +234,10 @@ Page({
     const detail = event.detail || {}
     const phoneCode = detail.code
 
-    if (!phoneCode || detail.errMsg !== 'getPhoneNumber:ok') {
-      wx.showToast({
-        title: '已取消手机号授权',
-        icon: 'none',
-      })
+    console.warn('手机号授权回调', detail)
+
+    if (!phoneCode) {
+      this.showPhoneAuthError(detail)
       return
     }
 
@@ -253,6 +264,54 @@ Page({
     } finally {
       this.setData({ loading: false })
     }
+  },
+
+  // 展示手机号授权暂不可用说明
+  handlePhoneUnavailable() {
+    wx.showModal({
+      title: '暂不支持关联手机',
+      content: '当前小程序为个人主体，暂不支持获取手机号。后续更换为企业或个体工商户主体并完成微信认证后，可开启手机号授权能力。',
+      showCancel: false,
+      confirmText: '知道了',
+      confirmColor: '#e97416',
+    })
+  },
+
+  // 展示手机号授权失败原因
+  showPhoneAuthError(detail = {}) {
+    const message = this.getPhoneAuthErrorMessage(detail)
+    const errMsg = detail.errMsg ? `\n\n微信返回：${detail.errMsg}` : ''
+
+    wx.showModal({
+      title: '手机号授权失败',
+      content: `${message}${errMsg}`,
+      showCancel: false,
+      confirmText: '知道了',
+      confirmColor: '#e97416',
+    })
+  },
+
+  // 获取手机号授权失败提示
+  getPhoneAuthErrorMessage(detail = {}) {
+    const errMsg = detail.errMsg || ''
+
+    if (errMsg.includes('no permission')) {
+      return '当前小程序没有获取手机号权限，请确认小程序为非个人主体并已完成微信认证，且已开通手机号快速验证能力。'
+    }
+
+    if (errMsg.includes('realname') || errMsg.includes('verify')) {
+      return '当前微信绑定手机号需要先完成验证，请按微信提示完成手机号验证后重试。'
+    }
+
+    if (errMsg.includes('deny') || errMsg.includes('cancel')) {
+      return '已取消手机号授权'
+    }
+
+    if (errMsg.includes('fail')) {
+      return '微信手机号授权失败，请根据微信返回信息处理。'
+    }
+
+    return '手机号授权未返回凭证'
   },
 
   // 退出当前登录态

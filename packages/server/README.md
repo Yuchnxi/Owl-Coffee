@@ -84,6 +84,7 @@ GET /api/public/miniapp-qrcode
 ```txt
 POST /api/app/auth/login
 POST /api/app/auth/refresh
+POST /api/app/auth/logout
 POST /api/app/auth/phone
 GET /api/app/auth/me
 ```
@@ -198,6 +199,8 @@ GET /api/admin/logs/operation
 复制 `.env.example` 为 `.env` 后填写本地配置。真实数据库密码、JWT Secret、小程序密钥等敏感信息不要提交。
 
 文件上传使用腾讯云 COS 服务端中转模式，需要配置 `TENCENT_COS_SECRET_ID`、`TENCENT_COS_SECRET_KEY`、`TENCENT_COS_BUCKET`、`TENCENT_COS_REGION`。如使用 CDN 或自定义域名，可配置 `TENCENT_COS_PUBLIC_BASE_URL`。
+
+小程序登录和手机号授权使用微信服务端接口，需要配置 `WECHAT_MINIAPP_APP_ID`、`WECHAT_MINIAPP_APP_SECRET`。本地临时调试可将 `WECHAT_MINIAPP_MOCK_LOGIN` 设为 `true`，真实联调和部署必须保持 `false`。
 
 当前初始化阶段只保留 MySQL 配置占位，后续数据库初始化时再接入连接插件和迁移脚本。
 

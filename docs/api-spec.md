@@ -1184,6 +1184,12 @@ POST /api/app/auth/login
 }
 ```
 
+说明：
+
+- `code` 来自小程序 `wx.login`。
+- 服务端通过微信 `jscode2session` 换取真实 `openid` 后创建或读取 `users` 记录。
+- 服务端需要配置 `WECHAT_MINIAPP_APP_ID` 和 `WECHAT_MINIAPP_APP_SECRET`。
+
 ### 10.1.2 手机号授权
 
 ```txt
@@ -1208,6 +1214,7 @@ POST /api/app/auth/phone
 说明：
 
 - `phoneCode` 来自小程序 `getPhoneNumber` 授权回调的 `detail.code`。
+- `phoneCode` 与 `wx.login` 的 `code` 不是同一个凭证，不能混用。
 - 服务端通过微信接口换取真实手机号后写入 `users.phone`，并将 `phoneBound` 更新为 `true`。
 - 服务端需要配置 `WECHAT_MINIAPP_APP_ID` 和 `WECHAT_MINIAPP_APP_SECRET`。
 

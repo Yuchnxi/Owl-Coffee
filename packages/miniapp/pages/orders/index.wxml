@@ -15,6 +15,19 @@
     <van-loading size="22px" color="#e97416">订单加载中</van-loading>
   </view>
 
+  <view class="empty-card login-card" wx:elif="{{needLogin}}">
+    <view class="empty-title">登录后查看订单</view>
+    <view class="empty-desc">退出登录后不会自动恢复账号，需要你主动登录后再查看历史订单。</view>
+    <van-button
+      custom-class="menu-button"
+      custom-style="width: 240rpx; height: 70rpx; border: 0; border-radius: 10rpx; background: #e97416; color: #ffffff; font-size: 25rpx; font-weight: 700;"
+      loading="{{loading}}"
+      bind:click="handleLoginAndLoadOrders"
+    >
+      登录查看订单
+    </van-button>
+  </view>
+
   <view class="order-list" wx:elif="{{orderList.length}}">
     <view class="order-card" wx:for="{{orderList}}" wx:key="id">
       <view class="order-head">

@@ -5,7 +5,7 @@ const Controller = require('egg').Controller
 const GENDER_LIST = ['male', 'female', 'secret']
 
 class AppAuthController extends Controller {
-  // 小程序演示登录
+  // 小程序微信登录
   async login() {
     const { ctx } = this
     const { code } = ctx.request.body || {}
@@ -52,7 +52,7 @@ class AppAuthController extends Controller {
     ctx.success({})
   }
 
-  // 小程序手机号授权演示
+  // 小程序手机号授权
   async phone() {
     const { ctx } = this
     const { phoneCode } = ctx.request.body || {}
