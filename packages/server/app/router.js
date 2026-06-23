@@ -101,8 +101,11 @@ module.exports = app => {
   // 小程序鉴权
   router.post('/api/app/auth/login', controller.app.auth.login)
   router.post('/api/app/auth/refresh', controller.app.auth.refresh)
+  router.post('/api/app/auth/logout', appAuth, controller.app.auth.logout)
   router.post('/api/app/auth/phone', appAuth, controller.app.auth.phone)
   router.get('/api/app/auth/me', appAuth, controller.app.auth.me)
+  router.put('/api/app/auth/profile', appAuth, controller.app.auth.profile)
+  router.post('/api/app/uploads', appAuth, controller.app.upload.create)
 
   // 小程序商品浏览
   router.get('/api/app/categories', controller.app.category.index)

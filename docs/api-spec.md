@@ -288,7 +288,7 @@ POST /api/admin/uploads
 | 字段 | 类型 | 必填 | 说明 |
 |---|---|---:|---|
 | `file` | file | 是 | 上传文件 |
-| `bizType` | string | 是 | `product` / `logo` / `store` / `website` |
+| `bizType` | string | 是 | `product` / `logo` / `store` / `website` / `avatar` |
 
 响应：
 
@@ -750,6 +750,7 @@ GET /api/admin/users
 | `id` | 用户 ID，`user_xxx` |
 | `avatarUrl` | 头像 |
 | `nickname` | 昵称 |
+| `gender` | 性别，`male` / `female` / `secret` |
 | `phone` | 手机号 |
 | `orderCount` | 订单数 |
 | `totalConsumeAmount` | 累计消费金额 |
@@ -1204,10 +1205,89 @@ POST /api/app/auth/phone
 | `phone` | 授权手机号 |
 | `phoneBound` | 是否已绑定手机号 |
 
-### 10.1.3 当前用户
+说明：
+
+- `phoneCode` 来自小程序 `getPhoneNumber` 授权回调的 `detail.code`。
+- 服务端通过微信接口换取真实手机号后写入 `users.phone`，并将 `phoneBound` 更新为 `true`。
+- 服务端需要配置 `WECHAT_MINIAPP_APP_ID` 和 `WECHAT_MINIAPP_APP_SECRET`。
+
+### 10.1.3 退出登录
+
+```txt
+POST /api/app/auth/logout
+```
+
+说明：
+
+- 需要 Bearer Token。
+- 服务端废弃当前小程序用户的 refreshToken。
+- 小程序端退出时需要同步清理本地 `accessToken`、`refreshToken` 和当前用户缓存。
+
+### 10.1.4 当前用户
 
 ```txt
 GET /api/app/auth/me
+```
+
+响应字段：
+
+| 字段 | 说明 |
+|---|---|
+| `id` | 用户 ID |
+| `nickname` | 昵称 |
+| `avatarUrl` | 头像 |
+| `gender` | 性别，`male` / `female` / `secret` |
+| `phone` | 手机号 |
+| `phoneBound` | 是否已绑定手机号 |
+| `userStatus` | 用户状态 |
+
+### 10.1.4 更新当前用户资料
+
+```txt
+PUT /api/app/auth/profile
+```
+
+请求体：
+
+```json
+{
+  "nickname": "待补充",
+  "avatarUrl": "https://cdn.example.com/uploads/avatar/2026/06/23/file_xxx.png",
+  "gender": "secret"
+}
+```
+
+说明：当前维护昵称、头像和性别；性别取值为 `male`、`female`、`secret`。
+
+### 10.1.5 小程序头像上传
+
+```txt
+POST /api/app/uploads
+```
+
+说明：小程序端上传使用服务端中转到腾讯云 COS，当前 `bizType` 仅支持 `avatar`。
+
+请求：
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| `file` | file | 是 | 上传头像文件 |
+| `bizType` | string | 是 | `avatar` |
+
+响应：
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "fileId": "file_xxx",
+    "url": "https://cdn.example.com/uploads/avatar/2026/06/23/file_xxx.png",
+    "name": "avatar.png",
+    "size": 102400,
+    "mimeType": "image/png"
+  }
+}
 ```
 
 ---

@@ -1,5 +1,3 @@
-const { bindPhone } = require('../../api/auth')
-
 Page({
   data: {
     // 当前用户信息
@@ -27,48 +25,11 @@ Page({
     this.setData({ loading: true })
 
     try {
-      const user = await getApp().ensureLogin()
+      const user = await getApp().restoreLogin()
       this.setData({ user: user || {} })
     } catch (err) {
       wx.showToast({
         title: err.message || '登录失败',
-        icon: 'none',
-      })
-    } finally {
-      this.setData({ loading: false })
-    }
-  },
-
-  // 处理微信手机号授权
-  async handlePhoneAuthorization(event) {
-    const phoneCode = (event.detail || {}).code
-
-    if (!phoneCode) {
-      wx.showToast({
-        title: '已取消手机号授权',
-        icon: 'none',
-      })
-      return
-    }
-
-    this.setData({ loading: true })
-
-    try {
-      const result = await bindPhone(phoneCode)
-      const user = {
-        ...(this.data.user || {}),
-        ...result,
-      }
-
-      getApp().globalData.currentUser = user
-      this.setData({ user })
-      wx.showToast({
-        title: '授权成功',
-        icon: 'success',
-      })
-    } catch (err) {
-      wx.showToast({
-        title: err.message || '授权失败',
         icon: 'none',
       })
     } finally {
@@ -83,12 +44,32 @@ Page({
     })
   },
 
+  // 打开个人资料页面
+  async handleOpenProfile() {
+    try {
+      await getApp().ensureLogin()
+      wx.navigateTo({
+        url: '/pages/profile/index',
+      })
+    } catch (err) {
+      wx.showToast({
+        title: err.message || '登录失败',
+        icon: 'none',
+      })
+    }
+  },
+
   // 处理我的页功能点击
   handleMenuTap(event) {
     const { key } = event.currentTarget.dataset
 
     if (key === 'orders' || key === 'pickup') {
       this.handleOpenOrders()
+      return
+    }
+
+    if (key === 'settings') {
+      this.handleOpenProfile()
       return
     }
 

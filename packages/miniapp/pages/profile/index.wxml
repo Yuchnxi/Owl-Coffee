@@ -1,0 +1,106 @@
+<view class="profile-page">
+  <view class="nav-bar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="nav-back" bindtap="handleBack">
+      <van-icon name="arrow-left" size="31px" color="#111111" />
+    </view>
+    <view class="nav-title">个人资料</view>
+  </view>
+
+  <view class="profile-card">
+    <view class="profile-row avatar-row">
+      <view class="row-label">头像</view>
+      <view class="row-value">
+        <van-uploader
+          class="avatar-uploader"
+          accept="image"
+          max-count="1"
+          show-upload="{{false}}"
+          deletable="{{false}}"
+          disabled="{{uploading}}"
+          bind:after-read="handleAvatarRead"
+        >
+          <view class="avatar-preview">
+            <image wx:if="{{user.avatarUrl}}" class="avatar-image" src="{{user.avatarUrl}}" mode="aspectFill" />
+            <view wx:else class="default-avatar">
+              <view class="owl-eye-row">
+                <view class="owl-eye"></view>
+                <view class="owl-eye"></view>
+              </view>
+              <view class="owl-beak"></view>
+            </view>
+          </view>
+        </van-uploader>
+        <van-icon name="arrow" size="22px" color="#9b9b9b" />
+      </view>
+    </view>
+
+    <view class="profile-row" bindtap="handleEditNickname">
+      <view class="row-label">用户名称</view>
+      <view class="row-value">
+        <text class="row-text">{{displayNickname}}</text>
+        <van-icon name="arrow" size="22px" color="#9b9b9b" />
+      </view>
+    </view>
+
+    <view class="profile-row" bindtap="handleOpenGenderPicker">
+      <view class="row-label">性别</view>
+      <view class="row-value">
+        <text class="row-text">{{displayGender}}</text>
+        <van-icon name="arrow" size="22px" color="#9b9b9b" />
+      </view>
+    </view>
+
+    <view class="profile-row phone-row">
+      <view class="row-label">关联手机</view>
+      <view class="row-value">
+        <text class="row-text">{{displayPhone}}</text>
+        <van-icon name="arrow" size="22px" color="#9b9b9b" />
+      </view>
+      <van-button
+        wx:if="{{!user.phoneBound}}"
+        custom-class="phone-auth-button"
+        open-type="getPhoneNumber"
+        loading="{{loading}}"
+        bind:getphonenumber="handlePhoneAuthorization"
+      />
+    </view>
+
+    <view class="profile-row account-row">
+      <view class="row-label">账号管理</view>
+      <view class="row-value">
+        <van-icon name="arrow" size="22px" color="#9b9b9b" />
+      </view>
+    </view>
+  </view>
+
+  <view class="logout-area">
+    <van-button
+      custom-class="logout-button"
+      custom-style="height: 86rpx; border: 0; border-radius: 999rpx; background: linear-gradient(180deg, #b87535 0%, #a76325 100%); color: #ffffff; font-size: 30rpx; font-weight: 600; box-shadow: inset 0 2rpx 0 rgba(255, 255, 255, 0.24), 0 14rpx 24rpx rgba(126, 75, 30, 0.16);"
+      round
+      block
+      bind:click="handleLogout"
+    >
+      退出登录
+    </van-button>
+  </view>
+
+  <van-popup
+    show="{{genderPickerVisible}}"
+    position="bottom"
+    round
+    close-on-click-overlay
+    bind:close="handleCloseGenderPicker"
+  >
+    <van-picker
+      show-toolbar
+      title="选择性别"
+      columns="{{genderColumns}}"
+      default-index="{{genderPickerIndex}}"
+      confirm-button-text="确定"
+      cancel-button-text="取消"
+      bind:confirm="handleConfirmGender"
+      bind:cancel="handleCloseGenderPicker"
+    />
+  </van-popup>
+</view>

@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS users (
   unionid VARCHAR(128) NULL,
   nickname VARCHAR(64) NULL,
   avatar_url VARCHAR(512) NULL,
+  gender VARCHAR(16) NOT NULL DEFAULT 'secret',
   phone VARCHAR(32) NULL,
   phone_bound TINYINT(1) NOT NULL DEFAULT 0,
   user_status VARCHAR(32) NOT NULL,
@@ -98,6 +99,7 @@ CREATE TABLE IF NOT EXISTS users (
   updated_by VARCHAR(32) NULL,
   UNIQUE KEY uk_users_openid (openid),
   KEY idx_users_phone (phone),
+  KEY idx_users_gender (gender),
   KEY idx_users_status (user_status)
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 

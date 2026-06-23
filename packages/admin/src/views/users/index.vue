@@ -54,6 +54,9 @@
         <el-table-column label="手机号" min-width="130" align="center">
           <template #default="{ row }">{{ row.phone || '待补充' }}</template>
         </el-table-column>
+        <el-table-column label="性别" min-width="90" align="center">
+          <template #default="{ row }">{{ getGenderLabel(row.gender) }}</template>
+        </el-table-column>
         <el-table-column prop="orderCount" label="订单数" min-width="100" align="center" />
         <el-table-column label="累计消费" min-width="120" align="center">
           <template #default="{ row }">
@@ -124,6 +127,7 @@
           <el-descriptions-item label="用户 ID">{{ currentUser.id }}</el-descriptions-item>
           <el-descriptions-item label="微信 OpenID">{{ currentUser.openidBound ? '已绑定' : '未绑定' }}</el-descriptions-item>
           <el-descriptions-item label="微信 UnionID">{{ currentUser.unionidBound ? '已绑定' : '未绑定' }}</el-descriptions-item>
+          <el-descriptions-item label="性别">{{ getGenderLabel(currentUser.gender) }}</el-descriptions-item>
           <el-descriptions-item label="手机号授权">{{ currentUser.phoneBound ? '已授权' : '未授权' }}</el-descriptions-item>
           <el-descriptions-item label="订单数">{{ currentUser.orderCount || 0 }}</el-descriptions-item>
           <el-descriptions-item label="累计消费">￥{{ formatMoney(currentUser.totalConsumeAmount) }}</el-descriptions-item>
@@ -249,6 +253,17 @@ async function handleToggleStatus(row) {
 // 获取用户状态文案
 function getUserStatusLabel(status) {
   return status === 'normal' ? '正常' : '禁用'
+}
+
+// 获取性别文案
+function getGenderLabel(gender) {
+  const genderMap = {
+    male: '男',
+    female: '女',
+    secret: '保密'
+  }
+
+  return genderMap[gender] || '保密'
 }
 
 // 格式化金额

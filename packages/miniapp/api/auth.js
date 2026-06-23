@@ -18,6 +18,14 @@ function refreshAccessToken(refreshToken) {
   })
 }
 
+// 退出当前小程序登录态
+function logout() {
+  return request({
+    url: '/api/app/auth/logout',
+    method: 'POST',
+  })
+}
+
 // 绑定微信手机号
 function bindPhone(phoneCode) {
   return request({
@@ -34,9 +42,20 @@ function fetchCurrentUser() {
   })
 }
 
+// 更新当前登录用户资料
+function updateProfile(data) {
+  return request({
+    url: '/api/app/auth/profile',
+    method: 'PUT',
+    data,
+  })
+}
+
 module.exports = {
   login,
   refreshAccessToken,
+  logout,
   bindPhone,
   fetchCurrentUser,
+  updateProfile,
 }

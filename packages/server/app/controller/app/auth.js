@@ -2,6 +2,8 @@
 
 const Controller = require('egg').Controller
 
+const GENDER_LIST = ['male', 'female', 'secret']
+
 class AppAuthController extends Controller {
   // 小程序演示登录
   async login() {
@@ -41,6 +43,15 @@ class AppAuthController extends Controller {
     ctx.success(result)
   }
 
+  // 小程序退出登录
+  async logout() {
+    const { ctx } = this
+
+    await ctx.service.appAuth.logout(ctx.state.appUser.id)
+
+    ctx.success({})
+  }
+
   // 小程序手机号授权演示
   async phone() {
     const { ctx } = this
@@ -72,6 +83,49 @@ class AppAuthController extends Controller {
     }
 
     ctx.success(ctx.service.appAuth.formatCurrentUser(user))
+  }
+
+  // 更新当前小程序用户资料
+  async profile() {
+    const { ctx } = this
+    const payload = this.normalizeProfilePayload(ctx.request.body || {})
+    const error = this.validateProfilePayload(payload)
+
+    if (error) {
+      ctx.status = 400
+      ctx.fail(10001, error)
+      return
+    }
+
+    const user = await ctx.service.appAuth.updateProfile(ctx.state.appUser.id, payload)
+
+    ctx.success(ctx.service.appAuth.formatCurrentUser(user))
+  }
+
+  // 归一化资料更新参数
+  normalizeProfilePayload(body) {
+    return {
+      nickname: typeof body.nickname === 'string' ? body.nickname.trim() : '',
+      avatarUrl: typeof body.avatarUrl === 'string' ? body.avatarUrl.trim() : '',
+      gender: typeof body.gender === 'string' ? body.gender.trim() : '',
+    }
+  }
+
+  // 校验资料更新参数
+  validateProfilePayload(payload) {
+    if (payload.nickname && payload.nickname.length > 64) {
+      return '用户名称不能超过 64 个字符'
+    }
+
+    if (payload.avatarUrl && payload.avatarUrl.length > 512) {
+      return '头像地址不能超过 512 个字符'
+    }
+
+    if (payload.gender && !GENDER_LIST.includes(payload.gender)) {
+      return '性别参数不正确'
+    }
+
+    return ''
   }
 }
 

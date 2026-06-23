@@ -36,7 +36,8 @@ class AppAuthService extends Service {
           phone_bound AS phoneBound,
           user_status AS userStatus,
           nickname,
-          avatar_url AS avatarUrl
+          avatar_url AS avatarUrl,
+          gender
         FROM users
         WHERE id = :userId
           AND deleted_at IS NULL
@@ -59,7 +60,8 @@ class AppAuthService extends Service {
           phone_bound AS phoneBound,
           user_status AS userStatus,
           nickname,
-          avatar_url AS avatarUrl
+          avatar_url AS avatarUrl,
+          gender
         FROM users
         WHERE openid = :openid
           AND deleted_at IS NULL
@@ -83,6 +85,7 @@ class AppAuthService extends Service {
           unionid,
           nickname,
           avatar_url,
+          gender,
           phone,
           phone_bound,
           user_status,
@@ -101,6 +104,7 @@ class AppAuthService extends Service {
           NULL,
           NULL,
           NULL,
+          'secret',
           NULL,
           0,
           'normal',
@@ -120,9 +124,9 @@ class AppAuthService extends Service {
     return this.findUserById(id)
   }
 
-  // 绑定演示手机号
-  async bindPhone(userId) {
-    const phone = '待补充'
+  // 绑定微信授权手机号
+  async bindPhone(userId, phoneCode) {
+    const phone = await this.fetchWechatPhoneNumber(phoneCode)
 
     await this.app.mysql.execute(
       `
@@ -139,6 +143,116 @@ class AppAuthService extends Service {
     )
 
     return this.findUserById(userId)
+  }
+
+  // 通过微信手机号授权 code 换取真实手机号
+  async fetchWechatPhoneNumber(phoneCode) {
+    const accessToken = await this.getWechatAccessToken()
+    const response = await fetch(
+      `https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token=${accessToken}`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ code: phoneCode }),
+      }
+    )
+    const data = await response.json()
+
+    if (data.errcode) {
+      this.throwHttpError(400, `微信手机号授权失败：${data.errmsg || data.errcode}`)
+    }
+
+    const phoneInfo = data.phone_info || {}
+    const phone = phoneInfo.purePhoneNumber || phoneInfo.phoneNumber
+
+    if (!phone) {
+      this.throwHttpError(400, '微信手机号授权未返回手机号')
+    }
+
+    return phone
+  }
+
+  // 获取并缓存微信接口调用凭证
+  async getWechatAccessToken() {
+    const { appId, appSecret } = this.config.wechatMiniapp
+
+    if (!appId || !appSecret || appId === '待补充' || appSecret === '待补充') {
+      this.throwHttpError(400, '请先配置微信小程序 appId 和 appSecret')
+    }
+
+    const cache = this.app.wechatMiniappAccessToken
+
+    if (cache && cache.expiresAt > Date.now() + 60 * 1000) {
+      return cache.accessToken
+    }
+
+    const url = 'https://api.weixin.qq.com/cgi-bin/token'
+      + `?grant_type=client_credential&appid=${encodeURIComponent(appId)}`
+      + `&secret=${encodeURIComponent(appSecret)}`
+    const response = await fetch(url)
+    const data = await response.json()
+
+    if (data.errcode) {
+      this.throwHttpError(400, `微信 access_token 获取失败：${data.errmsg || data.errcode}`)
+    }
+
+    if (!data.access_token) {
+      this.throwHttpError(400, '微信 access_token 获取失败')
+    }
+
+    this.app.wechatMiniappAccessToken = {
+      accessToken: data.access_token,
+      expiresAt: Date.now() + (Number(data.expires_in) || 7200) * 1000,
+    }
+
+    return data.access_token
+  }
+
+  // 更新小程序用户资料
+  async updateProfile(userId, data = {}) {
+    await this.app.mysql.execute(
+      `
+        UPDATE users
+        SET
+          nickname = :nickname,
+          avatar_url = :avatarUrl,
+          gender = COALESCE(NULLIF(:gender, ''), gender),
+          updated_at = NOW(3),
+          updated_by = :userId
+        WHERE id = :userId
+          AND deleted_at IS NULL
+      `,
+      {
+        userId,
+        nickname: data.nickname || null,
+        avatarUrl: data.avatarUrl || null,
+        gender: data.gender || '',
+      }
+    )
+
+    return this.findUserById(userId)
+  }
+
+  // 废弃当前小程序用户所有 refreshToken
+  async logout(userId) {
+    await this.app.mysql.execute(
+      `
+        UPDATE auth_refresh_tokens
+        SET revoked_at = NOW(3)
+        WHERE subject_id = :userId
+          AND subject_type = 'app_user'
+          AND revoked_at IS NULL
+      `,
+      { userId }
+    )
+  }
+
+  // 抛出带 HTTP 状态码的业务错误
+  throwHttpError(status, message) {
+    const error = new Error(message)
+
+    error.status = status
+    throw error
   }
 
   // 保存小程序 refreshToken 哈希
@@ -237,6 +351,7 @@ class AppAuthService extends Service {
       id: user.id,
       nickname: user.nickname,
       avatarUrl: user.avatarUrl,
+      gender: user.gender || 'secret',
       phone: user.phone,
       phoneBound: Boolean(user.phoneBound),
       userStatus: user.userStatus,

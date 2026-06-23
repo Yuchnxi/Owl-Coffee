@@ -49,6 +49,7 @@
 }
 
 .avatar {
+  overflow: hidden;
   display: flex;
   flex-shrink: 0;
   align-items: center;
@@ -62,9 +63,19 @@
   box-shadow: inset 0 -16rpx 22rpx rgba(89, 55, 32, 0.18);
 }
 
+.avatar-image {
+  display: block;
+  width: 120rpx;
+  height: 120rpx;
+}
+
 .avatar-eye-row {
   display: flex;
   gap: 14rpx;
+}
+
+.avatar-image + .avatar-eye-row {
+  display: none;
 }
 
 .avatar-eye {

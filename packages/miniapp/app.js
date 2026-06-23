@@ -25,6 +25,9 @@ App({
   // 是否正在提交订单
   checkoutInProgress: false,
 
+  // 登录状态变更代次
+  authGeneration: 0,
+
   globalData: {
     // 当前登录用户
     currentUser: null,
@@ -33,7 +36,7 @@ App({
   // 确保用户已完成微信登录
   ensureLogin() {
     if (!this.loginPromise) {
-      this.loginPromise = this.resolveLogin().finally(() => {
+      this.loginPromise = this.resolveLogin({ allowCreate: true }).finally(() => {
         this.loginPromise = null
       })
     }
@@ -41,39 +44,63 @@ App({
     return this.loginPromise
   },
 
+  // 仅恢复本地已有登录态，不主动创建新登录
+  restoreLogin() {
+    if (!wx.getStorageSync('accessToken') && !wx.getStorageSync('refreshToken')) {
+      this.globalData.currentUser = null
+      return Promise.resolve(null)
+    }
+
+    return this.resolveLogin({ allowCreate: false })
+  },
+
   // 恢复或创建小程序登录态
-  async resolveLogin() {
+  async resolveLogin(options = {}) {
+    const generation = this.authGeneration
+    const allowCreate = options.allowCreate !== false
     const accessToken = wx.getStorageSync('accessToken')
 
     if (accessToken) {
       try {
         const user = await fetchCurrentUser()
-        this.globalData.currentUser = user
+        this.setCurrentUser(user, generation)
         return user
       } catch (err) {
         if (err.statusCode !== 401) {
           throw err
         }
 
-        const user = await this.tryRefreshLogin()
+        const user = await this.tryRefreshLogin(generation)
 
         if (user) return user
       }
     }
 
+    if (!allowCreate) {
+      this.globalData.currentUser = null
+      return null
+    }
+
     const code = await this.getLoginCode()
     const result = await login(code)
 
+    if (generation !== this.authGeneration) {
+      throw new Error('登录状态已变更')
+    }
+
     wx.setStorageSync('accessToken', result.accessToken)
     wx.setStorageSync('refreshToken', result.refreshToken)
-    this.globalData.currentUser = result.user
+
+    const user = await fetchCurrentUser()
+
+    this.setCurrentUser(user, generation)
     await this.syncLocalCart()
 
-    return result.user
+    return user
   },
 
   // 尝试刷新登录凭证
-  async tryRefreshLogin() {
+  async tryRefreshLogin(generation = this.authGeneration) {
     const refreshToken = wx.getStorageSync('refreshToken')
 
     if (!refreshToken) {
@@ -88,7 +115,7 @@ App({
       wx.setStorageSync('refreshToken', result.refreshToken)
 
       const user = await fetchCurrentUser()
-      this.globalData.currentUser = user
+      this.setCurrentUser(user, generation)
       return user
     } catch (err) {
       if (err.statusCode !== 401) {
@@ -99,6 +126,24 @@ App({
       wx.removeStorageSync('refreshToken')
       return null
     }
+  },
+
+  // 清理当前小程序登录态
+  clearLoginState() {
+    ++this.authGeneration
+    this.loginPromise = null
+    this.globalData.currentUser = null
+    wx.removeStorageSync('accessToken')
+    wx.removeStorageSync('refreshToken')
+  },
+
+  // 按登录代次写入当前用户，避免退出时被旧请求覆盖
+  setCurrentUser(user, generation) {
+    if (generation !== this.authGeneration) {
+      throw new Error('登录状态已变更')
+    }
+
+    this.globalData.currentUser = user
   },
 
   // 登录后合并本地与服务端购物车

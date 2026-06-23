@@ -4,7 +4,8 @@
     "pages/menu/index",
     "pages/cart/index",
     "pages/orders/index",
-    "pages/mine/index"
+    "pages/mine/index",
+    "pages/profile/index"
   ],
   "window": {
     "navigationBarTitleText": "Owl Coffee",

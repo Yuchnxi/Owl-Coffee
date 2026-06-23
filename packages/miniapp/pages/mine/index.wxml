@@ -1,27 +1,20 @@
 <view class="mine-page">
   <view class="hero-section">
     <view class="hero-top">
-      <view class="profile-content">
+      <view class="profile-content" bindtap="handleOpenProfile">
         <view class="avatar">
+          <image wx:if="{{user.avatarUrl}}" class="avatar-image" src="{{user.avatarUrl}}" mode="aspectFill" />
           <view class="avatar-eye-row">
             <view class="avatar-eye"></view>
             <view class="avatar-eye"></view>
           </view>
-          <view class="avatar-beak"></view>
+          <view wx:if="{{!user.avatarUrl}}" class="avatar-beak"></view>
         </view>
 
         <view class="profile-main">
           <view class="profile-name">{{user.phoneBound ? (user.nickname || 'Owl Coffee 用户') : '欢迎来到 Owl Coffee'}}</view>
         </view>
       </view>
-
-      <button
-        wx:if="{{!user.phoneBound}}"
-        class="auth-hit-area"
-        open-type="getPhoneNumber"
-        bindgetphonenumber="handlePhoneAuthorization"
-        loading="{{loading}}"
-      ></button>
     </view>
   </view>
 
