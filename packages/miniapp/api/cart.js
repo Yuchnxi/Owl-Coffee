@@ -25,8 +25,36 @@ function addCartItem(data) {
   })
 }
 
+// 更新购物车单项数量
+function updateCartItem(cartItemId, quantity) {
+  return request({
+    url: `/api/app/cart/items/${cartItemId}`,
+    method: 'PUT',
+    data: { quantity },
+  })
+}
+
+// 删除购物车单项
+function deleteCartItem(cartItemId) {
+  return request({
+    url: `/api/app/cart/items/${cartItemId}`,
+    method: 'DELETE',
+  })
+}
+
+// 清空服务端购物车
+function clearRemoteCart() {
+  return request({
+    url: '/api/app/cart',
+    method: 'DELETE',
+  })
+}
+
 module.exports = {
+  clearRemoteCart,
+  deleteCartItem,
   fetchCart,
   syncCart,
   addCartItem,
+  updateCartItem,
 }

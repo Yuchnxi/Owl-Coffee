@@ -7,13 +7,14 @@ Page({
     // 我的页概览数据
     summaryList: [
       { key: 'orders', value: '--', label: '累计订单' },
-      { key: 'coupon', value: '待补充', label: '优惠券' },
+      { key: 'coupon', value: '查看', label: '优惠券' },
       { key: 'pickup', value: '--', label: '取餐码' },
     ],
 
     // 我的页服务列表
     menuList: [
       { key: 'orders', title: '我的订单', iconUrl: '/assets/iconfont/png/icon-order-list.png' },
+      { key: 'coupon', title: '我的优惠券', iconUrl: '/assets/iconfont/png/icon-order-current.png' },
       { key: 'pickup', title: '取餐信息', iconUrl: '/assets/iconfont/png/pickupInfo.png' },
       { key: 'service', title: '联系客服', iconUrl: '/assets/iconfont/png/icon-customer-service.png', badge: '待补充' },
       { key: 'settings', title: '设置', iconUrl: '/assets/iconfont/png/icon-settings.png' },
@@ -63,8 +64,22 @@ Page({
   handleMenuTap(event) {
     const { key } = event.currentTarget.dataset
 
-    if (key === 'orders' || key === 'pickup') {
+    if (key === 'orders') {
       this.handleOpenOrders()
+      return
+    }
+
+    if (key === 'coupon') {
+      wx.navigateTo({
+        url: '/pages/coupons/index',
+      })
+      return
+    }
+
+    if (key === 'pickup') {
+      wx.navigateTo({
+        url: '/pages/pickup-info/index',
+      })
       return
     }
 

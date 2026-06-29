@@ -4,6 +4,9 @@
     "pages/menu/index",
     "pages/cart/index",
     "pages/orders/index",
+    "pages/order-detail/index",
+    "pages/coupons/index",
+    "pages/pickup-info/index",
     "pages/mine/index",
     "pages/profile/index"
   ],

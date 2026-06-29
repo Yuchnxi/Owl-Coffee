@@ -19,7 +19,7 @@
 .status-tabs-inner {
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: flex-start;
   height: 92rpx;
   padding: 0 20rpx;
 }
@@ -27,6 +27,8 @@
 .status-tab {
   position: relative;
   min-width: 120rpx;
+  margin-right: 14rpx;
+  padding: 0 12rpx;
   color: #74685f;
   font-size: 26rpx;
   line-height: 58rpx;
@@ -68,6 +70,10 @@
   border-radius: 16rpx;
   background: #fff;
   box-shadow: 0 10rpx 30rpx rgba(83, 55, 35, 0.05);
+}
+
+.order-card:active {
+  background: #fffaf4;
 }
 
 .order-head,
@@ -204,7 +210,7 @@
   justify-content: center;
   width: 164rpx;
   height: 60rpx;
-  margin: 0;
+  margin: 0 0 0 14rpx;
   border-radius: 10rpx;
   background: #fff;
   font-size: 23rpx;
@@ -214,6 +220,11 @@
 
 .order-button::after {
   border-radius: 10rpx;
+}
+
+.order-button.ghost {
+  background: #fff;
+  color: #7a6a5f;
 }
 
 .order-button.primary {

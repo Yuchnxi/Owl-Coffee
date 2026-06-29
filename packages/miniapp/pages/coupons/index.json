@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "我的优惠券",
+  "usingComponents": {
+    "van-button": "@vant/weapp/button/index",
+    "van-loading": "@vant/weapp/loading/index"
+  }
+}

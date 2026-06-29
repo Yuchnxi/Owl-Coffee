@@ -59,7 +59,7 @@
       <view class="option-row" bindtap="handleCouponTap">
         <view class="row-label">优惠</view>
         <view class="option-value">
-          <text>暂无可用优惠</text>
+          <text class="option-copy">{{selectedCoupon ? selectedCoupon.name : (availableCoupons.length ? availableCoupons.length + ' 张可用' : '暂无可用优惠')}}</text>
           <text class="option-arrow">›</text>
         </view>
       </view>
@@ -83,7 +83,7 @@
       </view>
       <view class="amount-row payable-row">
         <view>应付金额</view>
-        <view class="payable-value">{{totalAmountText}}</view>
+        <view class="payable-value">{{payableAmountText}}</view>
       </view>
     </view>
   </block>
@@ -95,9 +95,9 @@
   </view>
 
   <view class="checkout-bar" wx:if="{{cartItems.length}}">
-    <view class="checkout-total">
-      <view class="total-label">合计</view>
-      <view class="total-price">{{totalAmountText}}</view>
+      <view class="checkout-total">
+        <view class="total-label">合计</view>
+      <view class="total-price">{{payableAmountText}}</view>
       <view wx:if="{{needLogin}}" class="login-hint">登录后提交订单</view>
     </view>
     <view class="checkout-divider"></view>
@@ -128,6 +128,41 @@
         <button class="remark-button cancel" bindtap="handleCloseRemark">取消</button>
         <button class="remark-button confirm" bindtap="handleSaveRemark">确认</button>
       </view>
+    </view>
+  </view>
+
+  <view class="coupon-mask" wx:if="{{couponPanelVisible}}" bindtap="handleCloseCouponPanel">
+    <view class="coupon-panel" catchtap="handlePreventTap">
+      <view class="coupon-head">
+        <view class="coupon-title">选择优惠券</view>
+        <view class="coupon-close" bindtap="handleCloseCouponPanel">×</view>
+      </view>
+
+      <view class="coupon-list" wx:if="{{availableCoupons.length}}">
+        <view
+          wx:for="{{availableCoupons}}"
+          wx:key="id"
+          class="coupon-item {{selectedCoupon && selectedCoupon.id === item.id ? 'active' : ''}}"
+          data-coupon-id="{{item.id}}"
+          bindtap="handleSelectCoupon"
+        >
+          <view class="coupon-discount">{{item.discountText}}</view>
+          <view class="coupon-info">
+            <view class="coupon-name">{{item.name}}</view>
+            <view class="coupon-meta">{{item.thresholdText}}</view>
+            <view class="coupon-meta">有效期至 {{item.validEndText}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="coupon-empty" wx:else>
+        {{couponLoading ? '优惠券加载中' : '暂无可用优惠券'}}
+      </view>
+
+      <van-button
+        custom-style="width: 100%; height: 78rpx; border: 0; border-radius: 10rpx; background: #f3ece4; color: #6f6258; font-size: 25rpx; font-weight: 700;"
+        bind:click="handleClearCoupon"
+      >不使用优惠券</van-button>
     </view>
   </view>
 </view>

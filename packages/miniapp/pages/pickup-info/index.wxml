@@ -1,0 +1,41 @@
+<view class="pickup-page">
+  <view class="loading-state" wx:if="{{loading}}">
+    <van-loading size="22px" color="#e97416">取餐信息加载中</van-loading>
+  </view>
+
+  <view class="empty-card" wx:elif="{{needLogin}}">
+    <view class="empty-title">登录后查看取餐信息</view>
+    <van-button
+      custom-style="width: 240rpx; height: 70rpx; border: 0; border-radius: 10rpx; background: #e97416; color: #ffffff; font-size: 25rpx; font-weight: 700;"
+      bind:click="handleLogin"
+    >登录查看</van-button>
+  </view>
+
+  <view class="pickup-list" wx:elif="{{orderList.length}}">
+    <view class="pickup-card" wx:for="{{orderList}}" wx:key="id">
+      <view class="card-head">
+        <view class="order-no">{{item.orderNo}}</view>
+        <view class="status-pill">{{item.statusText}}</view>
+      </view>
+      <view class="pickup-code" wx:if="{{item.pickupCode}}">
+        取餐码 <text>{{item.pickupCode}}</text>
+      </view>
+      <view class="pickup-code muted" wx:else>支付完成后生成取餐码</view>
+      <view class="order-summary">{{item.itemSummary}}</view>
+      <view class="order-meta">
+        <text>{{item.createdAtText}}</text>
+        <text>{{item.payAmountText}}</text>
+      </view>
+      <van-button
+        custom-style="width: 100%; height: 70rpx; margin-top: 22rpx; border: 0; border-radius: 10rpx; background: #e97416; color: #ffffff; font-size: 25rpx; font-weight: 700;"
+        data-order-id="{{item.id}}"
+        bind:click="handleOpenDetail"
+      >查看详情</van-button>
+    </view>
+  </view>
+
+  <view class="empty-card" wx:else>
+    <view class="empty-title">暂无待取餐订单</view>
+    <view class="empty-desc">当前没有未完成订单</view>
+  </view>
+</view>

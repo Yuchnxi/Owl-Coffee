@@ -1,4 +1,10 @@
-const { fetchOrderDetail, fetchOrders, mockPay } = require('../../api/order')
+const {
+  cancelOrder,
+  confirmPickup,
+  fetchOrderDetail,
+  fetchOrders,
+  mockPay,
+} = require('../../api/order')
 const { fetchSkuAvailability } = require('../../api/product')
 const { addCartItem, getCartItems } = require('../../utils/cart')
 
@@ -27,8 +33,11 @@ Page({
     statusTabs: [
       { label: '全部', value: 'all' },
       { label: '待付款', value: 'pendingPayment' },
+      { label: '已支付', value: 'paid' },
       { label: '制作中', value: 'making' },
+      { label: '待取餐', value: 'readyForPickup' },
       { label: '已完成', value: 'completed' },
+      { label: '已取消', value: 'cancelled' },
     ],
     activeStatus: 'all',
 
@@ -37,6 +46,8 @@ Page({
     needLogin: false,
     loading: false,
     payingOrderId: '',
+    cancellingOrderId: '',
+    confirmingOrderId: '',
     reorderingOrderId: '',
   },
 
@@ -151,6 +162,75 @@ Page({
     }
   },
 
+  // 取消当前待付款订单
+  async handleCancelOrder(event) {
+    const { orderId } = event.currentTarget.dataset
+
+    if (!orderId || this.data.cancellingOrderId) return
+
+    const confirmed = await this.confirmAction('取消订单', '确认取消这笔待付款订单吗？')
+
+    if (!confirmed) return
+
+    this.setData({ cancellingOrderId: orderId })
+
+    try {
+      await cancelOrder(orderId)
+      wx.showToast({
+        title: '订单已取消',
+        icon: 'success',
+      })
+      await this.loadOrders()
+    } catch (err) {
+      wx.showToast({
+        title: err.message || '取消订单失败',
+        icon: 'none',
+      })
+    } finally {
+      this.setData({ cancellingOrderId: '' })
+    }
+  },
+
+  // 确认当前待取餐订单已取餐
+  async handleConfirmPickup(event) {
+    const { orderId } = event.currentTarget.dataset
+
+    if (!orderId || this.data.confirmingOrderId) return
+
+    const confirmed = await this.confirmAction('确认取餐', '确认已经取到这笔订单了吗？')
+
+    if (!confirmed) return
+
+    this.setData({ confirmingOrderId: orderId })
+
+    try {
+      await confirmPickup(orderId)
+      wx.showToast({
+        title: '已确认取餐',
+        icon: 'success',
+      })
+      await this.loadOrders()
+    } catch (err) {
+      wx.showToast({
+        title: err.message || '确认取餐失败',
+        icon: 'none',
+      })
+    } finally {
+      this.setData({ confirmingOrderId: '' })
+    }
+  },
+
+  // 打开订单详情页
+  handleOpenDetail(event) {
+    const { orderId } = event.currentTarget.dataset
+
+    if (!orderId) return
+
+    wx.navigateTo({
+      url: `/pages/order-detail/index?orderId=${orderId}`,
+    })
+  },
+
   // 将历史订单中的可售商品重新加入购物车
   async handleOrderAgain(event) {
     const { orderId } = event.currentTarget.dataset
@@ -224,6 +304,19 @@ Page({
     })
   },
 
+  // 弹出二次确认
+  confirmAction(title, content) {
+    return new Promise(resolve => {
+      wx.showModal({
+        title,
+        content,
+        confirmColor: '#e97416',
+        success: result => resolve(Boolean(result.confirm)),
+        fail: () => resolve(false),
+      })
+    })
+  },
+
   // 整理订单卡片展示数据
   formatOrder(order) {
     const items = (order.items || []).map(item => ({
@@ -239,6 +332,7 @@ Page({
       amountText: this.formatPrice(order.payAmount),
       createdAtText: this.formatTime(order.createdAt),
       isPendingPayment: order.orderStatus === 'pendingPayment',
+      isReadyForPickup: order.orderStatus === 'readyForPickup',
       isCompleted: order.orderStatus === 'completed',
     }
   },

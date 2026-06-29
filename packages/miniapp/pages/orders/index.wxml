@@ -29,7 +29,13 @@
   </view>
 
   <view class="order-list" wx:elif="{{orderList.length}}">
-    <view class="order-card" wx:for="{{orderList}}" wx:key="id">
+    <view
+      class="order-card"
+      wx:for="{{orderList}}"
+      wx:key="id"
+      data-order-id="{{item.id}}"
+      bindtap="handleOpenDetail"
+    >
       <view class="order-head">
         <view class="order-no">订单号：{{item.orderNo}}</view>
         <view class="order-status {{item.statusClass}}">{{item.statusText}}</view>
@@ -58,27 +64,43 @@
         <view>到店自提</view>
       </view>
 
-      <view class="order-action-row" wx:if="{{item.pickupCode || item.isPendingPayment || item.isCompleted}}">
+      <view class="order-action-row" wx:if="{{item.pickupCode || item.isPendingPayment || item.isReadyForPickup || item.isCompleted}}">
         <view class="pickup-code" wx:if="{{item.pickupCode}}">
           取餐码：<text>{{item.pickupCode}}</text>
         </view>
         <view class="action-spacer" wx:else></view>
-        <button
+        <van-button
           wx:if="{{item.isPendingPayment}}"
-          class="order-button primary"
-          loading="{{payingOrderId === item.id}}"
-          disabled="{{payingOrderId}}"
+          custom-class="order-button ghost"
+          loading="{{cancellingOrderId === item.id}}"
+          disabled="{{cancellingOrderId || payingOrderId}}"
           data-order-id="{{item.id}}"
-          bindtap="handleMockPay"
-        >模拟支付</button>
-        <button
+          catch:click="handleCancelOrder"
+        >取消订单</van-button>
+        <van-button
+          wx:if="{{item.isPendingPayment}}"
+          custom-class="order-button primary"
+          loading="{{payingOrderId === item.id}}"
+          disabled="{{payingOrderId || cancellingOrderId}}"
+          data-order-id="{{item.id}}"
+          catch:click="handleMockPay"
+        >模拟支付</van-button>
+        <van-button
+          wx:elif="{{item.isReadyForPickup}}"
+          custom-class="order-button primary"
+          loading="{{confirmingOrderId === item.id}}"
+          disabled="{{confirmingOrderId}}"
+          data-order-id="{{item.id}}"
+          catch:click="handleConfirmPickup"
+        >确认取餐</van-button>
+        <van-button
           wx:elif="{{item.isCompleted}}"
-          class="order-button success"
+          custom-class="order-button success"
           loading="{{reorderingOrderId === item.id}}"
           disabled="{{reorderingOrderId}}"
           data-order-id="{{item.id}}"
-          bindtap="handleOrderAgain"
-        >再来一单</button>
+          catch:click="handleOrderAgain"
+        >再来一单</van-button>
       </view>
 
       <view class="amount-row">

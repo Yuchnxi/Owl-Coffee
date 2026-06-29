@@ -1,0 +1,39 @@
+<view class="coupon-page">
+  <view class="status-tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="value"
+      class="status-tab {{activeStatus === item.value ? 'active' : ''}}"
+      data-status="{{item.value}}"
+      bindtap="handleTabChange"
+    >{{item.label}}</view>
+  </view>
+
+  <view class="loading-state" wx:if="{{loading}}">
+    <van-loading size="22px" color="#e97416">优惠券加载中</van-loading>
+  </view>
+
+  <view class="empty-card" wx:elif="{{needLogin}}">
+    <view class="empty-title">登录后查看优惠券</view>
+    <van-button
+      custom-style="width: 240rpx; height: 70rpx; border: 0; border-radius: 10rpx; background: #e97416; color: #ffffff; font-size: 25rpx; font-weight: 700;"
+      bind:click="handleLogin"
+    >登录查看</van-button>
+  </view>
+
+  <view class="coupon-list" wx:elif="{{couponList.length}}">
+    <view class="coupon-card" wx:for="{{couponList}}" wx:key="id">
+      <view class="coupon-discount">{{item.discountText}}</view>
+      <view class="coupon-info">
+        <view class="coupon-name">{{item.name}}</view>
+        <view class="coupon-meta">{{item.thresholdText}}</view>
+        <view class="coupon-meta">{{item.validText}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-card" wx:else>
+    <view class="empty-title">暂无优惠券</view>
+    <view class="empty-desc">当前分类还没有优惠券</view>
+  </view>
+</view>

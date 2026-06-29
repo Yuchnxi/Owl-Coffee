@@ -1,4 +1,5 @@
 const { createOrder, mockPay } = require('../../api/order')
+const { fetchAvailableCoupons } = require('../../api/coupon')
 const {
   getCartItems,
   getBuyNowItems,
@@ -13,8 +14,11 @@ Page({
     // 购物车商品列表
     cartItems: [],
     totalCount: 0,
+    totalAmount: 0,
+    payableAmount: 0,
     totalAmountText: '¥0.00',
     discountAmountText: '-¥0.00',
+    payableAmountText: '¥0.00',
     loading: false,
     submitting: false,
     needLogin: false,
@@ -24,6 +28,12 @@ Page({
     remark: '',
     remarkDraft: '',
     remarkVisible: false,
+
+    // 结算可用优惠券列表
+    availableCoupons: [],
+    selectedCoupon: null,
+    couponPanelVisible: false,
+    couponLoading: false,
   },
 
   // 页面加载时记录订单来源
@@ -56,6 +66,9 @@ Page({
       const user = await getApp().restoreLogin()
 
       this.setData({ needLogin: !user })
+      if (user) {
+        await this.loadAvailableCoupons()
+      }
     } catch (err) {
       wx.showToast({
         title: err.message || '登录状态恢复失败',
@@ -86,6 +99,7 @@ Page({
       const cartItems = await app.syncLocalCart()
 
       this.refreshCart(cartItems)
+      await this.loadAvailableCoupons()
     } catch (err) {
       wx.showToast({
         title: err.message || '登录状态恢复失败',
@@ -96,12 +110,44 @@ Page({
     }
   },
 
-  // 展示暂无可用优惠提示
-  handleCouponTap() {
-    wx.showToast({
-      title: '暂无可用优惠',
-      icon: 'none',
+  // 打开优惠券选择面板
+  async handleCouponTap() {
+    if (this.data.needLogin) {
+      wx.showToast({
+        title: '登录后选择优惠券',
+        icon: 'none',
+      })
+      return
+    }
+
+    await this.loadAvailableCoupons()
+    this.setData({ couponPanelVisible: true })
+  },
+
+  // 关闭优惠券选择面板
+  handleCloseCouponPanel() {
+    this.setData({ couponPanelVisible: false })
+  },
+
+  // 选择结算优惠券
+  handleSelectCoupon(event) {
+    const { couponId } = event.currentTarget.dataset
+    const selectedCoupon = this.data.availableCoupons.find(item => item.id === couponId) || null
+
+    this.setData({
+      selectedCoupon,
+      couponPanelVisible: false,
     })
+    this.updateAmountSummary()
+  },
+
+  // 不使用优惠券
+  handleClearCoupon() {
+    this.setData({
+      selectedCoupon: null,
+      couponPanelVisible: false,
+    })
+    this.updateAmountSummary()
   },
 
   // 更新购物车商品数量
@@ -121,6 +167,7 @@ Page({
 
       saveBuyNowItems(items)
       this.refreshCart(items)
+      this.loadAvailableCoupons()
       return
     }
 
@@ -128,6 +175,7 @@ Page({
 
     this.refreshCart(items)
     this.syncCartSilently(items)
+    this.loadAvailableCoupons()
   },
 
   // 删除购物车中的单个商品
@@ -140,6 +188,7 @@ Page({
 
       saveBuyNowItems(items)
       this.refreshCart(items)
+      this.loadAvailableCoupons()
       return
     }
 
@@ -147,6 +196,7 @@ Page({
 
     this.refreshCart(items)
     this.syncCartSilently(items)
+    this.loadAvailableCoupons()
   },
 
   // 打开订单备注编辑层
@@ -196,6 +246,7 @@ Page({
           sugarLevel: item.sugarLevel,
           quantity: item.quantity,
         })),
+        couponUserId: this.data.selectedCoupon ? this.data.selectedCoupon.id : null,
         remark: this.data.remark,
       })
       const payment = await mockPay(order.id, 'success')
@@ -295,8 +346,76 @@ Page({
     this.setData({
       cartItems,
       totalCount,
+      totalAmount,
       totalAmountText: this.formatPrice(totalAmount),
     })
+    this.updateAmountSummary()
+  },
+
+  // 加载当前金额可用优惠券
+  async loadAvailableCoupons() {
+    if (!wx.getStorageSync('accessToken') || !this.data.totalAmount) {
+      this.setData({
+        availableCoupons: [],
+        selectedCoupon: null,
+      })
+      this.updateAmountSummary()
+      return
+    }
+
+    this.setData({ couponLoading: true })
+
+    try {
+      const data = await fetchAvailableCoupons(this.data.totalAmount)
+      const availableCoupons = (data.list || data || []).map(item => this.formatCoupon(item))
+      const selectedCoupon = availableCoupons.find(item => {
+        return this.data.selectedCoupon && item.id === this.data.selectedCoupon.id
+      }) || null
+
+      this.setData({
+        availableCoupons,
+        selectedCoupon,
+      })
+      this.updateAmountSummary()
+    } catch (err) {
+      this.setData({
+        availableCoupons: [],
+        selectedCoupon: null,
+      })
+      this.updateAmountSummary()
+    } finally {
+      this.setData({ couponLoading: false })
+    }
+  },
+
+  // 更新优惠和应付金额展示
+  updateAmountSummary() {
+    const totalAmount = Number(this.data.totalAmount) || 0
+    const discountAmount = this.data.selectedCoupon ? Number(this.data.selectedCoupon.discountAmount) || 0 : 0
+    const payableAmount = Math.max(totalAmount - discountAmount, 0)
+
+    this.setData({
+      payableAmount,
+      discountAmountText: `-${this.formatPrice(discountAmount)}`,
+      payableAmountText: this.formatPrice(payableAmount),
+    })
+  },
+
+  // 整理优惠券展示数据
+  formatCoupon(coupon) {
+    const thresholdAmount = Number(coupon.thresholdAmount) || 0
+    const discountAmount = Number(coupon.discountAmount) || 0
+    const discountText = coupon.couponType === 'discountRate'
+      ? `${Number(coupon.discountRate) || 0}折`
+      : this.formatPrice(discountAmount)
+
+    return {
+      ...coupon,
+      thresholdText: thresholdAmount > 0 ? `满${this.formatPrice(thresholdAmount)}可用` : '无门槛',
+      discountAmount,
+      discountText,
+      validEndText: this.formatTime(coupon.validEndAt),
+    }
   },
 
   // 已登录时静默同步购物车
@@ -316,5 +435,12 @@ Page({
     const value = Number(price) || 0
 
     return `¥${value.toFixed(2)}`
+  },
+
+  // 格式化日期展示
+  formatTime(value) {
+    if (!value) return '有效期待补充'
+
+    return value.replace('T', ' ').replace(/\.\d{3}Z$/, '')
   },
 })
