@@ -115,6 +115,16 @@ const defaultMenus = [
           title: '优惠券管理'
         },
         children: []
+      },
+      {
+        id: 'banner_management',
+        name: '轮播图管理',
+        path: '/marketing/banners',
+        icon: 'Picture',
+        meta: {
+          title: '轮播图管理'
+        },
+        children: []
       }
     ]
   },
@@ -230,11 +240,11 @@ function normalizeMenus(menus) {
   })
 }
 
-// 兼容旧营销菜单数据，补齐优惠券管理二级菜单
+// 兼容旧营销菜单数据，补齐营销二级菜单
 function normalizeMarketingMenu(menu) {
   const children = Array.isArray(menu.children) ? menu.children : []
 
-  if (children.some(child => child.id === 'coupon_management')) {
+  if (children.some(child => child.id === 'coupon_management') && children.some(child => child.id === 'banner_management')) {
     return {
       ...menu,
       path: '/marketing',
@@ -242,17 +252,29 @@ function normalizeMarketingMenu(menu) {
     }
   }
 
+  const childMap = new Map(children.map(child => [child.id, child]))
+
   return {
     ...menu,
     path: '/marketing',
     children: [
-      {
+      childMap.get('coupon_management') || {
         id: 'coupon_management',
         name: '优惠券管理',
         path: '/marketing/coupons',
         icon: 'Tickets',
         meta: {
           title: '优惠券管理'
+        },
+        children: []
+      },
+      childMap.get('banner_management') || {
+        id: 'banner_management',
+        name: '轮播图管理',
+        path: '/marketing/banners',
+        icon: 'Picture',
+        meta: {
+          title: '轮播图管理'
         },
         children: []
       }

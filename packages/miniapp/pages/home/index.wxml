@@ -9,33 +9,17 @@
       indicator-active-color="#e97416"
     >
       <swiper-item wx:for="{{bannerList}}" wx:key="id">
-        <view class="hero-slide">
+        <view
+          class="hero-slide"
+          data-link-type="{{item.linkType}}"
+          data-link-url="{{item.linkUrl}}"
+          bindtap="handleBannerTap"
+        >
           <image wx:if="{{item.imageUrl}}" class="hero-image" src="{{item.imageUrl}}" mode="aspectFill" />
           <view wx:else class="hero-placeholder">待补充</view>
-          <view class="hero-copy">
-            <view class="brand-kicker">{{item.kicker}}</view>
-            <view class="hero-title">{{item.title}}</view>
-          </view>
         </view>
       </swiper-item>
     </swiper>
-  </view>
-
-  <view class="quick-grid">
-    <view
-      class="quick-card"
-      wx:for="{{quickActions}}"
-      wx:key="title"
-      data-url="{{item.url}}"
-      bindtap="handleNavigate"
-    >
-      <view class="quick-icon">{{item.icon}}</view>
-      <view class="quick-content">
-        <view class="quick-title">{{item.title}}</view>
-        <view class="quick-desc">{{item.desc}}</view>
-      </view>
-      <view class="quick-arrow">›</view>
-    </view>
   </view>
 
   <view class="section-block">

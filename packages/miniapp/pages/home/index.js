@@ -13,22 +13,6 @@ Page({
       }
     ],
 
-    // 首页快捷入口
-    quickActions: [
-      {
-        title: '浏览菜单',
-        desc: '查看可点商品',
-        icon: '☕',
-        url: '/pages/menu/index'
-      },
-      {
-        title: '订单',
-        desc: '查看订单状态',
-        icon: '🧺',
-        url: '/pages/orders/index'
-      }
-    ],
-
     // 今日推荐商品列表
     recommendList: [],
     recommendLoading: false
@@ -47,7 +31,13 @@ Page({
       const bannerList = Array.isArray(data) ? data : data.list
 
       if (Array.isArray(bannerList) && bannerList.length) {
-        this.setData({ bannerList })
+        this.setData({
+          bannerList: bannerList.map(item => ({
+            ...item,
+            kicker: item.kicker || 'Owl Coffee',
+            title: item.title || '待补充'
+          }))
+        })
       }
     } catch (err) {
       // 轮播图接口待开发，当前保留占位内容
@@ -82,6 +72,26 @@ Page({
 
     wx.switchTab({
       url
+    })
+  },
+
+  // 处理轮播图点击跳转
+  handleBannerTap(event) {
+    const { linkType, linkUrl } = event.currentTarget.dataset
+
+    if (!linkType || linkType === 'none' || !linkUrl) return
+
+    if (linkType === 'page') {
+      const tabPages = ['/pages/home/index', '/pages/menu/index', '/pages/orders/index', '/pages/mine/index']
+      const navigate = tabPages.includes(linkUrl) ? wx.switchTab : wx.navigateTo
+
+      navigate({ url: linkUrl })
+      return
+    }
+
+    wx.showToast({
+      title: '网页跳转待补充',
+      icon: 'none'
     })
   },
 

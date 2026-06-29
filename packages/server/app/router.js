@@ -78,6 +78,13 @@ module.exports = app => {
   router.put('/api/admin/coupons/:couponId/disable', adminAuth, adminOperationLog, controller.admin.coupon.disable)
   router.delete('/api/admin/coupons/:couponId', adminAuth, adminOperationLog, controller.admin.coupon.destroy)
 
+  // 后台轮播图管理
+  router.get('/api/admin/banners', adminAuth, controller.admin.banner.index)
+  router.post('/api/admin/banners', adminAuth, adminOperationLog, controller.admin.banner.create)
+  router.put('/api/admin/banners/:bannerId', adminAuth, adminOperationLog, controller.admin.banner.update)
+  router.put('/api/admin/banners/:bannerId/status', adminAuth, adminOperationLog, controller.admin.banner.updateStatus)
+  router.delete('/api/admin/banners/:bannerId', adminAuth, adminOperationLog, controller.admin.banner.destroy)
+
   // 后台角色与菜单
   router.get('/api/admin/roles', adminAuth, controller.admin.role.index)
   router.get('/api/admin/roles/:roleId', adminAuth, controller.admin.role.show)
@@ -108,6 +115,7 @@ module.exports = app => {
   router.post('/api/app/uploads', appAuth, controller.app.upload.create)
 
   // 小程序商品浏览
+  router.get('/api/app/banners', controller.app.banner.index)
   router.get('/api/app/categories', controller.app.category.index)
   router.get('/api/app/products', controller.app.product.index)
   router.get('/api/app/products/:productId', controller.app.product.show)

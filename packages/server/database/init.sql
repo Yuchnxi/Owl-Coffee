@@ -285,6 +285,24 @@ CREATE TABLE IF NOT EXISTS user_coupons (
   KEY idx_user_coupons_order_id (order_id)
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE IF NOT EXISTS banners (
+  id VARCHAR(32) PRIMARY KEY,
+  title VARCHAR(128) NOT NULL,
+  kicker VARCHAR(64) NULL,
+  image_url VARCHAR(512) NOT NULL,
+  link_type VARCHAR(32) NOT NULL DEFAULT 'none',
+  link_url VARCHAR(255) NULL,
+  sort INT NOT NULL DEFAULT 0,
+  status VARCHAR(32) NOT NULL,
+  created_at DATETIME(3) NOT NULL,
+  updated_at DATETIME(3) NOT NULL,
+  deleted_at DATETIME(3) NULL,
+  created_by VARCHAR(32) NULL,
+  updated_by VARCHAR(32) NULL,
+  KEY idx_banners_status_sort (status, sort),
+  KEY idx_banners_deleted_at (deleted_at)
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE IF NOT EXISTS store_settings (
   id VARCHAR(32) PRIMARY KEY,
   store_name VARCHAR(128) NOT NULL,
@@ -361,6 +379,7 @@ VALUES
   ('users', NULL, '用户管理', '/users', 'User', 40, 'enabled', JSON_OBJECT('title', '用户管理'), NOW(3), NOW(3), NULL),
   ('marketing', NULL, '营销管理', '/marketing', 'Tickets', 60, 'enabled', JSON_OBJECT('title', '营销管理'), NOW(3), NOW(3), NULL),
   ('coupon_management', 'marketing', '优惠券管理', '/marketing/coupons', 'Tickets', 10, 'enabled', JSON_OBJECT('title', '优惠券管理'), NOW(3), NOW(3), NULL),
+  ('banner_management', 'marketing', '轮播图管理', '/marketing/banners', 'Picture', 20, 'enabled', JSON_OBJECT('title', '轮播图管理'), NOW(3), NOW(3), NULL),
   ('settings', NULL, '系统设置', '/settings', 'Setting', 70, 'enabled', JSON_OBJECT('title', '系统设置'), NOW(3), NOW(3), NULL),
   ('admin_users', 'settings', '账号管理', '/settings/admin-users', 'UserFilled', 10, 'enabled', JSON_OBJECT('title', '账号管理'), NOW(3), NOW(3), NULL),
   ('menu_management', 'settings', '菜单管理', '/settings/menus', 'Menu', 20, 'enabled', JSON_OBJECT('title', '菜单管理'), NOW(3), NOW(3), NULL),
@@ -395,6 +414,7 @@ VALUES
   ('role_admin', 'inventory', NOW(3)),
   ('role_admin', 'marketing', NOW(3)),
   ('role_admin', 'coupon_management', NOW(3)),
+  ('role_admin', 'banner_management', NOW(3)),
   ('role_admin', 'settings', NOW(3)),
   ('role_admin', 'admin_users', NOW(3)),
   ('role_admin', 'menu_management', NOW(3)),
@@ -444,6 +464,7 @@ ALTER TABLE order_items COMMENT = '订单商品明细快照表';
 ALTER TABLE payment_records COMMENT = '支付记录表';
 ALTER TABLE coupons COMMENT = '优惠券模板表';
 ALTER TABLE user_coupons COMMENT = '用户优惠券表';
+ALTER TABLE banners COMMENT = '小程序首页轮播图表';
 ALTER TABLE store_settings COMMENT = '单店基础配置表';
 ALTER TABLE files COMMENT = '上传文件记录表';
 ALTER TABLE admin_login_logs COMMENT = '后台登录日志表';

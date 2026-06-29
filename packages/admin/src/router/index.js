@@ -13,6 +13,7 @@ const InventoryView = () => import('../views/products/inventory/index.vue')
 const OrdersView = () => import('../views/orders/index.vue')
 const UsersView = () => import('../views/users/index.vue')
 const CouponManagementView = () => import('../views/marketing/coupons/index.vue')
+const BannerManagementView = () => import('../views/marketing/banners/index.vue')
 const AdminUsersView = () => import('../views/settings/admin-users/index.vue')
 const MenusView = () => import('../views/settings/menus/index.vue')
 const RolePermissionsView = () => import('../views/settings/role-permissions/index.vue')
@@ -117,6 +118,16 @@ const routes = [
           title: '优惠券管理',
           menuId: 'coupon_management',
           activeMenu: '/marketing/coupons'
+        }
+      },
+      {
+        path: 'marketing/banners',
+        name: 'bannerManagement',
+        component: BannerManagementView,
+        meta: {
+          title: '轮播图管理',
+          menuId: 'banner_management',
+          activeMenu: '/marketing/banners'
         }
       },
       {
@@ -246,9 +257,11 @@ function isLegacyProductChildMenu(menus, menuId) {
   })
 }
 
-// 兼容旧营销菜单权限，父级 marketing 可访问优惠券管理
+// 兼容旧营销菜单权限，父级 marketing 可访问营销二级页面
 function isLegacyMarketingChildMenu(menus, menuId) {
-  if (menuId !== 'coupon_management') {
+  const marketingChildMenus = ['coupon_management', 'banner_management']
+
+  if (!marketingChildMenus.includes(menuId)) {
     return false
   }
 
