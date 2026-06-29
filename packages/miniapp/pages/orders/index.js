@@ -231,6 +231,9 @@ Page({
     })
   },
 
+  // 阻止订单操作区点击冒泡到卡片详情
+  handlePreventTap() {},
+
   // 将历史订单中的可售商品重新加入购物车
   async handleOrderAgain(event) {
     const { orderId } = event.currentTarget.dataset

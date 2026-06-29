@@ -187,9 +187,25 @@
   background: #f7ead8;
 }
 
+.order-head,
+.current-order__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .order-title {
   color: #2f2118;
   font-size: 30rpx;
+  font-weight: 800;
+}
+
+.order-status {
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: #fff6ec;
+  color: #e97416;
+  font-size: 22rpx;
   font-weight: 800;
 }
 
@@ -197,6 +213,47 @@
   margin-top: 14rpx;
   color: #7d6653;
   font-size: 24rpx;
+}
+
+.current-order {
+  margin-top: 18rpx;
+  padding: 22rpx;
+  border-radius: 12rpx;
+  background: #fffaf2;
+}
+
+.current-order__no {
+  color: #8f8072;
+  font-size: 23rpx;
+}
+
+.current-order__code {
+  margin-top: 18rpx;
+  color: #e97416;
+  font-size: 26rpx;
+  font-weight: 800;
+}
+
+.current-order__code text {
+  margin-left: 14rpx;
+  font-size: 42rpx;
+  letter-spacing: 2rpx;
+}
+
+.current-order__summary {
+  overflow: hidden;
+  margin-top: 16rpx;
+  color: #2f2118;
+  font-size: 26rpx;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.current-order__footer {
+  margin-top: 18rpx;
+  color: #8f8072;
+  font-size: 23rpx;
 }
 
 .order-action {

@@ -64,7 +64,11 @@
         <view>到店自提</view>
       </view>
 
-      <view class="order-action-row" wx:if="{{item.pickupCode || item.isPendingPayment || item.isReadyForPickup || item.isCompleted}}">
+      <view
+        class="order-action-row"
+        wx:if="{{item.pickupCode || item.isPendingPayment || item.isReadyForPickup || item.isCompleted}}"
+        catchtap="handlePreventTap"
+      >
         <view class="pickup-code" wx:if="{{item.pickupCode}}">
           取餐码：<text>{{item.pickupCode}}</text>
         </view>
@@ -75,7 +79,7 @@
           loading="{{cancellingOrderId === item.id}}"
           disabled="{{cancellingOrderId || payingOrderId}}"
           data-order-id="{{item.id}}"
-          catch:click="handleCancelOrder"
+          bind:click="handleCancelOrder"
         >取消订单</van-button>
         <van-button
           wx:if="{{item.isPendingPayment}}"
@@ -83,7 +87,7 @@
           loading="{{payingOrderId === item.id}}"
           disabled="{{payingOrderId || cancellingOrderId}}"
           data-order-id="{{item.id}}"
-          catch:click="handleMockPay"
+          bind:click="handleMockPay"
         >模拟支付</van-button>
         <van-button
           wx:elif="{{item.isReadyForPickup}}"
@@ -91,7 +95,7 @@
           loading="{{confirmingOrderId === item.id}}"
           disabled="{{confirmingOrderId}}"
           data-order-id="{{item.id}}"
-          catch:click="handleConfirmPickup"
+          bind:click="handleConfirmPickup"
         >确认取餐</van-button>
         <van-button
           wx:elif="{{item.isCompleted}}"
@@ -99,7 +103,7 @@
           loading="{{reorderingOrderId === item.id}}"
           disabled="{{reorderingOrderId}}"
           data-order-id="{{item.id}}"
-          catch:click="handleOrderAgain"
+          bind:click="handleOrderAgain"
         >再来一单</van-button>
       </view>
 

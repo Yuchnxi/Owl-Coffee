@@ -51,8 +51,28 @@
   </view>
 
   <view class="order-panel">
-    <view class="order-title">当前取餐</view>
-    <view class="order-empty">暂无进行中的订单</view>
-    <view class="order-action" data-url="/pages/menu/index" bindtap="handleNavigate">去点一杯</view>
+    <view class="order-head">
+      <view class="order-title">当前取餐</view>
+      <view class="order-status" wx:if="{{currentOrder}}">{{currentOrder.statusText}}</view>
+    </view>
+
+    <view wx:if="{{currentOrderLoading}}" class="order-empty">取餐信息加载中...</view>
+
+    <view wx:elif="{{currentOrder}}" class="current-order" bindtap="handleOpenCurrentOrder">
+      <view class="current-order__no">订单号：{{currentOrder.orderNo}}</view>
+      <view class="current-order__code">
+        取餐码 <text>{{currentOrder.pickupCodeText}}</text>
+      </view>
+      <view class="current-order__summary">{{currentOrder.itemSummary}}</view>
+      <view class="current-order__footer">
+        <text>{{currentOrder.amountText}}</text>
+        <text>查看详情 ›</text>
+      </view>
+    </view>
+
+    <block wx:else>
+      <view class="order-empty">暂无进行中的订单</view>
+      <view class="order-action" data-url="/pages/menu/index" bindtap="handleNavigate">去点一杯</view>
+    </block>
   </view>
 </view>
